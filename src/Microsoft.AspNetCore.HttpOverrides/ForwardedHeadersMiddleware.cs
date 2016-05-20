@@ -101,8 +101,8 @@ namespace Microsoft.AspNetCore.HttpOverrides
             }
 
             // Group the data together.
-            var sets = new List<SetOfForwarders>(entryCount);
-            for (int i = 0; i < entryCount; i++)
+            var sets = new SetOfForwarders[entryCount];
+            for (int i = 0; i < sets.Length; i++)
             {
                 // They get processed in reverse order, right to left.
                 var set = new SetOfForwarders();
@@ -118,7 +118,7 @@ namespace Microsoft.AspNetCore.HttpOverrides
                 {
                     set.Host = forwardedHost[forwardedHost.Length - i - 1];
                 }
-                sets.Add(set);
+                sets[i] = set;
             }
 
             // Gather initial values
@@ -134,8 +134,9 @@ namespace Microsoft.AspNetCore.HttpOverrides
             bool applyChanges = false;
             int entriesConsumed = 0;
 
-            foreach (var set in sets)
+            for ( ; entriesConsumed < sets.Length; entriesConsumed++)
             {
+                var set = sets[entriesConsumed];
                 if (checkFor)
                 {
                     // For the first instance, allow remoteIp to be null for servers that don't support it natively.
@@ -146,9 +147,11 @@ namespace Microsoft.AspNetCore.HttpOverrides
                         break;
                     }
 
-                    if (IPEndPointParser.TryParse(set.IpAndPortText, out set.RemoteIpAndPort))
+                    IPEndPoint parsedEndPoint;
+                    if (IPEndPointParser.TryParse(set.IpAndPortText, out parsedEndPoint))
                     {
                         applyChanges = true;
+                        set.RemoteIpAndPort = parsedEndPoint;
                         currentValues.IpAndPortText = set.IpAndPortText;
                         currentValues.RemoteIpAndPort = set.RemoteIpAndPort;
                     }
@@ -186,8 +189,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
                         return;
                     }
                 }
-
-                entriesConsumed++;
             }
 
             if (applyChanges)
@@ -265,7 +266,7 @@ namespace Microsoft.AspNetCore.HttpOverrides
             return false;
         }
 
-        private class SetOfForwarders
+        private struct SetOfForwarders
         {
             public string IpAndPortText;
             public IPEndPoint RemoteIpAndPort;
