@@ -2,16 +2,19 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Rewrite.UrlRewrite;
 
 namespace RewriteSample
 {
     public class Startup
     {
         public void Configure(IApplicationBuilder app)
-        { 
+        {
             app.UseRewriter(new UrlRewriteOptions()
-                .ImportFromModRewrite("Rewrite.txt"));
+            //    .ImportFromModRewrite("Rewrite.txt"));
+                  .ImportFromUrlRewrite("UrlRewrite.txt"));
             app.Run(context => context.Response.WriteAsync(context.Request.Path));
+
         }
 
         public static void Main(string[] args)
