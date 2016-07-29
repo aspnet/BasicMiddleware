@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class Pattern
     {
-        public List<PatternSegment> PatternSegments { get; }
+        public IList<PatternSegment> PatternSegments { get; }
 
         public Pattern(List<PatternSegment> patternSegments)
         {

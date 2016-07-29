@@ -10,11 +10,9 @@ using System.Xml.Linq;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
-
-    public class FileParser
+    // TODO rename 
+    public static class XMLFileParser
     {
-        // TODO maybe make these 
-
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
         public static List<UrlRewriteRule> Parse(TextReader reader)
         {
@@ -66,7 +64,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 return;
             }
 
-            res.Name =  rule?.Attribute(RewriteTags.Name)?.Value;
+            res.Name =  rule.Attribute(RewriteTags.Name)?.Value;
 
             bool enabled;
             if (bool.TryParse(rule.Attribute(RewriteTags.Enabled)?.Value, out enabled))
@@ -126,8 +124,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
         private static Conditions CreateConditions(XElement conditions)
         {
-
-
             var condRes = new Conditions();
             if (conditions == null)
             {
@@ -200,11 +196,11 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
         private static UrlAction CreateUrlAction(XElement urlAction)
         {
-            var actionRes = new UrlAction();
             if (urlAction == null)
             {
                 throw new FormatException("Action is a required element of a rule.");
             }
+            var actionRes = new UrlAction();
 
             ActionType actionType;
             if (Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, out actionType))

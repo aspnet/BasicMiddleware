@@ -105,13 +105,13 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                                 // has processed the new string.
                                 if (context.Current != CloseBrace)
                                 {
-                                    throw new FormatException();
+                                    throw new FormatException("Lacking close brace for parameter at index: " + context.GetIndex());
                                 }
                             }
                             break;
                         case "UrlDecode":
                             {
-                                throw new NotImplementedException("Do no support UrlDecoding.");
+                                throw new NotImplementedException("UrlDecode is not supported.");
                             }
                         case "UrlEncode":
                             {
@@ -124,7 +124,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
                                 if (context.Current != CloseBrace)
                                 {
-                                    throw new FormatException();
+                                    throw new FormatException("Lacking close brace for parameter at index: " + context.GetIndex());
                                 }
                             }
                             break;
@@ -147,7 +147,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                                 return;
                             }
                         default:
-                            throw new FormatException("Unrecognized parameter.");
+                            throw new FormatException("Unrecognized parameter type: " + parameter + ", terminated at index: " + context.GetIndex());
                     }
                 }
             }
@@ -157,7 +157,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         {
             if (!context.Next())
             {
-                throw new FormatException();
+                throw new FormatException("No index avaible for backreference at index: " + context.GetIndex());
             }
 
             context.Mark();
@@ -165,7 +165,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             {
                 if (!context.Next())
                 {
-                    throw new FormatException();
+                    throw new FormatException("Lacking close brace for parameter at index: " + context.GetIndex());
                 }
             }
 
@@ -173,12 +173,12 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             int index;
             if (!int.TryParse(res, out index))
             {
-                throw new FormatException("Syntax error, invalid integer in response parameter.");
+                throw new FormatException("Syntax error, invalid integer in response parameter at index: " + context.GetIndex());
             }
 
             if (index > 9 || index < 0)
             {
-                throw new FormatException("Invalid index into response.");
+                throw new FormatException("Invalid integer into backreference " + index + "at index: " + context.GetIndex());
             }
             return index;
         }

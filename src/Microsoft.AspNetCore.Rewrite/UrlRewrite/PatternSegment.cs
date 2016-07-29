@@ -9,6 +9,9 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class PatternSegment
     {
+        // Given the httpcontext, the rule backreference, and the condition backreference
+        // Create a new string. Based on the definer of the func.
+        //                       Rule  Condition
         public Func<HttpContext, Match, Match, string> Evaluate { get; }
 
         public PatternSegment(Func<HttpContext, Match, Match, string> evaluate)

@@ -11,8 +11,7 @@ namespace RewriteSample
         public void Configure(IApplicationBuilder app)
         {
             app.UseRewriter(new UrlRewriteOptions()
-            //    .ImportFromModRewrite("Rewrite.txt"));
-                  .ImportFromUrlRewrite("UrlRewrite.txt"));
+                  .ImportFromUrlRewrite("UrlRewrite.xml"));
             app.Run(context => context.Response.WriteAsync(context.Request.Path));
 
         }

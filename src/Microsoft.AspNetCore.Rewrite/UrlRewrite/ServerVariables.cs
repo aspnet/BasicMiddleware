@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                         return ctx.Connection.RemotePort.ToString(CultureInfo.InvariantCulture);
                     };
                 default:
-                    throw new FormatException();
+                    throw new FormatException("Unrecognized server variable.");
             }
         }
     }

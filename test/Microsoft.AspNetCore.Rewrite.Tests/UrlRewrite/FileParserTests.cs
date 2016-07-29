@@ -32,10 +32,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = FileParser.Parse(new StringReader(xml));
+            var res = XMLFileParser.Parse(new StringReader(xml));
 
             // assert
-            Assert.True(CheckUrlRewriteRuleEquality(res, expected));
+           AssertUrlRewriteRuleEquality(res, expected);
         }
 
         [Fact]
@@ -69,10 +69,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = FileParser.Parse(new StringReader(xml));
+            var res = XMLFileParser.Parse(new StringReader(xml));
             
             // assert
-            Assert.True(CheckUrlRewriteRuleEquality(expected, res));
+            AssertUrlRewriteRuleEquality(expected, res);
         }
 
 
@@ -119,10 +119,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = FileParser.Parse(new StringReader(xml));
+            var res = XMLFileParser.Parse(new StringReader(xml));
 
             // assert
-            Assert.True(CheckUrlRewriteRuleEquality(expected, res));
+            AssertUrlRewriteRuleEquality(expected, res);
         }
 
 
@@ -170,72 +170,48 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                     MatchType = condGrouping,
                     TrackingAllCaptures = condTracking
                 }
-                
             };
         }
 
-        private bool CheckUrlRewriteRuleEquality(List<UrlRewriteRule> expected, List<UrlRewriteRule> actual)
+        private void AssertUrlRewriteRuleEquality(List<UrlRewriteRule> expected, List<UrlRewriteRule> actual)
         {
-            if (expected.Count != actual.Count)
-            {
-                return false;
-            }
+
+            Assert.Equal(expected.Count, actual.Count);
             for (var i = 0; i < expected.Count; i++)
             {
                 var r1 = expected[i];
                 var r2 = actual[i];
 
-                if (r1.Name != r2.Name
-                    || r1.Enabled != r2.Enabled
-                    || r1.StopProcessing != r2.StopProcessing
-                    || r1.PatternSyntax != r2.PatternSyntax)
-                {
-                    return false;
-                }
+                Assert.Equal(r1.Name, r2.Name);
+                Assert.Equal(r1.Enabled, r2.Enabled);
+                Assert.Equal(r1.StopProcessing, r2.StopProcessing);
+                Assert.Equal(r1.PatternSyntax, r2.PatternSyntax);
 
-                if (r1.Match.IgnoreCase != r2.Match.IgnoreCase
-                    || r1.Match.Negate != r2.Match.Negate)
-                {
-                    return false;
-                }
+                Assert.Equal(r1.Match.IgnoreCase, r2.Match.IgnoreCase);
+                Assert.Equal(r1.Match.Negate, r2.Match.Negate);
 
-                if (r1.Action.Type != r2.Action.Type
-                    || r1.Action.AppendQueryString != r2.Action.AppendQueryString
-                    || r1.Action.RedirectType != r2.Action.RedirectType
-                    || r1.Action.LogRewrittenUrl != r2.Action.LogRewrittenUrl)
-                {
-                    return false;
-                }
+                Assert.Equal(r1.Action.Type, r2.Action.Type);
+                Assert.Equal(r1.Action.AppendQueryString, r2.Action.AppendQueryString);
+                Assert.Equal(r1.Action.RedirectType, r2.Action.RedirectType);
+                Assert.Equal(r1.Action.LogRewrittenUrl, r2.Action.LogRewrittenUrl);
 
                 // TODO conditions, url pattern, initial match regex
-                if (r1.Conditions.MatchType != r2.Conditions.MatchType
-                    || r1.Conditions.TrackingAllCaptures != r2.Conditions.TrackingAllCaptures)
-                {
-                    return false;
-                }
+                Assert.Equal(r1.Conditions.MatchType, r2.Conditions.MatchType);
+                Assert.Equal(r1.Conditions.TrackingAllCaptures, r2.Conditions.TrackingAllCaptures);
+                Assert.Equal(r1.Conditions.ConditionList.Count, r2.Conditions.ConditionList.Count);
 
-                if (r1.Conditions.ConditionList.Count != r2.Conditions.ConditionList.Count)
-                {
-                    return false;
-                }
-                
+
+
                 for (var j = 0; j < r1.Conditions.ConditionList.Count; j++)
                 {
                     var c1 = r1.Conditions.ConditionList[j];
                     var c2 = r2.Conditions.ConditionList[j];
-                    if (c1.IgnoreCase != c2.IgnoreCase
-                        || c1.Negate != c2.Negate
-                        || c1.MatchType != c2.MatchType)
-                    {
-                        return false;
-                    }
-                    if (c1.Input.PatternSegments.Count != c2.Input.PatternSegments.Count)
-                    {
-                        return false;
-                    }
+                    Assert.Equal(c1.IgnoreCase, c2.IgnoreCase);
+                    Assert.Equal(c1.Negate, c2.Negate);
+                    Assert.Equal(c1.MatchType, c2.MatchType);
+                    Assert.Equal(c1.Input.PatternSegments.Count, c2.Input.PatternSegments.Count);
                 }
             }
-            return true;
         }
     }
 }

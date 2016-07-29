@@ -15,6 +15,10 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         /// <param name="filePath">The path to the file containing urlrewrite rules.</param>
         public static UrlRewriteOptions ImportFromUrlRewrite(this UrlRewriteOptions options, string filePath)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException("UrlRewriteOptions is null");
+            }
             // TODO use IHostingEnvironment as param.
             if (string.IsNullOrEmpty(filePath))
             {
@@ -23,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             using (var stream = File.OpenRead(filePath))
             {
-                options.Rules.AddRange(FileParser.Parse(new StreamReader(stream)));
+                options.Rules.AddRange(XMLFileParser.Parse(new StreamReader(stream)));
             };
             return options;
         }
