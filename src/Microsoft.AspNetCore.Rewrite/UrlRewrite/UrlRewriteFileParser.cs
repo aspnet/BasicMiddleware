@@ -108,7 +108,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 matchRes.Negate = parBool;
             }
 
-            var parsedInputString = match?.Attribute(RewriteTags.Url)?.Value;
+            var parsedInputString = match.Attribute(RewriteTags.Url)?.Value;
 
             if (matchRes.IgnoreCase)
             {
@@ -175,7 +175,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 condRes.MatchType = matchType;
             }
 
-            var parsedInputString = condition?.Attribute(RewriteTags.Input)?.Value;
+            var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
             if (parsedInputString != null)
             {
                 condRes.Input = InputParser.ParseInputString(parsedInputString);
