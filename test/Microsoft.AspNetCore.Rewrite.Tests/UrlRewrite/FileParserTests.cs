@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = XMLFileParser.Parse(new StringReader(xml));
+            var res = UrlRewriteFileParser.Parse(new StringReader(xml));
 
             // assert
            AssertUrlRewriteRuleEquality(res, expected);
@@ -69,7 +69,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = XMLFileParser.Parse(new StringReader(xml));
+            var res = UrlRewriteFileParser.Parse(new StringReader(xml));
             
             // assert
             AssertUrlRewriteRuleEquality(expected, res);
@@ -119,7 +119,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
-            var res = XMLFileParser.Parse(new StringReader(xml));
+            var res = UrlRewriteFileParser.Parse(new StringReader(xml));
 
             // assert
             AssertUrlRewriteRuleEquality(expected, res);

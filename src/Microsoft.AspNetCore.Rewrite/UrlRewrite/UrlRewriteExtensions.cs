@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             using (var stream = File.OpenRead(filePath))
             {
-                options.Rules.AddRange(XMLFileParser.Parse(new StreamReader(stream)));
+                options.Rules.AddRange(UrlRewriteFileParser.Parse(new StreamReader(stream)));
             };
             return options;
         }

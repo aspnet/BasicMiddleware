@@ -11,7 +11,7 @@ using System.Xml.Linq;
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     // TODO rename 
-    public static class XMLFileParser
+    public static class UrlRewriteFileParser
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
         public static List<UrlRewriteRule> Parse(TextReader reader)
