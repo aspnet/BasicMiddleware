@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Rewrite.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
@@ -12,9 +13,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
     /// </summary>
     public class InputParser
     {
-        private const char Percent = '%';
-        private const char Dollar = '$';
-        private const char Space = ' ';
         private const char Colon = ':';
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
@@ -37,6 +35,11 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 testString = string.Empty;
             }
             var context = new ParserContext(testString);
+            return ParseString(context);
+        }
+
+        private static Pattern ParseString(ParserContext context)
+        {
             var results = new List<PatternSegment>();
             while (context.Next())
             {
@@ -47,50 +50,142 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     {
                         throw new FormatException(context.Error());
                     }
-                    if (!ParseParameter(context, results))
-                    {
-                        throw new FormatException(context.Error());
-                    }
+                    ParseParameter(context, results);
+                }
+                else if (context.Current == CloseBrace)
+                {
+                    return new Pattern(results);
                 }
                 else
                 {
                     // Parse for literals, which will return on either the end of the test string 
                     // or when it hits a special character
-                    if (!ParseLiteral(context, results))
-                    {
-                        throw new FormatException(context.Error());
-                    }
+                    ParseLiteral(context, results);
                 }
             }
             return new Pattern(results);
         }
 
-        private static bool ParseParameter(ParserContext context, List<PatternSegment> results)
+        private static void ParseParameter(ParserContext context, List<PatternSegment> results)
         {
             context.Mark();
             string parameter;
+            // Four main cases:
+            // 1. {NAME} - Server Variable, create lambda to get the part of the context
+            // 2. {R:1}  - Rule parameter
+            // 3. {C:1}  - Condition Parameter
+            // 4. {function:xxx} - String function 
+            // TODO consider perf here. This is on startup and will only happen one time
+            // (unless we support Reload)
             while (context.Next())
             {
                 if (context.Current == CloseBrace)
                 {
-                    
+                    // This is just a server variable, so we do a lookup and verify the server variable exists.
+                    parameter = context.Capture();
+                    results.Add(new PatternSegment(ServerVariables.FindServerVariable(parameter)));
+                    return;
+                }
+                else if (context.Current == Colon)
+                {
+                    parameter = context.Capture();
+
+                    switch (parameter)
+                    {
+                        case "ToLower":
+                            {
+                                var pattern = ParseString(context);
+                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
+                                {
+                                    var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
+                                    return str.ToLowerInvariant();
+                                }));
+                                if (context.Current != CloseBrace)
+                                {
+                                    throw new FormatException();
+                                }
+                            }
+                            break;
+                        case "UrlDecode":
+                            {
+                                throw new NotImplementedException("Do no support UrlDecoding.");
+                            }
+                        case "UrlEncode":
+                            {
+                                var pattern = ParseString(context);
+                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
+                                {
+                                    var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
+                                    return UrlEncoder.Default.Encode(str);
+                                }));
+                                if (context.Current != CloseBrace)
+                                {
+                                    throw new FormatException();
+                                }
+                            }
+                            break;
+                        case "R":
+                            {
+                                var index = GetBackReferenceIndex(context);
+                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
+                                {
+                                    return ruleMatch?.Groups[index]?.Value;
+                                }));
+                                return;
+                            }
+                        case "C":
+                            {
+                                var index = GetBackReferenceIndex(context);
+                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
+                                {
+                                    return condMatch?.Groups[index]?.Value;
+                                }));
+                                return;
+                            }
+                        default:
+                            throw new FormatException("Unrecognized parameter.");
+                    }
                 }
             }
         }
 
-        /// <summary>
-        /// Parse a string literal in the test string. Continues capturing until the start of a new variable type.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="results"></param>
-        /// <returns></returns>
+        private static int GetBackReferenceIndex(ParserContext context)
+        {
+            if (!context.Next())
+            {
+                throw new FormatException();
+            }
+
+            context.Mark();
+            while (context.Current != CloseBrace)
+            {
+                if (!context.Next())
+                {
+                    throw new FormatException();
+                }
+            }
+
+            var res = context.Capture();
+            int index;
+            if (!int.TryParse(res, out index))
+            {
+                throw new FormatException("Syntax error, invalid integer in response parameter.");
+            }
+
+            if (index > 9 || index < 0)
+            {
+                throw new FormatException("Invalid index into response.");
+            }
+            return index;
+        }
+
         private static bool ParseLiteral(ParserContext context, List<PatternSegment> results)
         {
             context.Mark();
             string literal;
             while (true)
             {
-                if (context.Current == Percent || context.Current == Dollar)
+                if (context.Current == OpenBrace || context.Current == CloseBrace)
                 {
                     literal = context.Capture();
                     context.Back();
@@ -103,16 +198,11 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 }
             }
 
-            if (IsValidLiteral(context, literal))
-            {
-                // add results
-                results.Add(new PatternSegment(literal, SegmentType.Literal));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            // add results
+            results.Add(new PatternSegment((ctx, ruleMatch, condMatch) => {
+                return literal;
+            }));
+            return true;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
     public class UrlAction
     {
         public ActionType Type { get; set; }
-        public string Url { get; set; }
+        public Pattern Url { get; set; }
         public bool AppendQueryString { get; set; }
         public bool LogRewrittenUrl { get; set; }
         public RedirectType RedirectType { get; set; } = RedirectType.Permanent;

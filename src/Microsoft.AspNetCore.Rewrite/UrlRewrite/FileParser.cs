@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
@@ -11,57 +13,48 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
     public class FileParser
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
-        public static List<Rule> Parse(TextReader reader)
+        public static List<UrlRewriteRule> Parse(TextReader reader)
         {
             var temp = XDocument.Load(reader);
             var xmlRoot = temp.Descendants("rewrite");
-            var rules = new List<Rule>();
+            var rules = new List<UrlRewriteRule>();
             if (xmlRoot != null)
             {
                 // there is a valid rewrite block, go through each rule and process
                 rules.AddRange(GetGlobalRules(xmlRoot.Descendants("globalRules")));
                 rules.AddRange(GetRules(xmlRoot.Descendants("rules")));
-
             }
             return rules;
         }
 
-        private static List<Rule> GetGlobalRules(IEnumerable<XElement> globalRules)
+        private static List<UrlRewriteRule> GetGlobalRules(IEnumerable<XElement> globalRules)
         {
-            var result = new List<Rule>();
-            foreach (var rule in globalRules.Elements("rule"))
+            var result = new List<UrlRewriteRule>();
+            foreach (var rule in globalRules.Elements("rule") ?? Enumerable.Empty<XElement>())
             {
-                
-            }
-            return result;
-        }
-
-        private static List<Rule> GetRules(IEnumerable<XElement> rules)
-        {
-            var result = new List<Rule>();
-            foreach (var rule in rules.Elements("rule"))
-            {
-                var res = new Rule();
+                var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
-                ProcessMatch(rule.Element("match"));
+                //res.Action = CreateGlobalUrlAction(rule.Element("action"));
+                result.Add(res);
             }
             return result;
         }
 
-        private static void ProcessMatch(XElement match)
+        private static List<UrlRewriteRule> GetRules(IEnumerable<XElement> rules)
         {
-            var url = match?.Attribute("url");
-            if (url == null)
+            var result = new List<UrlRewriteRule>();
+            // TODO Better null check?
+            foreach (var rule in rules.Elements("rule") ?? Enumerable.Empty<XElement>())
             {
-                throw new FormatException("Cannot have rule without match");
+                var res = new UrlRewriteRule();
+                SetRuleAttributes(rule, res);
+                res.Action = CreateUrlAction(rule.Element("action"));
+                result.Add(res);
             }
-            var ignoreCase = match?.Attribute("ignoreCase");
-            var negate = match?.Attribute("negate");
-
-            // add the regex to the precompiled operation 
+            return result;
         }
 
-        private static void SetRuleAttributes(XElement rule, Rule res)
+        private static void SetRuleAttributes(XElement rule, UrlRewriteRule res)
         {
             if (rule == null)
             {
@@ -92,13 +85,13 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             res.Conditions = CreateConditions(rule.Element("condition"));
         }
 
-        private static Match CreateMatch(XElement match)
+        private static InitialMatch CreateMatch(XElement match)
         {
             if (match == null)
             {
                 return null;
             }
-            var matchRes = new Match();
+            var matchRes = new InitialMatch();
             bool parBool;
             if (bool.TryParse(match.Attribute("ignoreCase")?.Value, out parBool))
             {
@@ -129,7 +122,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         {
             if (conditions == null)
             {
-                return null; // TODO make sure no null pointer exception on Conditions
+                return null; // TODO make sure no null exception on Conditions
             }
 
             var condRes = new Conditions();
@@ -192,27 +185,40 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
             return condRes;
         }
-        private static void SetActionAttributes(XElement action)
-        {
-            var type = action.Attribute("type");
-            var url = action.Attribute("url");
-            var appendQueryString = action.Attribute("appendQueryString");
-            var logRewrittenUrl =  action.Attribute("logRewrittenUrl");
-            var redirectType = action.Attribute("redirectType");
-        }
 
-        private static void SetConditionAttributes(XElement condition)
+        private static UrlAction CreateUrlAction(XElement urlAction)
         {
-            var logicalGrouping = condition.Attribute("logicalGrouping");
-            var trackAllCaptures = condition.Attribute("trackAllCaptures");
-            foreach (var condElement in condition.Elements("add"))
+            var actionRes = new UrlAction();
+            if (urlAction == null)
             {
-                var input = condElement.Attribute("input");
-                var matchType = condElement.Attribute("matchType");
-                var pattern = condElement.Attribute("pattern");
-                var ignorePattern = condElement.Attribute("ignorePattern");
-                var negate = condElement.Attribute("negate");
+                throw new FormatException("Action is a required element of a rule.");
             }
+
+            ActionType actionType;
+            if (Enum.TryParse(urlAction.Attribute("type")?.Value, out actionType))
+            {
+                actionRes.Type = actionType;
+            }
+
+            bool parseBool;
+            if (bool.TryParse(urlAction.Attribute("appendQueryString")?.Value, out parseBool))
+            {
+                actionRes.AppendQueryString = parseBool;
+            }
+
+            if (bool.TryParse(urlAction.Attribute("logRewrittenUrl")?.Value, out parseBool))
+            {
+                actionRes.LogRewrittenUrl = parseBool;
+            }
+
+            RedirectType redirectType;
+            if (Enum.TryParse(urlAction.Attribute("redirectType")?.Value, out redirectType))
+            {
+                actionRes.RedirectType = redirectType;
+            }
+
+            actionRes.Url = InputParser.ParseInputString(urlAction.Attribute("url")?.Value);
+            return actionRes;
         }
     }
 }

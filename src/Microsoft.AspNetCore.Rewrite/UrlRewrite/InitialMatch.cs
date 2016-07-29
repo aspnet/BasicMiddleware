@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
-    public class Match
+    public class InitialMatch
     {
         // TODO can convert this to be Regex.
         public Regex Url { get; set; } // must be a non-empty string
         public bool IgnoreCase { get; set; } = true;
-        public bool Negate { get; set; } = false;
+        public bool Negate { get; set; }
     }
 }
