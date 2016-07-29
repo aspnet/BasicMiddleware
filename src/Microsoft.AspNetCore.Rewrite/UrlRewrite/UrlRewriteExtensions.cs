@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.IO;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
@@ -9,7 +12,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         /// Imports rules from a mod_rewrite file and adds the rules to current rules. 
         /// </summary>
         /// <param name="options">The UrlRewrite options.</param>
-        /// <param name="filePath">The path to the file containing mod_rewrite rules.</param>
+        /// <param name="filePath">The path to the file containing urlrewrite rules.</param>
         public static UrlRewriteOptions ImportFromUrlRewrite(this UrlRewriteOptions options, string filePath)
         {
             // TODO use IHostingEnvironment as param.
@@ -17,7 +20,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             {
                 throw new ArgumentException(nameof(filePath));
             }
-            // TODO IHosting to fix!
 
             using (var stream = File.OpenRead(filePath))
             {

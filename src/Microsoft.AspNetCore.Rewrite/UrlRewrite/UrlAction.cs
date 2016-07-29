@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
@@ -12,22 +10,5 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         public bool AppendQueryString { get; set; }
         public bool LogRewrittenUrl { get; set; }
         public RedirectType RedirectType { get; set; } = RedirectType.Permanent;
-    }
-
-    public enum RedirectType
-    {
-        Permanent = 301,
-        Found = 302,
-        SeeOther = 303,
-        Temporary = 307
-    }
-
-    public enum ActionType
-    {
-        None,
-        Rewrite,
-        Redirect,
-        CustomResponse,
-        AbortRequest
     }
 }

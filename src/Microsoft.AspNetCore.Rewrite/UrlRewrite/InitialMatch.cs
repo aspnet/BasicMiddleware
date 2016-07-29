@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class InitialMatch
     {
         // TODO can convert this to be Regex.
-        public Regex Url { get; set; } // must be a non-empty string
+        public Regex Url { get; set; } // TODO must be a non-empty string, throw in check after parsing?
         public bool IgnoreCase { get; set; } = true;
         public bool Negate { get; set; }
     }

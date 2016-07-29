@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class Condition
     {
-        public Pattern Input { get; set; } // This will eventually be similar to the pattern in mod_rewrite
-        public Regex MatchPattern { get; set; } // TODO maybe need to have a default here.
-        public bool Negate { get; set; } // default is false
+        public Pattern Input { get; set; } 
+        public Regex MatchPattern { get; set; }
+        public bool Negate { get; set; }
         public bool IgnoreCase { get; set; } = true;
         public MatchType MatchType { get; set; } = MatchType.Pattern;
-    }
-
-    public enum MatchType
-    {
-        Pattern,
-        IsFile,
-        IsDirectory
     }
 }

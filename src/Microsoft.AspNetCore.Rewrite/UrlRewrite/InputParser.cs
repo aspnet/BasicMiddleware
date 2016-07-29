@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Rewrite.Internal;
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     /// <summary>
-    /// Parses the TestString segment of the mod_rewrite condition.
     /// </summary>
     public class InputParser
     {
@@ -19,14 +18,9 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
         /// <summary>
         /// Creates a pattern, which is a template to create a new test string to 
-        /// compare to the condition pattern. Can contain server variables, back references, etc.
+        /// compare to the condition. Can contain server variables, back references, etc.
         /// </summary>
-        /// <param name="testString">The test string portion of the RewriteCond
-        /// Examples:
-        /// %{REMOTE_ADDR}
-        /// /var/www/%{REQUEST_URI}
-        /// %1
-        /// $1</param>
+        /// <param name="testString"></param>
         /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
         public static Pattern ParseInputString(string testString)
         {
@@ -34,6 +28,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             {
                 testString = string.Empty;
             }
+
             var context = new ParserContext(testString);
             return ParseString(context);
         }
@@ -54,6 +49,9 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 }
                 else if (context.Current == CloseBrace)
                 {
+                    // TODO we should be throwing a syntax error if we have uneven close braces
+                    // Can fix by keeping track of the number of '{' and '}' with an int, where {
+                    // increments and } decrements. Throw if < 0.
                     return new Pattern(results);
                 }
                 else
@@ -69,7 +67,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         private static void ParseParameter(ParserContext context, List<PatternSegment> results)
         {
             context.Mark();
-            string parameter;
             // Four main cases:
             // 1. {NAME} - Server Variable, create lambda to get the part of the context
             // 2. {R:1}  - Rule parameter
@@ -77,6 +74,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             // 4. {function:xxx} - String function 
             // TODO consider perf here. This is on startup and will only happen one time
             // (unless we support Reload)
+            string parameter;
             while (context.Next())
             {
                 if (context.Current == CloseBrace)
@@ -89,7 +87,8 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 else if (context.Current == Colon)
                 {
                     parameter = context.Capture();
-
+                    
+                    // Only 5 strings to expect here. Case sensitive.
                     switch (parameter)
                     {
                         case "ToLower":
@@ -100,6 +99,10 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                                     var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
                                     return str.ToLowerInvariant();
                                 }));
+
+                                // at this point, we expect our context to be on the ending closing brace,
+                                // because the ParseString() call will increment the context until it 
+                                // has processed the new string.
                                 if (context.Current != CloseBrace)
                                 {
                                     throw new FormatException();
@@ -118,6 +121,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                                     var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
                                     return UrlEncoder.Default.Encode(str);
                                 }));
+
                                 if (context.Current != CloseBrace)
                                 {
                                     throw new FormatException();
@@ -191,6 +195,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     context.Back();
                     break;
                 }
+
                 if (!context.Next())
                 {
                     literal = context.Capture();
@@ -198,7 +203,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 }
             }
 
-            // add results
             results.Add(new PatternSegment((ctx, ruleMatch, condMatch) => {
                 return literal;
             }));
