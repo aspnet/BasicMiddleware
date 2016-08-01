@@ -26,13 +26,20 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             // 1. Figure out which section of the string to match for the initial rule.
             var initMatchRes = InitialMatch.Match(context.HttpContext.Request.Path.ToString());
 
-            if (initMatchRes.Success == InitialMatch.Negate)
+            if (!initMatchRes.Success)
             {
                 return new RuleResult { Result = RuleTerminiation.Continue };
             }
             // done with initial match
-            
             // go through conditions now
+            var condMatchRes = Conditions.Evaluate(context.HttpContext, initMatchRes);
+            if (!condMatchRes.Success)
+            {
+                return new RuleResult { Result = RuleTerminiation.Continue };
+            }
+
+            // at this point we know the rule passed, evaluate the replacement.
+            return Action.ApplyAction(context.HttpContext, initMatchRes, condMatchRes);
         }
     }
 }

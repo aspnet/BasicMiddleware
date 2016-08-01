@@ -7,6 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
+using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
@@ -36,7 +39,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
                 // TODO handle full url with global rules - may or may not support
-                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action));
+                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action), true, res);
                 result.Add(res);
             }
         }
@@ -48,7 +51,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
-                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action));
+                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action), false);
                 result.Add(res);
             }
         }
@@ -81,7 +84,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
 
             CreateMatch(rule.Element(RewriteTags.Match), res);
-            res.Conditions = CreateConditions(rule.Element(RewriteTags.Conditions));
+            CreateConditions(rule.Element(RewriteTags.Conditions), res);
         }
 
         private static void CreateMatch(XElement match, UrlRewriteRule res)
@@ -116,7 +119,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                             matchRes.Match = path =>
                             {
                                 var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success };
+                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == matchRes.Negate};
                             };
                         }
                         else
@@ -125,7 +128,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                             matchRes.Match = path =>
                             {
                                 var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success };
+                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == matchRes.Negate };
                             };
                         }
                     }
@@ -144,38 +147,38 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         }
 
 
-        private static Conditions CreateConditions(XElement conditions)
+        private static void CreateConditions(XElement conditions, UrlRewriteRule res)
         {
-            var condRes = new Conditions();
             if (conditions == null)
             {
-                return condRes; // TODO make sure no null exception on Conditions
+                return; // TODO make sure no null exception on Conditions
             }
 
+
+            res.Conditions = new Conditions();
             LogicalGrouping grouping;
             if (Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, out grouping))
             {
-                condRes.MatchType = grouping;
+                res.Conditions.MatchType = grouping;
             }
 
             bool parBool;
             if (bool.TryParse(conditions.Attribute(RewriteTags.TrackingAllCaptures)?.Value, out parBool))
             {
-                condRes.TrackingAllCaptures = parBool;
+                res.Conditions.TrackingAllCaptures = parBool;
             }
 
             foreach (var cond in conditions.Elements(RewriteTags.Add))
             {
-                condRes.ConditionList.Add(CreateCondition(cond));
+                CreateCondition(cond, res);
             }
-            return condRes;
         }
 
-        private static Condition CreateCondition(XElement condition)
+        private static void CreateCondition(XElement condition, UrlRewriteRule res)
         {
             if (condition == null)
             {
-                return null;
+                return;
             }
 
             var condRes = new Condition();
@@ -205,18 +208,45 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value;
 
-            if (condRes.IgnoreCase)
+
+            switch (res.PatternSyntax)
             {
-                condRes.MatchPattern = new Regex(parsedInputString, RegexOptions.IgnoreCase | RegexOptions.Compiled, RegexTimeout);
+                case PatternSyntax.ECMAScript:
+                    {
+                        if (condRes.IgnoreCase)
+                        {
+                            var regex = new Regex(parsedInputString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+                            condRes.Match = path =>
+                            {
+                                var pathMatch = regex.Match(path);
+                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == condRes.Negate };
+                            };
+                        }
+                        else
+                        {
+                            var regex = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
+                            condRes.Match = path =>
+                            {
+                                var pathMatch = regex.Match(path);
+                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == condRes.Negate };
+                            };
+                        }
+                    }
+                    break;
+                case PatternSyntax.WildCard:
+                    throw new NotImplementedException("Wildcard syntax is not supported.");
+                case PatternSyntax.ExactMatch:
+                    condRes.Match = path =>
+                    {
+                        var pathMatch = string.Compare(parsedInputString, path, condRes.IgnoreCase);
+                        return new MatchResults { Success = pathMatch == 0 };
+                    };
+                    break;
             }
-            else
-            {
-                condRes.MatchPattern = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
-            }
-            return condRes;
+            res.Conditions.ConditionList.Add(condRes);
         }
 
-        private static UrlAction CreateUrlAction(XElement urlAction)
+        private static UrlAction CreateUrlAction(XElement urlAction, bool globalRule)
         {
             if (urlAction == null)
             {
@@ -248,7 +278,76 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
 
             actionRes.Url = InputParser.ParseInputString(urlAction.Attribute(RewriteTags.Url)?.Value);
+
+            CreateOnMatchAction(actionRes, globalRule);
             return actionRes;
+        }
+
+        public static void CreateOnMatchAction(UrlAction actionRes, bool globalRule)
+        {
+            switch (actionRes.Type)
+            {
+                case ActionType.None:
+                    actionRes.Evaluate = (pattern, context) => { };
+                    break;
+                case ActionType.Rewrite:
+                    if (globalRule)
+                    {
+                        // TODO create action 
+                    }
+                    else
+                    {
+                        if (actionRes.AppendQueryString)
+                        {
+                            actionRes.Evaluate = (pattern, context) =>
+                            {
+                                context.Request.Path = new PathString(pattern);
+                            };
+                        }
+                        else
+                        {
+                            actionRes.Evaluate = (pattern, context) =>
+                            {
+                                context.Request.Path = new PathString(pattern);
+                                context.Request.QueryString = new QueryString();
+                            };
+                        }
+                    }
+                    break;
+                case ActionType.Redirect:
+                    if (globalRule)
+                    {
+                        // TODO create action
+                    }
+                    else
+                    {
+                        if (actionRes.AppendQueryString)
+                        {
+                            actionRes.Evaluate = (pattern, context) =>
+                            {
+                                context.Response.StatusCode = (int)actionRes.RedirectType;
+                                // TODO probably need to add a forward slash here
+                                context.Response.Headers[HeaderNames.Location] = pattern + context.Request.QueryString;
+                            };
+                        }
+                        else
+                        {
+                            actionRes.Evaluate = (pattern, context) =>
+                            {
+                                context.Response.StatusCode = (int)actionRes.RedirectType;
+                                // TODO probably need to add a forward slash here
+                                context.Response.Headers[HeaderNames.Location] = pattern;
+                            };
+                        }
+                    }
+                    break;
+                case ActionType.AbortRequest:
+                    actionRes
+                    break;
+                case ActionType.CustomResponse:
+                    // TODO
+                    throw new FormatException("Custom Responses are not supported");
+            }
         }
     }
 }

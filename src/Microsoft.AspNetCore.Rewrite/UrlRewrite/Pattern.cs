@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             PatternSegments = patternSegments;
         }
 
-        public string Evaluate(HttpContext context, Match ruleMatch, Match condMatch)
+        public string Evaluate(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
             var strBuilder = new StringBuilder();
             foreach (var pattern in PatternSegments)

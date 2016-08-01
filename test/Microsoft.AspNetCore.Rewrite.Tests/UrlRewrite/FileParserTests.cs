@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             condList.Add(new Condition
             {
                 Input = InputParser.ParseInputString("{HTTPS}"),
-                MatchPattern = new Regex("^OFF$")
+                Match = new Regex("^OFF$")
             });
 
             var expected = new List<UrlRewriteRule>();
@@ -102,7 +102,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             condList.Add(new Condition
             {
                 Input = InputParser.ParseInputString("{HTTPS}"),
-                MatchPattern = new Regex("^OFF$")
+                Match = new Regex("^OFF$")
             });
 
             var expected = new List<UrlRewriteRule>();
