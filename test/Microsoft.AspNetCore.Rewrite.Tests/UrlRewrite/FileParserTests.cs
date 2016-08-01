@@ -156,7 +156,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 Enabled = enabled,
                 StopProcessing = stopProcessing,
                 PatternSyntax = patternSyntax,
-                Match = new InitialMatch
+                InitialMatch = new InitialMatch
                 {
                     Url = new Regex(Url),
                     IgnoreCase = ignoreCase,
@@ -184,8 +184,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 Assert.Equal(r1.StopProcessing, r2.StopProcessing);
                 Assert.Equal(r1.PatternSyntax, r2.PatternSyntax);
 
-                Assert.Equal(r1.Match.IgnoreCase, r2.Match.IgnoreCase);
-                Assert.Equal(r1.Match.Negate, r2.Match.Negate);
+                Assert.Equal(r1.InitialMatch.IgnoreCase, r2.InitialMatch.IgnoreCase);
+                Assert.Equal(r1.InitialMatch.Negate, r2.InitialMatch.Negate);
 
                 Assert.Equal(r1.Action.Type, r2.Action.Type);
                 Assert.Equal(r1.Action.AppendQueryString, r2.Action.AppendQueryString);
