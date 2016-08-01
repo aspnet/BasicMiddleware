@@ -23,15 +23,14 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             if (xmlRoot != null)
             {
                 // there is a valid rewrite block, go through each rule and process
-                rules.AddRange(GetGlobalRules(xmlRoot.Descendants(RewriteTags.GlobalRules)));
-                rules.AddRange(GetRules(xmlRoot.Descendants(RewriteTags.Rules)));
+                GetGlobalRules(xmlRoot.Descendants(RewriteTags.GlobalRules), rules);
+                GetRules(xmlRoot.Descendants(RewriteTags.Rules), rules);
             }
             return rules;
         }
 
-        private static List<UrlRewriteRule> GetGlobalRules(IEnumerable<XElement> globalRules)
+        private static List<UrlRewriteRule> GetGlobalRules(IEnumerable<XElement> globalRules, List<UrlRewriteRule> result)
         {
-            var result = new List<UrlRewriteRule>();
             foreach (var rule in globalRules.Elements(RewriteTags.Rule) ?? Enumerable.Empty<XElement>())
             {
                 var res = new UrlRewriteRule();
@@ -40,12 +39,10 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 res.Action = CreateUrlAction(rule.Element(RewriteTags.Action));
                 result.Add(res);
             }
-            return result;
         }
 
-        private static List<UrlRewriteRule> GetRules(IEnumerable<XElement> rules)
+        private static void GetRules(IEnumerable<XElement> rules, List<UrlRewriteRule> result)
         {
-            var result = new List<UrlRewriteRule>();
             // TODO Better null check?
             foreach (var rule in rules.Elements(RewriteTags.Rule) ?? Enumerable.Empty<XElement>())
             {
@@ -54,7 +51,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 res.Action = CreateUrlAction(rule.Element(RewriteTags.Action));
                 result.Add(res);
             }
-            return result;
         }
 
         private static void SetRuleAttributes(XElement rule, UrlRewriteRule res)

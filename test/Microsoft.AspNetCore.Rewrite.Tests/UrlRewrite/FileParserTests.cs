@@ -26,10 +26,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             var expected = new List<UrlRewriteRule>();
             expected.Add(CreateTestRule(new List<Condition>(),
-                IMurl: "^article/([0-9]+)/([_0-9a-z-]+)",
+                Url: "^article/([0-9]+)/([_0-9a-z-]+)",
                 name: "Rewrite to article.aspx",
-                UAactionType: ActionType.Rewrite,
-                UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
+                actionType: ActionType.Rewrite,
+                pattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
             var res = UrlRewriteFileParser.Parse(new StringReader(xml));
@@ -63,10 +63,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             var expected = new List<UrlRewriteRule>();
             expected.Add(CreateTestRule(condList,
-                IMurl: "^article/([0-9]+)/([_0-9a-z-]+)",
+                Url: "^article/([0-9]+)/([_0-9a-z-]+)",
                 name: "Rewrite to article.aspx",
-                UAactionType: ActionType.Rewrite,
-                UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
+                actionType: ActionType.Rewrite,
+                pattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
             var res = UrlRewriteFileParser.Parse(new StringReader(xml));
@@ -108,15 +108,15 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             var expected = new List<UrlRewriteRule>();
             expected.Add(CreateTestRule(condList,
-                IMurl: "^article/([0-9]+)/([_0-9a-z-]+)",
+                Url: "^article/([0-9]+)/([_0-9a-z-]+)",
                 name: "Rewrite to article.aspx",
-                UAactionType: ActionType.Rewrite,
-                UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
+                actionType: ActionType.Rewrite,
+                pattern: "article.aspx?id={R:1}&amp;title={R:2}"));
             expected.Add(CreateTestRule(condList,
-                IMurl: "^article/([0-9]+)/([_0-9a-z-]+)",
+                Url: "^article/([0-9]+)/([_0-9a-z-]+)",
                 name: "Rewrite to article.aspx",
-                UAactionType: ActionType.Redirect,
-                UApattern: "article.aspx?id={R:1}&amp;title={R:2}"));
+                actionType: ActionType.Redirect,
+                pattern: "article.aspx?id={R:1}&amp;title={R:2}"));
 
             // act
             var res = UrlRewriteFileParser.Parse(new StringReader(xml));
@@ -134,25 +134,25 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             bool enabled = true,
             PatternSyntax patternSyntax = PatternSyntax.ECMAScript,
             bool stopProcessing = false,
-            string IMurl = "",
-            bool IMignoreCase = true,
-            bool IMnegate = false,
-            ActionType UAactionType = ActionType.None,
-            string UApattern = "",
-            bool UAappendQueryString = false,
-            bool UAlogRewrittenUrl = false,
-            RedirectType UAredirectType = RedirectType.Permanent
+            string Url = "",
+            bool ignoreCase = true,
+            bool negate = false,
+            ActionType actionType = ActionType.None,
+            string pattern = "",
+            bool appendQueryString = false,
+            bool rewrittenUrl = false,
+            RedirectType redirectType = RedirectType.Permanent
             )
         {
             return new UrlRewriteRule
             {
                 Action = new UrlAction
                 {
-                    Url = InputParser.ParseInputString(UApattern),
-                    Type = UAactionType,
-                    AppendQueryString = UAappendQueryString,
-                    LogRewrittenUrl = UAlogRewrittenUrl,
-                    RedirectType = UAredirectType
+                    Url = InputParser.ParseInputString(pattern),
+                    Type = actionType,
+                    AppendQueryString = appendQueryString,
+                    LogRewrittenUrl = rewrittenUrl,
+                    RedirectType = redirectType
                 },
                 Name = name,
                 Enabled = enabled,
@@ -160,9 +160,9 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 PatternSyntax = patternSyntax,
                 Match = new InitialMatch
                 {
-                    Url = new Regex(IMurl),
-                    IgnoreCase = IMignoreCase,
-                    Negate = IMnegate
+                    Url = new Regex(Url),
+                    IgnoreCase = ignoreCase,
+                    Negate = negate
                 },
                 Conditions = new Conditions
                 {
@@ -175,7 +175,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
         private void AssertUrlRewriteRuleEquality(List<UrlRewriteRule> expected, List<UrlRewriteRule> actual)
         {
-
             Assert.Equal(expected.Count, actual.Count);
             for (var i = 0; i < expected.Count; i++)
             {
