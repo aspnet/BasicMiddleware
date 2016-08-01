@@ -75,7 +75,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             AssertUrlRewriteRuleEquality(expected, res);
         }
 
-
         [Fact]
         public void RuleParse_ParseMultipleRules()
         {
@@ -124,7 +123,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             // assert
             AssertUrlRewriteRuleEquality(expected, res);
         }
-
 
         // Creates a rule with appropriate default values of the url rewrite rule.
         private UrlRewriteRule CreateTestRule(List<Condition> conditions,
@@ -198,8 +196,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 Assert.Equal(r1.Conditions.MatchType, r2.Conditions.MatchType);
                 Assert.Equal(r1.Conditions.TrackingAllCaptures, r2.Conditions.TrackingAllCaptures);
                 Assert.Equal(r1.Conditions.ConditionList.Count, r2.Conditions.ConditionList.Count);
-
-
 
                 for (var j = 0; j < r1.Conditions.ConditionList.Count; j++)
                 {
