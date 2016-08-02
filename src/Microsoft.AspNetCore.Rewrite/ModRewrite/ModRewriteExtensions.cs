@@ -20,12 +20,12 @@ namespace Microsoft.AspNetCore.Rewrite
         {
             if (options == null)
             {
-                throw new ArgumentNullException("UrlRewriteOptions is null");
+                throw new ArgumentNullException(nameof(options));
             }
 
             if (hostingEnv == null)
             {
-                throw new ArgumentNullException("HostingEnvironment is null");
+                throw new ArgumentNullException(nameof(hostingEnv));
             }
 
             if (string.IsNullOrEmpty(filePath))
@@ -48,23 +48,16 @@ namespace Microsoft.AspNetCore.Rewrite
         /// <param name="reader">Text reader containing a stream of mod_rewrite rules.</param>
         public static UrlRewriteOptions ImportFromModRewrite(this UrlRewriteOptions options, TextReader reader)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+            
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
             options.Rules.AddRange(FileParser.Parse(reader));
-            return options;
-        }
-
-        /// <summary>
-        /// Adds a mod_rewrite rule to the current rules.
-        /// Additional properties (conditions, flags) for the rule can be added through the action.
-        /// </summary>
-        /// <param name="options">The UrlRewrite options.</param>
-        /// <param name="rule">The literal string of a mod_rewrite rule: 
-        /// "RewriteRule Pattern Substitution [Flags]"</param>
-        /// <param name="action">Action to perform on the <see cref="RuleBuilder"/> </param>
-        public static UrlRewriteOptions AddModRewriteRule(this UrlRewriteOptions options, string rule, Action<RuleBuilder> action)
-        {
-            var builder = new RuleBuilder(rule);
-            action(builder);
-            options.Rules.Add(builder.Build());
             return options;
         }
 
@@ -76,6 +69,16 @@ namespace Microsoft.AspNetCore.Rewrite
         /// "RewriteRule Pattern Substitution [Flags]"</param>
         public static UrlRewriteOptions AddModRewriteRule(this UrlRewriteOptions options, string rule)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (rule == null)
+            {
+                throw new ArgumentNullException(nameof(rule));
+            }
+
             var builder = new RuleBuilder(rule);
             options.Rules.Add(builder.Build());
             return options;

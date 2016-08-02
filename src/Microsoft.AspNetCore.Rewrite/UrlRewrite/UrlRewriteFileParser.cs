@@ -7,17 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
 using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions;
-using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlMatches;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
-    // TODO rename 
     public static class UrlRewriteFileParser
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
+
         public static List<UrlRewriteRule> Parse(TextReader reader)
         {
             var temp = XDocument.Load(reader);
@@ -35,13 +34,16 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
         private static void GetGlobalRules(IEnumerable<XElement> globalRules, List<UrlRewriteRule> result)
         {
-            foreach (var rule in globalRules.Elements(RewriteTags.Rule) ?? Enumerable.Empty<XElement>())
+            foreach (var rule in globalRules.Elements(RewriteTags.GlobalRules) ?? Enumerable.Empty<XElement>())
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
                 // TODO handle full url with global rules - may or may not support
                 CreateUrlAction(rule.Element(RewriteTags.Action), true, res);
-                result.Add(res);
+                if (res.Enabled)
+                {
+                    result.Add(res);
+                }
             }
         }
 
@@ -53,7 +55,10 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
                 CreateUrlAction(rule.Element(RewriteTags.Action), false, res);
-                result.Add(res);
+                if (res.Enabled)
+                {
+                    result.Add(res);
+                }
             }
         }
 
@@ -95,7 +100,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 throw new FormatException("Rules must have an associated match.");
             }
 
-            var matchRes = new InitialMatch();
+            var matchRes = new ParsedUrlMatch();
 
             bool parBool;
             if (bool.TryParse(match.Attribute(RewriteTags.IgnoreCase)?.Value, out parBool))
@@ -117,46 +122,33 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                         if (matchRes.IgnoreCase)
                         {
                             var regex = new Regex(parsedInputString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
-                            matchRes.Match = path =>
-                            {
-                                var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == matchRes.Negate};
-                            };
+                            res.InitialMatch = new RegexMatch(regex, matchRes.Negate);
                         }
                         else
                         {
                             var regex = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
-                            matchRes.Match = path =>
-                            {
-                                var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == matchRes.Negate };
-                            };
+                            res.InitialMatch = new RegexMatch(regex, matchRes.Negate);
                         }
                     }
                     break;
                 case PatternSyntax.WildCard:
                     throw new NotImplementedException("Wildcard syntax is not supported.");
                 case PatternSyntax.ExactMatch:
-                    matchRes.Match = path =>
-                    {
-                        var pathMatch = string.Compare(parsedInputString, path, matchRes.IgnoreCase);
-                        return new MatchResults { Success = pathMatch == 0 };
-                    };
+                    res.InitialMatch = new ExactMatch(matchRes.IgnoreCase, parsedInputString, matchRes.Negate);
                     break;
             }
-            res.InitialMatch = matchRes;
         }
 
 
         private static void CreateConditions(XElement conditions, UrlRewriteRule res)
         {
+            // This is to avoid nullptr exception on referencing conditions.
+            res.Conditions = new Conditions();
             if (conditions == null)
             {
                 return; // TODO make sure no null exception on Conditions
             }
 
-
-            res.Conditions = new Conditions();
             LogicalGrouping grouping;
             if (Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, out grouping))
             {
@@ -182,68 +174,81 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 return;
             }
 
-            var condRes = new Condition();
+            var parsedCondRes = new ParsedCondition();
 
             bool parBool;
             if (bool.TryParse(condition.Attribute(RewriteTags.IgnoreCase)?.Value, out parBool))
             {
-                condRes.IgnoreCase = parBool;
+                parsedCondRes.IgnoreCase = parBool;
             }
 
             if (bool.TryParse(condition.Attribute(RewriteTags.Negate)?.Value, out parBool))
             {
-                condRes.Negate = parBool;
+                parsedCondRes.Negate = parBool;
             }
 
             MatchType matchType;
             if (Enum.TryParse(condition.Attribute(RewriteTags.MatchPattern)?.Value, out matchType))
             {
-                condRes.MatchType = matchType;
+                parsedCondRes.MatchType = matchType;
             }
 
             var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
-            if (parsedInputString != null)
+            if (parsedInputString == null)
             {
-                condRes.Input = InputParser.ParseInputString(parsedInputString);
+                throw new FormatException("Null input for condition");
             }
+            var input = InputParser.ParseInputString(parsedInputString);
+
 
             parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value;
-
+            if (parsedInputString == null)
+            {
+                throw new FormatException("Null pattern for condition.");
+            }
             switch (res.PatternSyntax)
             {
                 case PatternSyntax.ECMAScript:
                     {
-                        if (condRes.IgnoreCase)
+                        switch (parsedCondRes.MatchType)
                         {
-                            var regex = new Regex(parsedInputString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
-                            condRes.Match = path =>
-                            {
-                                var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == condRes.Negate };
-                            };
+                            case MatchType.Pattern:
+                                {
+                                    if (parsedCondRes.IgnoreCase)
+                                    {
+                                        var regex = new Regex(parsedInputString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+                                        res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new RegexMatch(regex, parsedCondRes.Negate) });
+
+                                    }
+                                    else
+                                    {
+                                        var regex = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
+                                        res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new RegexMatch(regex, parsedCondRes.Negate) });
+                                    }
+                                }
+                                break;
+                            case MatchType.IsDirectory:
+                                {
+                                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new IsDirectoryMatch(parsedCondRes.Negate) });
+                                }
+                                break;
+                            case MatchType.IsFile:
+                                {
+                                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new IsFileMatch(parsedCondRes.Negate) });
+                                }
+                                break;
+                            default:
+                                throw new FormatException("Unrecognized matchType.");
                         }
-                        else
-                        {
-                            var regex = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
-                            condRes.Match = path =>
-                            {
-                                var pathMatch = regex.Match(path);
-                                return new MatchResults { BackReference = pathMatch.Groups, Success = pathMatch.Success == condRes.Negate };
-                            };
-                        }
+                      
                     }
                     break;
                 case PatternSyntax.WildCard:
                     throw new NotImplementedException("Wildcard syntax is not supported.");
                 case PatternSyntax.ExactMatch:
-                    condRes.Match = path =>
-                    {
-                        var pathMatch = string.Compare(parsedInputString, path, condRes.IgnoreCase);
-                        return new MatchResults { Success = pathMatch == 0 };
-                    };
+                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new ExactMatch(parsedCondRes.IgnoreCase, parsedInputString, parsedCondRes.Negate) });
                     break;
             }
-            res.Conditions.ConditionList.Add(condRes);
         }
 
         private static void CreateUrlAction(XElement urlAction, bool globalRule, UrlRewriteRule res)
@@ -279,15 +284,15 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             actionRes.Url = InputParser.ParseInputString(urlAction.Attribute(RewriteTags.Url)?.Value);
 
-            CreateOnMatchAction(actionRes, globalRule, res);
+            CreateUrlActionFromParsedAction(actionRes, globalRule, res);
         }
 
-        public static void CreateOnMatchAction(ParsedUrlAction actionRes, bool globalRule, UrlRewriteRule res)
+        public static void CreateUrlActionFromParsedAction(ParsedUrlAction actionRes, bool globalRule, UrlRewriteRule res)
         {
             switch (actionRes.Type)
             {
                 case ActionType.None:
-                    res.Action = new 
+                    res.Action = new VoidAction();
                     break;
                 case ActionType.Rewrite:
                     if (globalRule)
@@ -298,15 +303,11 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     {
                         if (actionRes.AppendQueryString)
                         {
-                            res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue);
+                            res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url);
                         }
                         else
                         {
-                            actionRes.Evaluate = (pattern, context) =>
-                            {
-                                context.Request.Path = new PathString(pattern);
-                                context.Request.QueryString = new QueryString();
-                            };
+                            res.Action = new RewriteClearQueryAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url);
                         }
                     }
                     break;
@@ -319,21 +320,11 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     {
                         if (actionRes.AppendQueryString)
                         {
-                            actionRes.Evaluate = (pattern, context) =>
-                            {
-                                context.Response.StatusCode = (int)actionRes.RedirectType;
-                                // TODO probably need to add a forward slash here
-                                context.Response.Headers[HeaderNames.Location] = pattern + context.Request.QueryString;
-                            };
+                            res.Action = new RedirectAction((int)actionRes.RedirectType, actionRes.Url);
                         }
                         else
                         {
-                            actionRes.Evaluate = (pattern, context) =>
-                            {
-                                context.Response.StatusCode = (int)actionRes.RedirectType;
-                                // TODO probably need to add a forward slash here
-                                context.Response.Headers[HeaderNames.Location] = pattern;
-                            };
+                            res.Action = new RedirectClearQueryAction((int)actionRes.RedirectType, actionRes.Url);
                         }
                     }
                     break;

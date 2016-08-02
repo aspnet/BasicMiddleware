@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         public const string Input = "input";
         public const string Pattern = "pattern";
         public const string Type = "type";
-        public const string AppendQuery = "appendQuery";
+        public const string AppendQuery = "appendQueryString";
         public const string LogRewrittenUrl = "logRewrittenUrl";
         public const string RedirectType = "redirectType";
     }

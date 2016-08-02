@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions
 {
-    public class RewriteAction : UrlAction
+    public class RewriteClearQueryAction : UrlAction
     {
         public RuleTerminiation Result { get; }
 
-        public RewriteAction(RuleTerminiation result, Pattern pattern)
+        public RewriteClearQueryAction(RuleTerminiation result, Pattern pattern)
         {
             Result = result;
             Url = pattern;
@@ -19,14 +19,15 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
             var pattern = Url.Evaluate(context, ruleMatch, condMatch, true);
-
             var split = pattern.IndexOf('?');
+            context.Request.QueryString = new QueryString();
+
             if (split >= 0)
             {
                 context.Request.Path = new PathString(pattern.Substring(0, split));
                 context.Request.QueryString = context.Request.QueryString.Add(new QueryString(pattern.Substring(split)));
             }
-            else
+            else 
             {
                 context.Request.Path = new PathString(pattern);
             }

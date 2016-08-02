@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
@@ -11,7 +10,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
     public class Pattern
     {
         public IList<PatternSegment> PatternSegments { get; }
-
         public Pattern(List<PatternSegment> patternSegments)
         {
             PatternSegments = patternSegments;
@@ -19,7 +17,18 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
         public string Evaluate(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
+            return Evaluate(context, ruleMatch, condMatch, false);
+        }
+
+        public string Evaluate(HttpContext context, MatchResults ruleMatch, MatchResults condMatch, bool leadingSlash)
+        {
             var strBuilder = new StringBuilder();
+
+            if (leadingSlash)
+            {
+                strBuilder.Append("/");
+            }
+
             foreach (var pattern in PatternSegments)
             {
                 strBuilder.Append(pattern.Evaluate(context, ruleMatch, condMatch));

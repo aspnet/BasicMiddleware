@@ -183,24 +183,6 @@ namespace Microsoft.AspNetCore.Rewrite
             Assert.Equal(response, expected);
         }
 
-        [Fact(Skip="Need to handle escape characters")]
-        public async Task Invoke_HandleMultipleBackReferences()
-        {
-            var options = new UrlRewriteOptions()
-                .ImportFromModRewrite(new StringReader(@"RewriteRule ^/blog/([0-9]+)-([a-z]+) /blog/index.php?archive=$1-$2"));
-            var builder = new WebHostBuilder()
-              .Configure(app =>
-              {
-                  app.UseRewriter(options);
-                  app.Run(context => context.Response.WriteAsync(context.Request.Path));
-              });
-            var server = new TestServer(builder);
-
-            var response = await server.CreateClient().GetStringAsync("http://www.foo.org/blog/2016-jun");
-
-            Assert.Equal(response, @"/blog/index.php?archive=2016-jun");
-        }
-
         [Fact]
         public async Task Invoke_CheckFullUrlWithUFlagOnlyPath()
         {

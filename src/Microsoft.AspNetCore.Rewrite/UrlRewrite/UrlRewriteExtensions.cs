@@ -20,13 +20,14 @@ namespace Microsoft.AspNetCore.Rewrite
         {
             if (options == null)
             {
-                throw new ArgumentNullException("UrlRewriteOptions is null");
+                throw new ArgumentNullException(nameof(options));
             }
 
             if (hostingEnv == null)
             {
-                throw new ArgumentNullException("HostingEnvironment is null");
+                throw new ArgumentNullException(nameof(hostingEnv));
             }
+
             if (string.IsNullOrEmpty(filePath))
             {
                 throw new ArgumentException(nameof(filePath));
@@ -36,6 +37,30 @@ namespace Microsoft.AspNetCore.Rewrite
             using (var stream = File.OpenRead(path))
             {
                 options.Rules.AddRange(UrlRewriteFileParser.Parse(new StreamReader(stream)));
+            };
+            return options;
+        }
+
+        /// <summary>
+        /// Imports rules from a mod_rewrite file and adds the rules to current rules. 
+        /// </summary>
+        /// <param name="options">The UrlRewrite options.</param>
+        /// <param name="stream">The text reader stream.</param>
+        public static UrlRewriteOptions ImportFromUrlRewrite(this UrlRewriteOptions options, TextReader stream)
+        {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (stream == null)
+            {
+                throw new ArgumentException(nameof(stream));
+            }
+
+            using (stream)
+            {
+                options.Rules.AddRange(UrlRewriteFileParser.Parse(stream));
             };
             return options;
         }

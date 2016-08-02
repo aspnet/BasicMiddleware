@@ -2,10 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.UrlRewrite;
 using Xunit;
@@ -98,16 +95,16 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             return context;
         }
 
-        private Match CreateTestRuleMatch()
+        private MatchResults CreateTestRuleMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return match;
+            return new MatchResults { BackReference = match.Groups, Success = match.Success };
         }
 
-        private Match CreateTestCondMatch()
+        private MatchResults CreateTestCondMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return match;
+            return new MatchResults { BackReference = match.Groups, Success = match.Success };
         }
     }
 }

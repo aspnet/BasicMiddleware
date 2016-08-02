@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.UrlRewrite.PatternSegments;
 
