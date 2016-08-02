@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class MatchResults
     {
-        public ICollection BackReference { get; set; }
+        public IList<string> BackReference { get; set; }
         public bool Success { get; set; }
     }
 }

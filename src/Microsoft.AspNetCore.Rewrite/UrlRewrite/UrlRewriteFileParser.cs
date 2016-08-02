@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
+using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
@@ -39,7 +40,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
                 // TODO handle full url with global rules - may or may not support
-                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action), true, res);
+                CreateUrlAction(rule.Element(RewriteTags.Action), true, res);
                 result.Add(res);
             }
         }
@@ -51,7 +52,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
-                res.Action = CreateUrlAction(rule.Element(RewriteTags.Action), false);
+                CreateUrlAction(rule.Element(RewriteTags.Action), false, res);
                 result.Add(res);
             }
         }
@@ -208,7 +209,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value;
 
-
             switch (res.PatternSyntax)
             {
                 case PatternSyntax.ECMAScript:
@@ -246,13 +246,13 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             res.Conditions.ConditionList.Add(condRes);
         }
 
-        private static UrlAction CreateUrlAction(XElement urlAction, bool globalRule)
+        private static void CreateUrlAction(XElement urlAction, bool globalRule, UrlRewriteRule res)
         {
             if (urlAction == null)
             {
                 throw new FormatException("Action is a required element of a rule.");
             }
-            var actionRes = new UrlAction();
+            var actionRes = new ParsedUrlAction();
 
             ActionType actionType;
             if (Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, out actionType))
@@ -279,16 +279,15 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 
             actionRes.Url = InputParser.ParseInputString(urlAction.Attribute(RewriteTags.Url)?.Value);
 
-            CreateOnMatchAction(actionRes, globalRule);
-            return actionRes;
+            CreateOnMatchAction(actionRes, globalRule, res);
         }
 
-        public static void CreateOnMatchAction(UrlAction actionRes, bool globalRule)
+        public static void CreateOnMatchAction(ParsedUrlAction actionRes, bool globalRule, UrlRewriteRule res)
         {
             switch (actionRes.Type)
             {
                 case ActionType.None:
-                    actionRes.Evaluate = (pattern, context) => { };
+                    res.Action = new 
                     break;
                 case ActionType.Rewrite:
                     if (globalRule)
@@ -299,10 +298,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     {
                         if (actionRes.AppendQueryString)
                         {
-                            actionRes.Evaluate = (pattern, context) =>
-                            {
-                                context.Request.Path = new PathString(pattern);
-                            };
+                            res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue);
                         }
                         else
                         {
@@ -342,7 +338,6 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     }
                     break;
                 case ActionType.AbortRequest:
-                    actionRes
                     break;
                 case ActionType.CustomResponse:
                     // TODO

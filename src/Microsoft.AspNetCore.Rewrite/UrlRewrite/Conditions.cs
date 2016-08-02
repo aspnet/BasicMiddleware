@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
+
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public class Conditions

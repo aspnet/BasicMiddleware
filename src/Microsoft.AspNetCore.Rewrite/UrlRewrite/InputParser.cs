@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Rewrite.Internal;
+using Microsoft.AspNetCore.Rewrite.UrlRewrite.PatternSegments;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
@@ -81,7 +82,8 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 {
                     // This is just a server variable, so we do a lookup and verify the server variable exists.
                     parameter = context.Capture();
-                    results.Add(new PatternSegment(ServerVariables.FindServerVariable(parameter)));
+
+                    results.Add(ServerVariables.FindServerVariable(parameter));
                     return;
                 }
                 else if (context.Current == Colon)
@@ -94,11 +96,8 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                         case "ToLower":
                             {
                                 var pattern = ParseString(context);
-                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
-                                {
-                                    var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
-                                    return str.ToLowerInvariant();
-                                }));
+
+                                results.Add(new ToLowerSegment(pattern));
 
                                 // at this point, we expect our context to be on the ending closing brace,
                                 // because the ParseString() call will increment the context until it 
@@ -116,11 +115,8 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                         case "UrlEncode":
                             {
                                 var pattern = ParseString(context);
-                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
-                                {
-                                    var str = pattern.Evaluate(ctx, ruleMatch, condMatch);
-                                    return UrlEncoder.Default.Encode(str);
-                                }));
+
+                                results.Add(new UrlEncodeSegment(pattern));
 
                                 if (context.Current != CloseBrace)
                                 {
@@ -131,19 +127,15 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                         case "R":
                             {
                                 var index = GetBackReferenceIndex(context);
-                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
-                                {
-                                    return ruleMatch?.Groups[index]?.Value;
-                                }));
+
+                                results.Add(new RuleMatchSegment(index));
                                 return;
                             }
                         case "C":
                             {
                                 var index = GetBackReferenceIndex(context);
-                                results.Add(new PatternSegment((ctx, ruleMatch, condMatch) =>
-                                {
-                                    return condMatch?.Groups[index]?.Value;
-                                }));
+
+                                results.Add(new ConditionMatchSegment(index));
                                 return;
                             }
                         default:
@@ -203,9 +195,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 }
             }
 
-            results.Add(new PatternSegment((ctx, ruleMatch, condMatch) => {
-                return literal;
-            }));
+            results.Add(new LiteralSegment(literal));
             return true;
         }
     }

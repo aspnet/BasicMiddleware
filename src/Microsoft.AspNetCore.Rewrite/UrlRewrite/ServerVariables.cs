@@ -2,16 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite.UrlRewrite.PatternSegments;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
     public static class ServerVariables
     { 
-        public static Func<HttpContext, Match, Match, string> FindServerVariable(string serverVariable)
+        public static PatternSegment FindServerVariable(string serverVariable)
         {
             switch(serverVariable)
             {
@@ -21,82 +19,37 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                 case "APP_POOL_ID":
                     throw new NotImplementedException();
                 case "CONTENT_LENGTH":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.ContentLength.ToString();
-                    };
+                    return new HeaderSegment(HeaderNames.ContentLength);
                 case "CONTENT_TYPE":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.ContentType;
-                    };
+                    return new HeaderSegment(HeaderNames.ContentType);
                 case "HTTP_ACCEPT":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.Accept];
-                    };
+                    return new HeaderSegment(HeaderNames.Accept);
                 case "HTTP_COOKIE":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.Cookie];
-                    };
+                    return new HeaderSegment(HeaderNames.Cookie);
                 case "HTTP_HOST":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.Host];
-                    };
+                    return new HeaderSegment(HeaderNames.Host);
                 case "HTTP_PROXY_CONNECTION":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.ProxyAuthenticate];
-                    };
+                    return new HeaderSegment(HeaderNames.ProxyAuthenticate);
                 case "HTTP_REFERER":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.Referer];
-                    };
+                    return new HeaderSegment(HeaderNames.Referer);
                 case "HTTP_USER_AGENT":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.UserAgent];
-                    };
+                    return new HeaderSegment(HeaderNames.UserAgent);
                 case "HTTP_CONNECTION":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Headers[HeaderNames.Connection];
-                    };
+                    return new HeaderSegment(HeaderNames.Connection);
                 case "HTTP_URL":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.Path.ToString();
-                    };
+                    return new UrlSegment();
                 case "HTTPS":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.IsHttps ? "ON" : "OFF";
-                    };
+                    return new IsHttpsSegment();
                 case "LOCAL_ADDR":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Connection.LocalIpAddress.ToString();
-                    };
+                    return new LocalAddressSegment();
                 case "QUERY_STRING":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Request.QueryString.ToString();
-                    };
+                    return new QueryStringSegment();
                 case "REMOTE_ADDR":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Connection.RemoteIpAddress?.ToString();
-                    };
+                    return new RemoteAddressSegment();
                 case "REMOTE_HOST":
                     throw new NotImplementedException();
                 case "REMOTE_PORT":
-                    return (ctx, ruleMatch, condMatch) =>
-                    {
-                        return ctx.Connection.RemotePort.ToString(CultureInfo.InvariantCulture);
-                    };
+                    return new RemotePortSegment();
                 default:
                     throw new FormatException("Unrecognized server variable.");
             }
