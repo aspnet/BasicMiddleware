@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
                     return new RemotePortSegment();
                 case "REQUEST_FILENAME":
                     // TODO this is a required feature, but the request filename notion needs to be discussed.
-                    throw new NotImplementedException("Request filename to be implemented soon");
+                    return new RequestFileNameSegment();
                 default:
                     throw new FormatException("Unrecognized server variable.");
             }

@@ -27,6 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions
             if (split >= 0)
             {
                 context.Request.QueryString = context.Request.QueryString.Add(new QueryString(pattern.Substring(split)));
+                // not using the response.redirect here because status codes may be 301, 302, 307, 308 
                 context.Response.Headers[HeaderNames.Location] = pattern.Substring(0, split) + context.Request.QueryString;
             }
             else

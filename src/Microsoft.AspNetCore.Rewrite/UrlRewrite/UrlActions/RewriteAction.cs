@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions
 
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            var pattern = Url.Evaluate(context, ruleMatch, condMatch, true);
+            var pattern = Url.Evaluate(context, ruleMatch, condMatch, leadingSlash:true);
 
             var split = pattern.IndexOf('?');
             if (split >= 0)

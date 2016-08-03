@@ -113,5 +113,32 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             Assert.Equal(response.Headers.Location.OriginalString, "hello");
         }
+
+        [Fact(Skip = "Still fixing.")]
+        public async Task Invoke_RewriteWithFileChecks()
+        {
+            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Remove trailing slash"" stopProcessing=""true"">  
+<match url=""(.*)/$"" />  
+<conditions>  
+<add input=""{REQUEST_FILENAME}"" matchType=""IsFile"" negate=""true"" />  
+<add input=""{REQUEST_FILENAME}"" matchType=""IsDirectory"" negate=""true"" />  
+</conditions>  
+<action type=""Redirect"" redirectType=""Permanent"" url=""{R:1}"" />  
+</rule>    
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("/hey/hello/");
+
+            Assert.Equal(response.Headers.Location.OriginalString, "/hey/hello");
+        }
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlMatches;
 
 namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
 {
+    // TODO rename methods
     public static class UrlRewriteFileParser
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
@@ -20,26 +21,26 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         public static List<UrlRewriteRule> Parse(TextReader reader)
         {
             var temp = XDocument.Load(reader);
-            var xmlRoot = temp.Descendants(RewriteTags.Rewrite);
+            var xmlRoot = temp.Descendants(RewriteTags.Rewrite).FirstOrDefault();
             var rules = new List<UrlRewriteRule>();
 
             if (xmlRoot != null)
             {
                 // there is a valid rewrite block, go through each rule and process
-                GetGlobalRules(xmlRoot.Descendants(RewriteTags.GlobalRules), rules);
-                GetRules(xmlRoot.Descendants(RewriteTags.Rules), rules);
+                ParseGlobalRules(xmlRoot.Descendants(RewriteTags.GlobalRules), rules);
+                ParseRules(xmlRoot.Descendants(RewriteTags.Rules), rules);
             }
             return rules;
         }
 
-        private static void GetGlobalRules(IEnumerable<XElement> globalRules, List<UrlRewriteRule> result)
+        private static void ParseGlobalRules(IEnumerable<XElement> globalRules, List<UrlRewriteRule> result)
         {
-            foreach (var rule in globalRules.Elements(RewriteTags.GlobalRules) ?? Enumerable.Empty<XElement>())
+            foreach (var rule in globalRules.Elements(RewriteTags.GlobalRules))
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
                 // TODO handle full url with global rules - may or may not support
-                CreateUrlAction(rule.Element(RewriteTags.Action), true, res);
+                CreateUrlAction(rule.Element(RewriteTags.Action), res, globalRule: true);
                 if (res.Enabled)
                 {
                     result.Add(res);
@@ -47,14 +48,14 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
         }
 
-        private static void GetRules(IEnumerable<XElement> rules, List<UrlRewriteRule> result)
+        private static void ParseRules(IEnumerable<XElement> rules, List<UrlRewriteRule> result)
         {
             // TODO Better null check?
-            foreach (var rule in rules.Elements(RewriteTags.Rule) ?? Enumerable.Empty<XElement>())
+            foreach (var rule in rules.Elements(RewriteTags.Rule))
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
-                CreateUrlAction(rule.Element(RewriteTags.Action), false, res);
+                CreateUrlAction(rule.Element(RewriteTags.Action), res, globalRule: false);
                 if (res.Enabled)
                 {
                     result.Add(res);
@@ -201,11 +202,8 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             var input = InputParser.ParseInputString(parsedInputString);
 
 
-            parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value;
-            if (parsedInputString == null)
-            {
-                throw new FormatException("Null pattern for condition.");
-            }
+            parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value ?? string.Empty;
+
             switch (res.PatternSyntax)
             {
                 case PatternSyntax.ECMAScript:
@@ -251,7 +249,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
         }
 
-        private static void CreateUrlAction(XElement urlAction, bool globalRule, UrlRewriteRule res)
+        private static void CreateUrlAction(XElement urlAction, UrlRewriteRule res, bool globalRule)
         {
             if (urlAction == null)
             {

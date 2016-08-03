@@ -24,6 +24,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
         {
             var strBuilder = new StringBuilder();
 
+            // TODO consider thread static for string builder - DAVID PERF
             if (leadingSlash)
             {
                 strBuilder.Append("/");
