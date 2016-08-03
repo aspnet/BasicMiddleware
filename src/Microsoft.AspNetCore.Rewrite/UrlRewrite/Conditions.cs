@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             foreach (var condition in ConditionList)
             {
                 var res = condition.Evaluate(context, ruleMatch, prevCond);
-                success = MatchType == LogicalGrouping.MatchAll ? success && res.Success : success || res.Success;
+                success = (MatchType == LogicalGrouping.MatchAll ? (success && res.Success) : (success || res.Success));
                 prevCond = res;
             }
             return new MatchResults { Success = success, BackReference = prevCond?.BackReference };

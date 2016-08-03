@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite.PatternSegments
     {
         public override string Evaluate(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return context.Request.PathBase + context.Request.Path;
+            return context.Request.Path;
         }
     }
 }
