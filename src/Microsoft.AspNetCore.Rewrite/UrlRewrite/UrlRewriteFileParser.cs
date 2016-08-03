@@ -189,7 +189,7 @@ namespace Microsoft.AspNetCore.Rewrite.UrlRewrite
             }
 
             MatchType matchType;
-            if (Enum.TryParse(condition.Attribute(RewriteTags.MatchPattern)?.Value, out matchType))
+            if (Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, out matchType))
             {
                 parsedCondRes.MatchType = matchType;
             }
