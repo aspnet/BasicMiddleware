@@ -4,10 +4,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Rewrite.RuleAbstraction;
-using Microsoft.AspNetCore.Rewrite.UrlRewrite;
-using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlActions;
-using Microsoft.AspNetCore.Rewrite.UrlRewrite.UrlMatches;
+using Microsoft.AspNetCore.Rewrite.Internal;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlMatches;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite

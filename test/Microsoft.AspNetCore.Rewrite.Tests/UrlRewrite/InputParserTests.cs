@@ -4,7 +4,7 @@
 using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Rewrite.UrlRewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite

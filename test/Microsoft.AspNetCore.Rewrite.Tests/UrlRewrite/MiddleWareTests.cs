@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -17,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RedirectPathToPathAndQuery()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                             <rules>
                                 <rule name=""Rewrite to article.aspx"">
                                     <match url = ""^article/([0-9]+)/([_0-9a-z-]+)"" />
@@ -41,7 +42,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RewritePathToPathAndQuery()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                             <rules>
                                 <rule name=""Rewrite to article.aspx"">
                                     <match url = ""^article/([0-9]+)/([_0-9a-z-]+)"" />
@@ -65,7 +66,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RewriteBasedOnQueryStringParameters()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                 <rules>
                 <rule name=""Query String Rewrite"">  
                 <match url=""page\.asp$"" />  
@@ -93,7 +94,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RedirectToLowerCase()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                 <rules>
                 <rule name=""Convert to lower case"" stopProcessing=""true"">  
                 <match url="".*[A-Z].*"" ignoreCase=""false"" />  
@@ -117,7 +118,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RedirectRemoveTrailingSlash()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                 <rules>
                 <rule name=""Remove trailing slash"" stopProcessing=""true"">  
 <match url=""(.*)/$"" />  
@@ -144,7 +145,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_RedirectAddTrailingSlash()
         {
-            var options = new UrlRewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
                 <rules>
                 <rule name=""Add trailing slash"" stopProcessing=""true"">  
 <match url=""(.*[^/])$"" />  
@@ -166,6 +167,93 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var response = await server.CreateClient().GetAsync("hey/hello");
 
             Assert.Equal(response.Headers.Location.OriginalString, "hey/hello/");
+        }
+
+        [Fact]
+        public async Task Invoke_RedirectToHttps()
+        {
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+<rule name=""Redirect to HTTPS"" stopProcessing=""true"">  
+<match url=""(.*)"" />  
+<conditions>  
+<add input=""{HTTPS}"" pattern=""^OFF$"" />  
+</conditions>  
+<action type=""Redirect"" url=""https://{HTTP_HOST}/{R:1}"" redirectType=""Permanent"" />  
+</rule>  
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync(new Uri("http://example.com"));
+
+            Assert.Equal(response.Headers.Location.OriginalString, "https://example.com/");
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteToHttps()
+        {
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+<rule name=""Rewrite to HTTPS"" stopProcessing=""true"">  
+<match url=""(.*)"" />  
+<conditions>  
+<add input=""{HTTPS}"" pattern=""^OFF$"" />  
+</conditions>  
+<action type=""Rewrite"" url=""https://{HTTP_HOST}/{R:1}"" />  
+</rule>  
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(
+                        context.Request.Scheme + 
+                        "://" +
+                        context.Request.Host +
+                        context.Request.Path + 
+                        context.Request.QueryString));
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetStringAsync(new Uri("http://example.com"));
+
+            Assert.Equal(response, "https://example.com/");
+        }
+
+        [Fact]
+        public async Task Invoke_ReverseProxyToAnotherSite()
+        {
+            var options = new RewriteOptions().ImportFromUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+<rule name=""Proxy"">  
+<match url=""(.*)"" />  
+<action type=""Rewrite"" url=""http://internalserver/{R:1}"" />  
+</rule>  
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(
+                        context.Request.Scheme +
+                        "://" +
+                        context.Request.Host +
+                        context.Request.Path +
+                        context.Request.QueryString));
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetStringAsync(new Uri("http://example.com/"));
+
+            Assert.Equal(response, "http://internalserver/");
         }
     }
 }

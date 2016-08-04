@@ -13,7 +13,7 @@ namespace RewriteSample
     {
         public void Configure(IApplicationBuilder app, IHostingEnvironment hostingEnv)
         {
-            app.UseRewriter(new UrlRewriteOptions()
+            app.UseRewriter(new RewriteOptions()
                   .ImportFromUrlRewrite(hostingEnv, "UrlRewrite.xml")
                   .ImportFromModRewrite(hostingEnv, "Rewrite.txt"));
             app.Run(context => context.Response.WriteAsync(context.Request.Path));
