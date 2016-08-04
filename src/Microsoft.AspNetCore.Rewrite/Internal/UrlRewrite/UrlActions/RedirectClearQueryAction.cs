@@ -18,8 +18,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
 
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            context.Response.StatusCode = StatusCode;
             var pattern = Url.Evaluate(context, ruleMatch, condMatch);
+            context.Response.StatusCode = StatusCode;
 
             // we are clearing the query, so just put the pattern in the location header
             context.Response.Headers[HeaderNames.Location] = pattern;

@@ -279,11 +279,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                 case ActionType.Rewrite:
                     if (actionRes.AppendQueryString)
                     {
-                        res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url);
+                        res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url, clearQuery: false);
                     }
                     else
                     {
-                        res.Action = new RewriteClearQueryAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url);
+                        res.Action = new RewriteAction(res.StopProcessing ? RuleTerminiation.StopRules : RuleTerminiation.Continue, actionRes.Url, clearQuery: true);
                     }
                     break;
                 case ActionType.Redirect:

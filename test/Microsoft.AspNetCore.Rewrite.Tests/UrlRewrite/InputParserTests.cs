@@ -18,8 +18,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var result = InputParser.ParseInputString(testString);
             Assert.Equal(result.PatternSegments.Count, 1);
         }
-
-        // Tests sizes of the pattern segments. These are all anonyomus lambdas, so cant check contents.
+        
+        // TODO update tests to check type
         [Theory]
         [InlineData("foo/bar/{R:1}/what", 3)]
         [InlineData("foo/{R:1}", 2)]
@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Equal(result.PatternSegments.Count, expected);
         }
 
-        // Test actual evaluation of the lambdas, verifying the correct string comes from the evalation
+        // Test actual evaluation of the types, verifying the correct string comes from the evalation
         [Theory]
         [InlineData("hey/hello/what", "hey/hello/what")]
         [InlineData("hey/{R:1}/what", "hey/foo/what")]

@@ -3,24 +3,30 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Rewrite.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
 {
     public class RewriteAction : UrlAction
     {
         public RuleTerminiation Result { get; }
+        public bool ClearQuery { get; }
 
-        public RewriteAction(RuleTerminiation result, Pattern pattern)
+        public RewriteAction(RuleTerminiation result, Pattern pattern, bool clearQuery)
         {
             Result = result;
             Url = pattern;
+            ClearQuery = clearQuery;
         }
 
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
             var pattern = Url.Evaluate(context, ruleMatch, condMatch);
-            
+
+            if (ClearQuery)
+            {
+                context.Request.QueryString = new QueryString();
+            }
+
             if (pattern.IndexOf("://") >= 0)
             {
                 string scheme = null;

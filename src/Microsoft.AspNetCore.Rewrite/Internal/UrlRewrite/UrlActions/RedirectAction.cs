@@ -18,8 +18,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
 
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            context.Response.StatusCode = StatusCode;
+
             var pattern = Url.Evaluate(context, ruleMatch, condMatch);
+            context.Response.StatusCode = StatusCode;
 
             // url can either contain the full url or the path and query
             // always add to location header.
@@ -27,9 +28,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
             var split = pattern.IndexOf('?');
             if (split >= 0)
             {
-                context.Request.QueryString = context.Request.QueryString.Add(new QueryString(pattern.Substring(split)));
+                var query =  context.Request.QueryString.Add(new QueryString(pattern.Substring(split)));
                 // not using the response.redirect here because status codes may be 301, 302, 307, 308 
-                context.Response.Headers[HeaderNames.Location] = pattern.Substring(0, split) + context.Request.QueryString;
+                context.Response.Headers[HeaderNames.Location] = pattern.Substring(0, split) + query;
             }
             else
             {

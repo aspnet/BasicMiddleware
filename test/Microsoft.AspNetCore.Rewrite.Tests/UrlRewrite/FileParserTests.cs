@@ -147,7 +147,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         {
             return new UrlRewriteRule
             {
-                Action = new RewriteAction( RuleTerminiation.Continue, InputParser.ParseInputString(Url)),
+                Action = new RewriteAction( RuleTerminiation.Continue, InputParser.ParseInputString(Url), clearQuery: false),
                 Name = name,
                 Enabled = enabled,
                 StopProcessing = stopProcessing,
