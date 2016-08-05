@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
         // Explicitly say that nothing happens
         public override RuleResult ApplyAction(HttpContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return new RuleResult { Result = RuleTerminiation.Continue };
+            return RuleResult.Continue;
         }
     }
 }

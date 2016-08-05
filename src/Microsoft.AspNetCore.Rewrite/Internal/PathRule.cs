@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                         path,
                         req.QueryString);
                     context.HttpContext.Response.Redirect(newUrl);
-                    return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+                    return RuleResult.ResponseComplete;
                 }
                 else
                 {
@@ -35,14 +35,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 }
                 if (OnCompletion == Transformation.TerminatingRewrite)
                 {
-                    return new RuleResult { Result = RuleTerminiation.StopRules };
+                    return RuleResult.StopRules;
                 }
                 else
                 {
-                    return new RuleResult { Result = RuleTerminiation.Continue };
+                    return RuleResult.Continue;
                 }
             }
-            return new RuleResult { Result = RuleTerminiation.Continue };
+            return RuleResult.Continue;
         }
     }
 }

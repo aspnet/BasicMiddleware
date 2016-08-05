@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
         {
             if (!Enabled)
             {
-                return new RuleResult { Result = RuleTerminiation.Continue };
+                return RuleResult.Continue;
             }
             // Due to the path string always having a leading slash,
             // remove it from the path before regex comparison
@@ -25,13 +25,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
 
             if (!initMatchRes.Success)
             {
-                return new RuleResult { Result = RuleTerminiation.Continue };
+                return RuleResult.Continue;
             }
 
             var condMatchRes = Conditions.Evaluate(context, initMatchRes);
             if (!condMatchRes.Success)
             {
-                return new RuleResult { Result = RuleTerminiation.Continue };
+                return RuleResult.Continue;
             }
 
             // at this point we know the rule passed, evaluate the replacement.

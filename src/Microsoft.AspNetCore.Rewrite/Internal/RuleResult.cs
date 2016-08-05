@@ -5,6 +5,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public class RuleResult
     {
+        public static RuleResult Continue = new RuleResult { Result = RuleTerminiation.Continue };
+        public static RuleResult ResponseComplete = new RuleResult { Result = RuleTerminiation.ResponseComplete };
+        public static RuleResult StopRules = new RuleResult { Result = RuleTerminiation.StopRules };
+
         public RuleTerminiation Result { get; set; }
     }
 }

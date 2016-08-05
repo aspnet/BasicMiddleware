@@ -26,6 +26,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
             if (xmlRoot != null)
             {
                 // there is a valid rewrite block, go through each rule and process
+                // TODO Global rules are currently not treated differently than normal rules, fix. 
                 ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules), rules, globalRule: true);
                 ParseRules(xmlRoot.Descendants(RewriteTags.Rules), rules, globalRule: false);
             }

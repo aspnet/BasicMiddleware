@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
             string flagRes = null;
             if (CheckMatchResult(results.Success))
             {
-                return new RuleResult { Result = RuleTerminiation.Continue };
+                return RuleResult.Continue;
             }
 
             if (Flags.HasFlag(RuleFlagType.EscapeBackreference))
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
 
             if (!CheckCondition(context, results, previous))
             {
-                return new RuleResult { Result = RuleTerminiation.Continue };
+                return RuleResult.Continue;
             }
             // TODO add chained flag
 
@@ -81,12 +81,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
             if (Flags.HasFlag(RuleFlagType.Forbidden))
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-                return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+                return RuleResult.ResponseComplete;
             }
             else if (Flags.HasFlag(RuleFlagType.Gone))
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status410Gone;
-                return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+                return RuleResult.ResponseComplete;
             }
             else if (result == "-")
             {
@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
                         context.HttpContext.Response.Headers[HeaderNames.Location] = "/" + result + context.HttpContext.Request.QueryString;
                     }
                 }
-                return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+                return RuleResult.ResponseComplete;
             }
             else
             {
@@ -144,11 +144,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
                 }
                 if (Flags.HasFlag(RuleFlagType.Last) || Flags.HasFlag(RuleFlagType.End))
                 {
-                    return new RuleResult { Result = RuleTerminiation.StopRules };
+                    return RuleResult.StopRules;
                 }
                 else
                 {
-                    return new RuleResult { Result = RuleTerminiation.Continue };
+                    return RuleResult.Continue;
                 }
             }
         }

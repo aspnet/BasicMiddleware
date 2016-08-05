@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
 
             // we are clearing the query, so just put the pattern in the location header
             context.Response.Headers[HeaderNames.Location] = pattern;
-            return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+            return RuleResult.ResponseComplete;
         }
     }
 }

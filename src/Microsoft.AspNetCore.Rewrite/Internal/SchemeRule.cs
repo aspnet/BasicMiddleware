@@ -34,11 +34,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     context.HttpContext.Request.Host = host;
                     if (OnCompletion == Transformation.TerminatingRewrite)
                     {
-                        return new RuleResult { Result = RuleTerminiation.StopRules };
+                        return RuleResult.StopRules;
                     }
                     else
                     {
-                        return new RuleResult { Result = RuleTerminiation.Continue };
+                        return RuleResult.Continue;
                     }
                 }
 
@@ -46,9 +46,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 var newUrl = new StringBuilder().Append("https://").Append(host).Append(req.PathBase).Append(req.Path).Append(req.QueryString);
                 context.HttpContext.Response.Redirect(newUrl.ToString());
-                return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+                return RuleResult.ResponseComplete;
             }
-            return new RuleResult { Result = RuleTerminiation.Continue }; ;
+            return RuleResult.Continue;
         }
     }
 }

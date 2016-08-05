@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
             {
                 context.Response.Headers[HeaderNames.Location] = pattern;
             }
-            return new RuleResult { Result = RuleTerminiation.ResponseComplete };
+            return RuleResult.ResponseComplete;
         }
     }
 }
