@@ -61,6 +61,38 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             CheckResponseCompressed(response, expectCompressed: true, expectedBodyLength: 24);
         }
 
+        [Theory]
+        [InlineData("text/plain; charset=ISO-8859-4")]
+        [InlineData("text/plain ; charset=ISO-8859-4")]
+        public async Task Request_CompressGzipWithMimeTypeWithCharset(string responseContentType)
+        {
+            var options = new ResponseCompressionOptions()
+            {
+                MimeTypes = new string[] { "text/plain" },
+                MinimumSize = MinimumSize,
+                Providers = new IResponseCompressionProvider[]
+                {
+                    new GzipResponseCompressionProvider(CompressionLevel.Optimal)
+                }
+            };
+
+            var middleware = new ResponseCompressionMiddleware(async context =>
+            {
+                context.Response.ContentType = responseContentType;
+                await context.Response.WriteAsync(new string('a', 100));
+            }, Options.Create(options));
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers[HeaderNames.AcceptEncoding] = "gzip";
+
+            httpContext.Response.Body = new MemoryStream();
+
+            await middleware.Invoke(httpContext);
+
+            Assert.Equal(24, httpContext.Response.ContentLength);
+            Assert.Equal(24, httpContext.Response.Body.Length);
+        }
+
         [Fact]
         public async Task Request_CompressUnknown()
         {

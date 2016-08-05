@@ -73,9 +73,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             var bodyStream = context.Response.Body;
 
-            using (var uncompressedStream = new MemoryStream())
+            using (var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _mimeTypes))
             {
-                context.Response.Body = uncompressedStream;
+                context.Response.Body = bodyWrapperStream;
 
                 try
                 {
@@ -86,36 +86,44 @@ namespace Microsoft.AspNetCore.ResponseCompression
                     context.Response.Body = bodyStream;
                 }
 
-                uncompressedStream.Seek(0, SeekOrigin.Begin);
-
-                if (uncompressedStream.Length < _minimumSize ||                 // The response is too small
-                    context.Response.Headers[HeaderNames.ContentRange] != StringValues.Empty ||     // The response is partial
-                    context.Response.Headers[HeaderNames.ContentEncoding] != StringValues.Empty ||    // Already a specific encoding
-                    !IsMimeTypeCompressable(context.Response.ContentType))      // MIME type not in the authorized list
+                var uncompressedStream = bodyWrapperStream.UncompressedStream;
+                if (uncompressedStream != null)
                 {
-                    await uncompressedStream.CopyToAsync(bodyStream);
-                }
-                else
-                {
-                    using (var compressedStream = new MemoryStream())
+                    try
                     {
-                        await compressionProvider.CompressAsync(uncompressedStream, compressedStream);
+                        uncompressedStream.Seek(0, SeekOrigin.Begin);
 
-                        if (compressedStream.Length >= uncompressedStream.Length)
+                        if (uncompressedStream.Length < _minimumSize)                 // The response is too small
                         {
-                            uncompressedStream.Seek(0, SeekOrigin.Begin);
                             await uncompressedStream.CopyToAsync(bodyStream);
                         }
                         else
                         {
-                            context.Response.Headers[HeaderNames.ContentEncoding] = compressionProvider.EncodingName;
-                            context.Response.Headers[HeaderNames.ContentMD5] = StringValues.Empty;      // Reset the MD5 because the content changed.
-                            context.Response.Headers[HeaderNames.ContentLength] = compressedStream.Length.ToString();
-                            context.Response.ContentLength = compressedStream.Length;
+                            using (var compressedStream = new MemoryStream())
+                            {
+                                await compressionProvider.CompressAsync(uncompressedStream, compressedStream);
 
-                            compressedStream.Seek(0, SeekOrigin.Begin);
-                            await compressedStream.CopyToAsync(bodyStream);
+                                if (compressedStream.Length >= uncompressedStream.Length)
+                                {
+                                    uncompressedStream.Seek(0, SeekOrigin.Begin);
+                                    await uncompressedStream.CopyToAsync(bodyStream);
+                                }
+                                else
+                                {
+                                    context.Response.Headers[HeaderNames.ContentEncoding] = compressionProvider.EncodingName;
+                                    context.Response.Headers[HeaderNames.ContentMD5] = StringValues.Empty;      // Reset the MD5 because the content changed.
+                                    context.Response.Headers[HeaderNames.ContentLength] = compressedStream.Length.ToString();
+                                    context.Response.ContentLength = compressedStream.Length;
+
+                                    compressedStream.Seek(0, SeekOrigin.Begin);
+                                    await compressedStream.CopyToAsync(bodyStream);
+                                }
+                            }
                         }
+                    }
+                    finally
+                    {
+                        uncompressedStream.Dispose();
                     }
                 }
             }
@@ -137,11 +145,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
 
             return null;
-        }
-
-        private bool IsMimeTypeCompressable(string mimeType)
-        {
-            return !string.IsNullOrEmpty(mimeType) && _mimeTypes.Contains(mimeType);
         }
     }
 }
