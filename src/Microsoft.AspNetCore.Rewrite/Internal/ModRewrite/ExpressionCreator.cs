@@ -3,7 +3,7 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Rewrite.Internal.Operands;
+using Microsoft.AspNetCore.Rewrite.Internal.ModRewrite.Operands;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite
 {

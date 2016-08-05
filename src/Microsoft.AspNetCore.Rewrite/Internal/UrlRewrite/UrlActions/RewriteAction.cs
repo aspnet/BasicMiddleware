@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
             {
                 context.Request.QueryString = new QueryString();
             }
-
+            // TODO PERF, substrings, object creation, etc.
             if (pattern.IndexOf("://") >= 0)
             {
                 string scheme = null;
@@ -36,11 +36,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
                 var fragment = new FragmentString();
                 UriHelper.FromAbsolute(pattern, out scheme, out host, out path, out query, out fragment);
 
-                // TODO How to split among path and pathbase: globalrules vs rules
-                if (!path.StartsWithSegments(context.Request.PathBase))
-                {
-                    // TODO throw here?
-                }
                 context.Request.Scheme = scheme;
                 context.Request.Host = host;
                 context.Request.Path = path;
@@ -48,7 +43,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlActions
             }
             else
             {
-                // TODO PERF
                 var split = pattern.IndexOf('?');
                 if (split >= 0)
                 {

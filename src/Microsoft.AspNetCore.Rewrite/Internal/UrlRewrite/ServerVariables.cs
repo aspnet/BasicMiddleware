@@ -51,7 +51,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                 case "REMOTE_PORT":
                     return new RemotePortSegment();
                 case "REQUEST_FILENAME":
-                    // TODO this is a required feature, but the request filename notion needs to be discussed.
                     return new RequestFileNameSegment();
                 default:
                     throw new FormatException("Unrecognized server variable.");

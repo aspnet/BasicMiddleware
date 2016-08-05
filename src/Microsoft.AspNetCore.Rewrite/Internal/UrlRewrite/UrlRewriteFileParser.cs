@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite.UrlMatches;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
 {
-    // TODO rename methods
     public static class UrlRewriteFileParser
     {
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
@@ -21,26 +20,31 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
         {
             var temp = XDocument.Load(reader);
             var xmlRoot = temp.Descendants(RewriteTags.Rewrite).FirstOrDefault();
-            var rules = new List<UrlRewriteRule>();
 
             if (xmlRoot != null)
             {
-                // there is a valid rewrite block, go through each rule and process
+                var result = new List<UrlRewriteRule>();
                 // TODO Global rules are currently not treated differently than normal rules, fix. 
-                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules), rules, globalRule: true);
-                ParseRules(xmlRoot.Descendants(RewriteTags.Rules), rules, globalRule: false);
+                // See: https://github.com/aspnet/BasicMiddleware/issues/59
+                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result, isGlobalRule: true);
+                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result, isGlobalRule: false);
+                return result;
             }
-            return rules;
+            return null;
         }
 
-        private static void ParseRules(IEnumerable<XElement> rules, List<UrlRewriteRule> result, bool globalRule)
+        private static void ParseRules(XElement rules, List<UrlRewriteRule> result, bool isGlobalRule)
         {
-            // TODO Better null check?
+            if (rules == null)
+            {
+                return;
+            }
+
             foreach (var rule in rules.Elements(RewriteTags.Rule))
             {
                 var res = new UrlRewriteRule();
                 SetRuleAttributes(rule, res);
-                CreateUrlAction(rule.Element(RewriteTags.Action), res, globalRule);
+                CreateUrlAction(rule.Element(RewriteTags.Action), res, isGlobalRule);
                 if (res.Enabled)
                 {
                     result.Add(res);
@@ -50,10 +54,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
 
         private static void SetRuleAttributes(XElement rule, UrlRewriteRule res)
         {
-            if (rule == null)
-            {
-                return;
-            }
 
             res.Name =  rule.Attribute(RewriteTags.Name)?.Value;
 
@@ -132,7 +132,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
             res.Conditions = new Conditions();
             if (conditions == null)
             {
-                return; // TODO make sure no null exception on Conditions
+                return;
             }
 
             LogicalGrouping grouping;
@@ -155,10 +155,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
 
         private static void CreateCondition(XElement condition, UrlRewriteRule res)
         {
-            if (condition == null)
-            {
-                return;
-            }
 
             var parsedCondRes = new ParsedCondition();
 
@@ -179,15 +175,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                 parsedCondRes.MatchType = matchType;
             }
 
-            var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
-            if (parsedInputString == null)
+            var parsedString = condition.Attribute(RewriteTags.Input)?.Value;
+            if (parsedString == null)
             {
                 throw new FormatException("Null input for condition");
             }
-            var input = InputParser.ParseInputString(parsedInputString);
 
-
-            parsedInputString = condition.Attribute(RewriteTags.Pattern)?.Value ?? string.Empty;
+            var input = InputParser.ParseInputString(parsedString);
 
             switch (res.PatternSyntax)
             {
@@ -197,17 +191,23 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                         {
                             case MatchType.Pattern:
                                 {
+                                    parsedString = condition.Attribute(RewriteTags.Pattern)?.Value;
+                                    if (parsedString == null)
+                                    {
+                                        throw new FormatException("Pattern match does not have an associated pattern attribute in condition.");
+                                    }
+                                    Regex regex = null;
+                                    
                                     if (parsedCondRes.IgnoreCase)
                                     {
-                                        var regex = new Regex(parsedInputString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
-                                        res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new RegexMatch(regex, parsedCondRes.Negate) });
-
+                                        regex = new Regex(parsedString, RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
                                     }
                                     else
                                     {
-                                        var regex = new Regex(parsedInputString, RegexOptions.Compiled, RegexTimeout);
-                                        res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new RegexMatch(regex, parsedCondRes.Negate) });
+                                        regex = new Regex(parsedString, RegexOptions.Compiled, RegexTimeout);
                                     }
+
+                                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new RegexMatch(regex, parsedCondRes.Negate) });
                                 }
                                 break;
                             case MatchType.IsDirectory:
@@ -229,8 +229,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                 case PatternSyntax.WildCard:
                     throw new NotImplementedException("Wildcard syntax is not supported.");
                 case PatternSyntax.ExactMatch:
-                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new ExactMatch(parsedCondRes.IgnoreCase, parsedInputString, parsedCondRes.Negate) });
+                    parsedString = condition.Attribute(RewriteTags.Pattern)?.Value;
+                    if (parsedString == null)
+                    {
+                        throw new FormatException("Pattern match does not have an associated pattern attribute in condition.");
+                    }
+                    res.Conditions.ConditionList.Add(new Condition { Input = input, Match = new ExactMatch(parsedCondRes.IgnoreCase, parsedString, parsedCondRes.Negate) });
                     break;
+                default:
+                    throw new FormatException("Unrecognized pattern syntax.");
             }
         }
 
@@ -240,6 +247,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
             {
                 throw new FormatException("Action is a required element of a rule.");
             }
+
             var actionRes = new ParsedUrlAction();
 
             ActionType actionType;
@@ -298,7 +306,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
                     }
                     break;
                 case ActionType.AbortRequest:
-                    break;
+                    throw new FormatException("Abort requests are not supported.");
                 case ActionType.CustomResponse:
                     // TODO
                     throw new FormatException("Custom Responses are not supported");

@@ -4,7 +4,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.FileProviders;
 
-namespace Microsoft.AspNetCore.Rewrite.Internal.Operands
+namespace Microsoft.AspNetCore.Rewrite.Internal.ModRewrite.Operands
 {
     public abstract class Operand
     {

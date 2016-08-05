@@ -5,7 +5,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlRewrite
 {
     public static class RewriteTags
     {
-        // TODO More strings to be added later once further implementations are added.
         public const string Rewrite = "rewrite";
         public const string GlobalRules = "globalRules";
         public const string Rules = "rules";

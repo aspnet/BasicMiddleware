@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Rewrite.Internal.ModRewrite;
-using Microsoft.AspNetCore.Rewrite.Internal.Operands;
+using Microsoft.AspNetCore.Rewrite.Internal.ModRewrite.Operands;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.ModRewrite
