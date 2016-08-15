@@ -17,21 +17,6 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
     {
         private const string TextPlain = "text/plain";
 
-        private const int MinimumSize = 10;
-
-        [Fact]
-        public void Options_IncorrectMinimumSize()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-           {
-               new ResponseCompressionMiddleware(null, Options.Create(new ResponseCompressionOptions()
-               {
-                   MimeTypes = new string[] { TextPlain },
-                   MinimumSize = 0
-               }));
-           });
-        }
-
         [Fact]
         public void Options_NullMimesTypes()
         {
@@ -39,8 +24,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             {
                 new ResponseCompressionMiddleware(null, Options.Create(new ResponseCompressionOptions()
                 {
-                    MimeTypes = null,
-                    MinimumSize = 10
+                    MimeTypes = null
                 }));
             });
         }
@@ -69,7 +53,6 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var options = new ResponseCompressionOptions()
             {
                 MimeTypes = new string[] { "text/plain" },
-                MinimumSize = MinimumSize,
                 Providers = new IResponseCompressionProvider[]
                 {
                     new GzipResponseCompressionProvider(CompressionLevel.Optimal)
@@ -89,7 +72,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 
             await middleware.Invoke(httpContext);
 
-            Assert.Equal(24, httpContext.Response.ContentLength);
+            Assert.Null(httpContext.Response.ContentLength);
             Assert.Equal(24, httpContext.Response.Body.Length);
         }
 
@@ -107,14 +90,6 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var response = await InvokeMiddleware(100, requestAcceptEncoding: "gzip", responseType: "text/html");
 
             CheckResponseCompressed(response, expectCompressed: false, expectedBodyLength: 100);
-        }
-
-        [Fact]
-        public async Task Request_UnderMinimumSize()
-        {
-            var response = await InvokeMiddleware(MinimumSize - 1, requestAcceptEncoding: "gzip", responseType: TextPlain);
-
-            CheckResponseCompressed(response, expectCompressed: false, expectedBodyLength: MinimumSize - 1);
         }
 
         [Fact]
@@ -149,7 +124,6 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var options = new ResponseCompressionOptions()
             {
                 MimeTypes = new string[] { TextPlain },
-                MinimumSize = MinimumSize,
                 Providers = new IResponseCompressionProvider[]
                 {
                     new GzipResponseCompressionProvider(CompressionLevel.Optimal)
@@ -187,7 +161,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             {
                 Assert.Equal(StringValues.Empty, response.Headers[HeaderNames.ContentMD5]);
                 Assert.Equal("gzip", response.Headers[HeaderNames.ContentEncoding]);
-                Assert.Equal(expectedBodyLength, response.ContentLength);
+                Assert.Null(response.ContentLength);
                 Assert.Equal(expectedBodyLength, response.Body.Length);
             }
             else

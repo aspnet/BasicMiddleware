@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.ResponseCompression
 {
@@ -24,12 +23,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
         }
 
-        public async Task CompressAsync(Stream input, Stream output)
+        public Stream CreateStream(Stream outputStream)
         {
-            using (var deflate = new GZipStream(output, _level, true))
-            {
-                await input.CopyToAsync(deflate);
-            }
+            return new GZipStream(outputStream, _level, true);
         }
     }
 }

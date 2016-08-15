@@ -7,12 +7,13 @@ namespace Microsoft.AspNetCore.ResponseCompression
 {
     public class ResponseCompressionOptions
     {
+        /// <summary>
+        /// The accepted MIME types. Other MIME type bodies are not compressed.
+        /// </summary>
         public IEnumerable<string> MimeTypes { get; set; }
 
-        public int MinimumSize { get; set; }
-
         /// <summary>
-        /// The compression providers.
+        /// The compression providers. If 'null', the GZIP provider is set as default.
         /// </summary>
         public IEnumerable<IResponseCompressionProvider> Providers { get; set; }
     }

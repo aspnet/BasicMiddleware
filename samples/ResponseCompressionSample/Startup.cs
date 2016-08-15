@@ -12,7 +12,10 @@ namespace ResponseCompressionSample
     {
         public void Configure(IApplicationBuilder app)
         {
-            app.UseResponseCompression(new string[] { "text/plain" });
+            app.UseResponseCompression(new ResponseCompressionOptions()
+            {
+                MimeTypes = new string[] { "text/plain" }
+            });
 
             app.Run(async context =>
             {

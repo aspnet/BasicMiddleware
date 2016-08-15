@@ -23,15 +23,27 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly HashSet<string> _mimeTypes;
 
+        private readonly IResponseCompressionProvider _compressionProvider;
+
         private bool _compressionChecked = false;
 
-        internal Stream UncompressedStream { get; private set; } = null;
+        private Stream _compressionStream = null;
 
-        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, HashSet<string> mimeTypes)
+        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, HashSet<string> mimeTypes, IResponseCompressionProvider compressionProvider)
         {
             _response = response;
             _bodyOriginalStream = bodyOriginalStream;
             _mimeTypes = mimeTypes;
+            _compressionProvider = compressionProvider;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_compressionStream != null)
+            {
+                _compressionStream.Dispose();
+                _compressionStream = null;
+            }
         }
 
         public override bool CanRead => _bodyOriginalStream.CanRead;
@@ -63,9 +75,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         public override void Flush()
         {
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                UncompressedStream.Flush();
+                _compressionStream.Flush();
             }
             else
             {
@@ -75,9 +87,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                return UncompressedStream.FlushAsync(cancellationToken);
+                return _compressionStream.FlushAsync(cancellationToken);
             }
             return _bodyOriginalStream.FlushAsync(cancellationToken);
         }
@@ -101,9 +113,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             OnWrite();
 
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                UncompressedStream.Write(buffer, offset, count);
+                _compressionStream.Write(buffer, offset, count);
             }
             else
             {
@@ -116,9 +128,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             OnWrite();
 
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                return UncompressedStream.BeginWrite(buffer, offset, count, callback, state);
+                return _compressionStream.BeginWrite(buffer, offset, count, callback, state);
             }
             return _bodyOriginalStream.BeginWrite(buffer, offset, count, callback, state);
         }
@@ -127,9 +139,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             OnWrite();
 
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                UncompressedStream.EndWrite(asyncResult);
+                _compressionStream.EndWrite(asyncResult);
             }
             else
             {
@@ -142,9 +154,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             OnWrite();
 
-            if (UncompressedStream != null)
+            if (_compressionStream != null)
             {
-                return UncompressedStream.WriteAsync(buffer, offset, count, cancellationToken);
+                return _compressionStream.WriteAsync(buffer, offset, count, cancellationToken);
             }
             return _bodyOriginalStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
@@ -155,7 +167,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 if (IsCompressable())
                 {
-                    UncompressedStream = new MemoryStream();
+                    _response.Headers[HeaderNames.ContentEncoding] = _compressionProvider.EncodingName;
+                    _response.Headers.Remove(HeaderNames.ContentMD5);      // Reset the MD5 because the content changed.
+                    _response.Headers.Remove(HeaderNames.ContentLength);
+
+                    _compressionStream = _compressionProvider.CreateStream(_bodyOriginalStream);
                 }
 
                 _compressionChecked = true;

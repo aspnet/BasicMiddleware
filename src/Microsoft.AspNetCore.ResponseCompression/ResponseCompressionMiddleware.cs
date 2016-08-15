@@ -7,7 +7,6 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,8 +21,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly HashSet<string> _mimeTypes;
 
-        private readonly int _minimumSize;
-
         /// <summary>
         /// Initialize the Response Compression middleware.
         /// </summary>
@@ -31,12 +28,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="options"></param>
         public ResponseCompressionMiddleware(RequestDelegate next, IOptions<ResponseCompressionOptions> options)
         {
-            if (options.Value.MinimumSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(options.Value.MinimumSize));
-            }
-            _minimumSize = options.Value.MinimumSize;
-
             if (options.Value.MimeTypes == null)
             {
                 throw new ArgumentNullException(nameof(options.Value.MimeTypes));
@@ -73,7 +64,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             var bodyStream = context.Response.Body;
 
-            using (var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _mimeTypes))
+            using (var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _mimeTypes, compressionProvider))
             {
                 context.Response.Body = bodyWrapperStream;
 
@@ -84,47 +75,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 finally
                 {
                     context.Response.Body = bodyStream;
-                }
-
-                var uncompressedStream = bodyWrapperStream.UncompressedStream;
-                if (uncompressedStream != null)
-                {
-                    try
-                    {
-                        uncompressedStream.Seek(0, SeekOrigin.Begin);
-
-                        if (uncompressedStream.Length < _minimumSize)                 // The response is too small
-                        {
-                            await uncompressedStream.CopyToAsync(bodyStream);
-                        }
-                        else
-                        {
-                            using (var compressedStream = new MemoryStream())
-                            {
-                                await compressionProvider.CompressAsync(uncompressedStream, compressedStream);
-
-                                if (compressedStream.Length >= uncompressedStream.Length)
-                                {
-                                    uncompressedStream.Seek(0, SeekOrigin.Begin);
-                                    await uncompressedStream.CopyToAsync(bodyStream);
-                                }
-                                else
-                                {
-                                    context.Response.Headers[HeaderNames.ContentEncoding] = compressionProvider.EncodingName;
-                                    context.Response.Headers[HeaderNames.ContentMD5] = StringValues.Empty;      // Reset the MD5 because the content changed.
-                                    context.Response.Headers[HeaderNames.ContentLength] = compressedStream.Length.ToString();
-                                    context.Response.ContentLength = compressedStream.Length;
-
-                                    compressedStream.Seek(0, SeekOrigin.Begin);
-                                    await compressedStream.CopyToAsync(bodyStream);
-                                }
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        uncompressedStream.Dispose();
-                    }
                 }
             }
         }
