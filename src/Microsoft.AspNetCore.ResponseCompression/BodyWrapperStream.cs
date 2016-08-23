@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly Stream _bodyOriginalStream;
 
-        private readonly HashSet<string> _mimeTypes;
+        private readonly ISet<string> _mimeTypes;
 
         private readonly IResponseCompressionProvider _compressionProvider;
 
@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private Stream _compressionStream = null;
 
-        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, HashSet<string> mimeTypes, IResponseCompressionProvider compressionProvider)
+        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, ISet<string> mimeTypes, IResponseCompressionProvider compressionProvider)
         {
             _response = response;
             _bodyOriginalStream = bodyOriginalStream;
@@ -187,6 +187,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private bool IsMimeTypeCompressable(string mimeType)
         {
+            if (string.IsNullOrEmpty(mimeType))
+            {
+                return false;
+            }
+
             var separator = mimeType.IndexOf(';');
             if (separator >= 0)
             {
@@ -195,7 +200,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 mimeType = mimeType.Trim();
             }
 
-            return !string.IsNullOrEmpty(mimeType) && _mimeTypes.Contains(mimeType);
+            return _mimeTypes.Contains(mimeType);
         }
     }
 }

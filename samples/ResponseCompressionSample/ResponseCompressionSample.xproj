@@ -10,9 +10,6 @@
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Label="Configuration">
-    <RootNamespace>C:\ws\github\BasicMiddleware\samples\RewriteSample\Properties\AssemblyInfo.csResponseCompressionSample</RootNamespace>
-  </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
     <DevelopmentServerPort>46824</DevelopmentServerPort>

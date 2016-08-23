@@ -16,5 +16,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// The compression providers. If 'null', the GZIP provider is set as default.
         /// </summary>
         public IEnumerable<IResponseCompressionProvider> Providers { get; set; }
+
+        /// <summary>
+        /// 'False' to enable compression only on HTTP request. Enable compression on HTTPS request
+        /// may lead to security problems.
+        /// </summary>
+        public bool EnableHttps { get; set; } = false;
     }
 }

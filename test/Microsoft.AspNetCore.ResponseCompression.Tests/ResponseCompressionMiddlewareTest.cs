@@ -4,8 +4,12 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -20,13 +24,21 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void Options_NullMimesTypes()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 new ResponseCompressionMiddleware(null, Options.Create(new ResponseCompressionOptions()
                 {
                     MimeTypes = null
                 }));
             });
+        }
+
+        [Fact]
+        public void Options_HttpsDisabledByDefault()
+        {
+            var options = new ResponseCompressionOptions();
+
+            Assert.False(options.EnableHttps);
         }
 
         [Fact]
@@ -52,7 +64,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         {
             var options = new ResponseCompressionOptions()
             {
-                MimeTypes = new string[] { "text/plain" },
+                MimeTypes = new string[] { TextPlain },
                 Providers = new IResponseCompressionProvider[]
                 {
                     new GzipResponseCompressionProvider(CompressionLevel.Optimal)
@@ -119,6 +131,38 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.Equal(50, response.Body.Length);
         }
 
+        [Theory]
+        [InlineData(false, 100)]
+        [InlineData(true, 24)]
+        public async Task Request_Https(bool enableHttps, int expectedLength)
+        {
+            var options = new ResponseCompressionOptions()
+            {
+                MimeTypes = new string[] { TextPlain },
+                Providers = new IResponseCompressionProvider[]
+                {
+                    new GzipResponseCompressionProvider(CompressionLevel.Optimal)
+                },
+                EnableHttps = enableHttps
+            };
+
+            var middleware = new ResponseCompressionMiddleware(async context =>
+            {
+                context.Response.ContentType = TextPlain;
+                await context.Response.WriteAsync(new string('a', 100));
+            }, Options.Create(options));
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers[HeaderNames.AcceptEncoding] = "gzip";
+            httpContext.Request.IsHttps = true;
+
+            httpContext.Response.Body = new MemoryStream();
+
+            await middleware.Invoke(httpContext);
+
+            Assert.Equal(expectedLength, httpContext.Response.Body.Length);
+        }
+
         private async Task<HttpResponse> InvokeMiddleware(int uncompressedBodyLength, string requestAcceptEncoding, string responseType, Action<HttpResponse> addResponseAction = null)
         {
             var options = new ResponseCompressionOptions()
@@ -171,6 +215,43 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                 Assert.Null(response.ContentLength);
                 Assert.Equal(expectedBodyLength, response.Body.Length);
             }
+        }
+
+        [Fact]
+        public async Task Request_FullStack()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseResponseCompression(new ResponseCompressionOptions()
+                    {
+                        MimeTypes = new string[] { TextPlain }
+                    });
+                    app.Run(context =>
+                    {
+                        context.Response.Headers[HeaderNames.ContentType] = TextPlain;
+                        return context.Response.WriteAsync(new string('a', 100));
+                    });
+                });
+
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+
+            // Temp: very basic performance test code
+            //var chrono = new System.Diagnostics.Stopwatch();
+            //chrono.Start();
+            //for (int i = 0; i < 10000; i++)
+            //{
+                var request = new HttpRequestMessage(HttpMethod.Get, "");
+                request.Headers.AcceptEncoding.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
+
+                var response = await client.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                Assert.Equal(24, responseContent.Length);
+            //}
+            //chrono.Stop();
+            //Assert.Equal(5, chrono.ElapsedMilliseconds);
         }
     }
 }

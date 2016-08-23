@@ -21,6 +21,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly HashSet<string> _mimeTypes;
 
+        private readonly bool _enableHttps;
+
         /// <summary>
         /// Initialize the Response Compression middleware.
         /// </summary>
@@ -30,7 +32,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             if (options.Value.MimeTypes == null)
             {
-                throw new ArgumentNullException(nameof(options.Value.MimeTypes));
+                throw new ArgumentException($"{nameof(options.Value.MimeTypes)} is not provided in argument {nameof(options)}");
             }
             _mimeTypes = new HashSet<string>(options.Value.MimeTypes);
 
@@ -45,6 +47,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 };
             }
             _compressionProviders = providers.ToArray();
+
+            _enableHttps = options.Value.EnableHttps;
         }
 
         /// <summary>
@@ -54,7 +58,12 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
-            IResponseCompressionProvider compressionProvider = SelectProvider(context.Request.Headers[HeaderNames.AcceptEncoding]);
+            IResponseCompressionProvider compressionProvider = null;
+
+            if (!context.Request.IsHttps || _enableHttps)
+            {
+                compressionProvider = SelectProvider(context.Request.Headers[HeaderNames.AcceptEncoding]);
+            }
 
             if (compressionProvider == null)
             {

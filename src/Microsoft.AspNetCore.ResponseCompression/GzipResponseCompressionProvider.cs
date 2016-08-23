@@ -15,13 +15,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
             _level = level;
         }
 
-        public string EncodingName
-        {
-            get
-            {
-                return "gzip";
-            }
-        }
+        public string EncodingName { get; } = "gzip";
 
         public Stream CreateStream(Stream outputStream)
         {
