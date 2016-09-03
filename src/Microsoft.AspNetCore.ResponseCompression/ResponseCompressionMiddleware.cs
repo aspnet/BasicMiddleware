@@ -7,9 +7,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.ResponseCompression
 {
@@ -17,7 +16,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
     {
         private readonly RequestDelegate _next;
 
-        private readonly IResponseCompressionProvider[] _compressionProviders;
+        private readonly Dictionary<string, IResponseCompressionProvider> _compressionProviders;
 
         private readonly HashSet<string> _mimeTypes;
 
@@ -46,7 +45,14 @@ namespace Microsoft.AspNetCore.ResponseCompression
                     new GzipResponseCompressionProvider(CompressionLevel.Fastest)
                 };
             }
-            _compressionProviders = providers.ToArray();
+            else if (!providers.Any())
+            {
+                throw new ArgumentException($"{nameof(options.Value.Providers)} cannot be empty in argument {nameof(options)}");
+            }
+
+            _compressionProviders = providers.ToDictionary(p => p.EncodingName, StringComparer.OrdinalIgnoreCase);
+            _compressionProviders.Add("*", providers.First());
+            _compressionProviders.Add("identity", null);
 
             _enableHttps = options.Value.EnableHttps;
         }
@@ -62,7 +68,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             if (!context.Request.IsHttps || _enableHttps)
             {
-                compressionProvider = SelectProvider(context.Request.Headers[HeaderNames.AcceptEncoding]);
+                compressionProvider = SelectProvider(context.Request.GetTypedHeaders());
             }
 
             if (compressionProvider == null)
@@ -88,17 +94,23 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
         }
 
-        private IResponseCompressionProvider SelectProvider(StringValues encodings)
+        private IResponseCompressionProvider SelectProvider(RequestHeaders headers)
         {
-            for (int i = 0; i < encodings.Count; i++)
-            {
-                var encoding = encodings[i];
+            var unsorted = headers.AcceptEncoding;
 
-                for (int j = 0; j < _compressionProviders.Length; j++)
+            if (unsorted != null)
+            {
+                var sorted = unsorted
+                    .Where(s => s.Quality.GetValueOrDefault(1) > 0)
+                    .OrderByDescending(s => s.Quality.GetValueOrDefault(1));
+
+                foreach (var encoding in sorted)
                 {
-                    if (encoding.IndexOf(_compressionProviders[j].EncodingName) >= 0)
+                    IResponseCompressionProvider provider;
+
+                    if (_compressionProviders.TryGetValue(encoding.Value, out provider))
                     {
-                        return _compressionProviders[j];
+                        return provider;
                     }
                 }
             }

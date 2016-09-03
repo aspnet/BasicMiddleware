@@ -42,6 +42,19 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Fact]
+        public void Options_EmptyProviderList()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ResponseCompressionMiddleware(null, Options.Create(new ResponseCompressionOptions()
+                {
+                    MimeTypes = new string[] { TextPlain },
+                    Providers = new IResponseCompressionProvider[0]
+                }));
+            });
+        }
+
+        [Fact]
         public async Task Request_Uncompressed()
         {
             var response = await InvokeMiddleware(100, requestAcceptEncoding: null, responseType: TextPlain);
@@ -94,6 +107,34 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var response = await InvokeMiddleware(100, requestAcceptEncoding: "unknown", responseType: TextPlain);
 
             CheckResponseCompressed(response, expectCompressed: false, expectedBodyLength: 100);
+        }
+
+        [Fact]
+        public async Task Request_CompressStar()
+        {
+            var response = await InvokeMiddleware(100, requestAcceptEncoding: "*", responseType: TextPlain);
+
+            CheckResponseCompressed(response, expectCompressed: true, expectedBodyLength: 24);
+        }
+
+        [Fact]
+        public async Task Request_CompressIdentity()
+        {
+            var response = await InvokeMiddleware(100, requestAcceptEncoding: "identity", responseType: TextPlain);
+
+            CheckResponseCompressed(response, expectCompressed: false, expectedBodyLength: 100);
+        }
+
+        [Theory]
+        [InlineData("identity;q=0.5, gzip;q=1", true, 24)]
+        [InlineData("gzip;q=0.5, identity;q=0.8", false, 100)]
+        [InlineData("identity;q=0, gzip;q=0.8", true, 24)]
+        [InlineData("identity;q=0.5, gzip", true, 24)]
+        public async Task Request_CompressQuality(string acceptEncoding, bool expectCompressed, int expectedBodyLength)
+        {
+            var response = await InvokeMiddleware(100, requestAcceptEncoding: acceptEncoding, responseType: TextPlain);
+
+            CheckResponseCompressed(response, expectCompressed: expectCompressed, expectedBodyLength: expectedBodyLength);
         }
 
         [Fact]
