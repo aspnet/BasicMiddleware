@@ -7,8 +7,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.ResponseCompression
 {
@@ -68,7 +69,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             if (!context.Request.IsHttps || _enableHttps)
             {
-                compressionProvider = SelectProvider(context.Request.GetTypedHeaders());
+                compressionProvider = SelectProvider(context.Request.Headers[HeaderNames.AcceptEncoding]);
             }
 
             if (compressionProvider == null)
@@ -94,11 +95,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
         }
 
-        private IResponseCompressionProvider SelectProvider(RequestHeaders headers)
+        private IResponseCompressionProvider SelectProvider(StringValues acceptEncoding)
         {
-            var unsorted = headers.AcceptEncoding;
+            IList<StringWithQualityHeaderValue> unsorted;
 
-            if (unsorted != null)
+            if (StringWithQualityHeaderValue.TryParseList(acceptEncoding, out unsorted) && unsorted != null)
             {
                 var sorted = unsorted
                     .Where(s => s.Quality.GetValueOrDefault(1) > 0)
