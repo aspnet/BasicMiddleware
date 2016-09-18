@@ -17,9 +17,18 @@ namespace Microsoft.AspNetCore.HttpOverrides
 {
     public class ForwardedHeadersMiddleware
     {
-        private const string XForwardedForHeaderName = "X-Forwarded-For";
-        private const string XForwardedHostHeaderName = "X-Forwarded-Host";
-        private const string XForwardedProtoHeaderName = "X-Forwarded-Proto";
+        private string XForwardedForHeaderName
+        {
+            get { return _options.ForwardedForHeaderName; }
+        }
+        private string XForwardedHostHeaderName
+        {
+            get { return _options.ForwardedHostHeaderName; }
+        }
+        private string XForwardedProtoHeaderName
+        {
+            get { return _options.ForwardedProtoHeaderName; }
+        }
         private const string XOriginalForName = "X-Original-For";
         private const string XOriginalHostName = "X-Original-Host";
         private const string XOriginalProtoName = "X-Original-Proto";

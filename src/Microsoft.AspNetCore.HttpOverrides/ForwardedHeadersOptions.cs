@@ -10,6 +10,46 @@ namespace Microsoft.AspNetCore.Builder
     public class ForwardedHeadersOptions
     {
         /// <summary>
+        /// X-Forwarded-For
+        /// </summary>
+        public const string DefaultForwardedForHeaderName = "X-Forwarded-For";
+
+        /// <summary>
+        /// X-Forwarded-Host
+        /// </summary>
+        public const string DefaultForwardedHostHeaderName = "X-Forwarded-Host";
+
+        /// <summary>
+        /// X-Forwarded-Proto
+        /// </summary>
+        public const string DefaultForwardedProtoHeaderName = "X-Forwarded-Proto";
+
+        /// <summary>
+        /// Use this header name instead of X-Forwarded-For
+        /// </summary>
+        /// <example>
+        /// app.UseForwardedHeaders(new ForwardedHeadersOptions
+        /// {
+        ///     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost,
+        ///     ForwardedForHeaderName  = "X-AppEngine-User-IP",
+        ///     ForwardedHostHeaderName = "X-AppEngine-Default-Version-Hostname",
+        /// });
+        /// </example>
+        public string ForwardedForHeaderName { get; set; } = DefaultForwardedForHeaderName;
+
+        /// <summary>
+        /// Use this header name instead of X-Forwarded-Host
+        /// </summary>
+        /// <seealso cref="ForwardedForHeaderName" />
+        public string ForwardedHostHeaderName { get; set; } = DefaultForwardedHostHeaderName;
+
+        /// <summary>
+        /// Use this header name instead of X-Forwarded-Proto
+        /// </summary>
+        /// <seealso cref="ForwardedForHeaderName" />
+        public string ForwardedProtoHeaderName { get; set; } = DefaultForwardedProtoHeaderName;
+
+        /// <summary>
         /// Identifies which forwarders should be processed.
         /// </summary>
         public ForwardedHeaders ForwardedHeaders { get; set; }
