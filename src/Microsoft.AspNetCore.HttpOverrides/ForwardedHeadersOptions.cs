@@ -27,14 +27,6 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Use this header name instead of X-Forwarded-For
         /// </summary>
-        /// <example>
-        /// app.UseForwardedHeaders(new ForwardedHeadersOptions
-        /// {
-        ///     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost,
-        ///     ForwardedForHeaderName  = "X-AppEngine-User-IP",
-        ///     ForwardedHostHeaderName = "X-AppEngine-Default-Version-Hostname",
-        /// });
-        /// </example>
         public string ForwardedForHeaderName { get; set; } = DefaultForwardedForHeaderName;
 
         /// <summary>
