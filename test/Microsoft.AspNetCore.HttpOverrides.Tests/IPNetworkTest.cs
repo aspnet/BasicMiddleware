@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.HttpOverrides
 
         [Theory]
         [InlineData("foo")]
-        // TODO: This test fails on my Mac
+        // TODO: This test fails on OS X
         // See https://github.com/dotnet/corefx/issues/11843
         [InlineData("4294967296")]
         [InlineData("10.0.0.0/88/99")]

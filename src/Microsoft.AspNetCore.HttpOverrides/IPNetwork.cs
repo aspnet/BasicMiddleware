@@ -5,17 +5,18 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Immutable;
 
 namespace Microsoft.AspNetCore.HttpOverrides
 {
     public class IPNetwork
     {
-        static readonly char[] PrefixLengthSeparators = new char[] { '/' };
+        private static readonly char[] PrefixLengthSeparators = new char[] { '/' };
 
         /// <summary>
         /// All IPv4 addresses 0.0.0.0/0
         /// </summary>
-        public static readonly IPNetwork AllIPv4 = new IPNetwork(IPAddress.Parse("0.0.0.0"), 0);
+        public static readonly IPNetwork AllIPv4 = Parse("0.0.0.0/0");
 
         /// <summary>
         /// IPv4 localhost range 127.0.0.0/8 (255.0.0.0)
@@ -30,34 +31,39 @@ namespace Microsoft.AspNetCore.HttpOverrides
         /// <summary>
         /// RFC1918 Private IPv4 range 10.0.0.0/8 (255.0.0.0)
         /// </summary>
+        /// <seealso cref="RFC1918" />
         public static readonly IPNetwork IPv4Private10 = Parse("10.0.0.0/8");
 
         /// <summary>
         /// RFC1918 Private IPv4 range 172.16.0.0/12 (255.240.0.0)
         /// </summary>
+        /// <seealso cref="RFC1918" />
         public static readonly IPNetwork IPv4Private172 = Parse("172.16.0.0/12");
 
         /// <summary>
         /// RFC1918 Private IPv4 range 192.168.0.0/16 (255.255.0.0)
         /// </summary>
+        /// <seealso cref="RFC1918" />
         public static readonly IPNetwork IPv4Private192 = Parse("192.168.0.0/16");
 
         /// <summary>
-        /// RFC1918 Private IPv4 range 192.168.0.0/16 (255.255.0.0)
+        /// IPv4 Multicast range 224.0.0.0/4
         /// </summary>
         public static readonly IPNetwork IPv4Multicast = Parse("224.0.0.0/4");
 
         /// <summary>
-        /// RFC1918 Private IPv4 Addresses 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, link-local, and localhost
+        /// RFC1918 Private IPv4 Addresses 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
         /// </summary>
-        public static readonly IPNetwork[] IPv4PrivateNetworks = new IPNetwork[]
-        {
-            IPv4Loopback,
-            IPv4LinkLocal,
-            IPv4Private10,
-            IPv4Private172,
-            IPv4Private192,
-        };
+        /// <seealso cref="IPv4PrivateNetworks" />
+        public static readonly ImmutableArray<IPNetwork> RFC1918 = ImmutableArray.Create(IPv4Private10, IPv4Private172, IPv4Private192);
+
+        /// <summary>
+        /// <see cref="IPv4LinkLocal" />
+        /// <see cref="IPv4Loopback" />
+        /// <see cref="RFC1918" />
+        /// </summary>
+        /// <seealso cref="PrivateNetworks" />
+        public static readonly ImmutableArray<IPNetwork> IPv4PrivateNetworks = ImmutableArray.Create(IPv4Loopback, IPv4LinkLocal, IPv4Private10, IPv4Private172, IPv4Private192);
 
         /// <summary>
         /// IPv6 default unicast route ::/0 (everything)
@@ -72,6 +78,9 @@ namespace Microsoft.AspNetCore.HttpOverrides
         /// <summary>
         /// Private IPv6 range fc00::/7 (RFC1918 equivalent)
         /// </summary>
+        /// <seealso cref="PrivateNetworks" />
+        /// <seealso cref="IPv4PrivateNetworks" />
+        /// <seealso cref="IPv6PrivateNetworks" />
         public static readonly IPNetwork IPv6Private = Parse("fc00::/7");
 
         /// <summary>
@@ -100,29 +109,31 @@ namespace Microsoft.AspNetCore.HttpOverrides
         public static readonly IPNetwork IPv6Orchid = Parse("2001:0010::/28");
 
         /// <summary>
+        /// Private IPv6 Addresses localhost, link-local, and rfc1918 equivalent.
+        /// </summary>
+        /// <seealso cref="PrivateNetworks" />
+        public static readonly ImmutableArray<IPNetwork> IPv6PrivateNetworks = ImmutableArray.Create(IPv6Loopback, IPv6LinkLocal, IPv6Private);
+
+        /// <summary>
         /// All IPv4 and IPv6 addresses 0.0.0.0/0, ::/0
         /// </summary>
-        public static readonly IPNetwork[] All = new IPNetwork[]
-        {
-            AllIPv4,
-            AllIPv6
-        };
+        public static readonly ImmutableArray<IPNetwork> All = ImmutableArray.Create(AllIPv4, AllIPv6);
 
         /// <summary>
         /// Private IPv4 and IPv6 addresses 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7, link-local, and localhost
         /// </summary>
-        public static readonly IPNetwork[] PrivateNetworks = new IPNetwork[]
-        {
+        /// <seealso cref="RFC1918" />
+        /// <seealso cref="IPv4PrivateNetworks" />
+        /// <seealso cref="IPv6PrivateNetworks" />
+        public static readonly ImmutableArray<IPNetwork> PrivateNetworks = ImmutableArray.Create(
             IPv4Loopback,
             IPv4LinkLocal,
             IPv4Private10,
             IPv4Private172,
             IPv4Private192,
-
             IPv6Loopback,
             IPv6LinkLocal,
-            IPv6Private,
-        };
+            IPv6Private);
 
         // Helper method for Parse/TryParse
         private static bool TryParsePrefixLength(IPAddress prefix, string[] parts, out byte length)
