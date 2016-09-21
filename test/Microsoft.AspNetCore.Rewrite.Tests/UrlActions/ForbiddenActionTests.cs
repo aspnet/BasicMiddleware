@@ -16,7 +16,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
             var context = new RewriteContext {HttpContext = new DefaultHttpContext()};
             var action = new ForbiddenAction();
 
-
             action.ApplyAction(context, null, null);
 
             Assert.Equal(context.Result, RuleResult.EndResponse);
