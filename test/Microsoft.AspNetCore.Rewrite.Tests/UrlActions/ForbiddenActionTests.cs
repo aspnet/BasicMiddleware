@@ -19,7 +19,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
 
             action.ApplyAction(context, null, null);
 
-
             Assert.Equal(context.Result, RuleResult.EndResponse);
             Assert.Equal(context.HttpContext.Response.StatusCode, StatusCodes.Status403Forbidden);
         }
