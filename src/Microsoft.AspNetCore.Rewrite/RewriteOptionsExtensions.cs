@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Rewrite
         }
 
         /// <summary>
-        /// Rewrites the path if the regex matches the HttpContext's PathString
+        /// Add a rule that rewrites the path if the regex matches the HttpContext's PathString and skips remaining rules.
         /// </summary>
         /// <param name="options">The <see cref="RewriteOptions"/>.</param>
         /// <param name="regex">The regex string to compare with.</param>
@@ -44,11 +44,11 @@ namespace Microsoft.AspNetCore.Rewrite
         /// <returns>The Rewrite options.</returns>
         public static RewriteOptions AddRewrite(this RewriteOptions options, string regex, string replacement)
         {
-            return AddRewrite(options, regex, replacement, skipRemainingRules: false);
+            return AddRewrite(options, regex, replacement, skipRemainingRules: true);
         }
 
         /// <summary>
-        /// Rewrites the path if the regex matches the HttpContext's PathString
+        /// Adds a rule that rewrites the path if the regex matches the HttpContext's PathString.
         /// </summary>
         /// <param name="options">The <see cref="RewriteOptions"/>.</param>
         /// <param name="regex">The regex string to compare with.</param>
