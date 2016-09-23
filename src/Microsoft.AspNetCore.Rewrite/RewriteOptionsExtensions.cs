@@ -36,18 +36,6 @@ namespace Microsoft.AspNetCore.Rewrite
         }
 
         /// <summary>
-        /// Add a rule that rewrites the path if the regex matches the HttpContext's PathString and skips remaining rules.
-        /// </summary>
-        /// <param name="options">The <see cref="RewriteOptions"/>.</param>
-        /// <param name="regex">The regex string to compare with.</param>
-        /// <param name="replacement">If the regex matches, what to replace HttpContext with.</param>
-        /// <returns>The Rewrite options.</returns>
-        public static RewriteOptions AddRewrite(this RewriteOptions options, string regex, string replacement)
-        {
-            return AddRewrite(options, regex, replacement, skipRemainingRules: true);
-        }
-
-        /// <summary>
         /// Adds a rule that rewrites the path if the regex matches the HttpContext's PathString.
         /// </summary>
         /// <param name="options">The <see cref="RewriteOptions"/>.</param>
