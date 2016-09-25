@@ -13,13 +13,16 @@ using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.ResponseCompression
 {
+    /// <summary>
+    /// Enable HTTP response compression.
+    /// </summary>
     public class ResponseCompressionMiddleware
     {
         private readonly RequestDelegate _next;
 
         private readonly Dictionary<string, IResponseCompressionProvider> _compressionProviders;
 
-        private readonly HashSet<string> _mimeTypes;
+        private readonly Func<HttpContext, bool> _shouldCompressResponse;
 
         private readonly bool _enableHttps;
 
@@ -30,11 +33,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="options"></param>
         public ResponseCompressionMiddleware(RequestDelegate next, IOptions<ResponseCompressionOptions> options)
         {
-            if (options.Value.MimeTypes == null)
+            if (options.Value.ShouldCompressResponse == null)
             {
-                throw new ArgumentException($"{nameof(options.Value.MimeTypes)} is not provided in argument {nameof(options)}");
+                throw new ArgumentException($"{nameof(options.Value.ShouldCompressResponse)} is not provided in argument {nameof(options)}");
             }
-            _mimeTypes = new HashSet<string>(options.Value.MimeTypes);
+            _shouldCompressResponse = options.Value.ShouldCompressResponse;
 
             _next = next;
 
@@ -80,7 +83,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             var bodyStream = context.Response.Body;
 
-            using (var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _mimeTypes, compressionProvider))
+            using (var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _shouldCompressResponse, compressionProvider))
             {
                 context.Response.Body = bodyWrapperStream;
 

@@ -1,14 +1,11 @@
 {
-    "version": "1.1.0-*",
+    "version": "0.1.0-*",
     "buildOptions": {
         "warningsAsErrors": true,
         "keyFile": "../../tools/Key.snk",
-        "nowarn": [
-            "CS1591"
-        ],
         "xmlDoc": true
     },
-    "description": "ASP.NET Core basic middleware for HTTP Response compression.",
+    "description": "ASP.NET Core middleware for HTTP Response compression.",
     "packOptions": {
         "repository": {
             "type": "git",

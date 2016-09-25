@@ -2,11 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.ResponseCompression
+namespace Microsoft.AspNetCore.Builder
 {
+    /// <summary>
+    /// Extension methods for the ResponseCompression middleware.
+    /// </summary>
     public static class ResponseCompressionExtensions
     {
         /// <summary>

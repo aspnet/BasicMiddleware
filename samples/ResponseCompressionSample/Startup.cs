@@ -14,7 +14,7 @@ namespace ResponseCompressionSample
         {
             app.UseResponseCompression(new ResponseCompressionOptions()
             {
-                MimeTypes = new string[] { "text/plain" }
+                ShouldCompressResponse = ResponseCompressionUtils.CreateShouldCompressResponseDelegate(new string[] { "text/plain" })
             });
 
             app.Run(async context =>

@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly Stream _bodyOriginalStream;
 
-        private readonly ISet<string> _mimeTypes;
+        private readonly Func<HttpContext, bool> _shouldCompressResponse;
 
         private readonly IResponseCompressionProvider _compressionProvider;
 
@@ -29,11 +29,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private Stream _compressionStream = null;
 
-        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, ISet<string> mimeTypes, IResponseCompressionProvider compressionProvider)
+        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, Func<HttpContext, bool> shouldCompressResponse, IResponseCompressionProvider compressionProvider)
         {
             _response = response;
             _bodyOriginalStream = bodyOriginalStream;
-            _mimeTypes = mimeTypes;
+            _shouldCompressResponse = shouldCompressResponse;
             _compressionProvider = compressionProvider;
         }
 
@@ -75,6 +75,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         public override void Flush()
         {
+            OnWrite();
+
             if (_compressionStream != null)
             {
                 _compressionStream.Flush();
@@ -87,6 +89,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
+            OnWrite();
+
             if (_compressionStream != null)
             {
                 return _compressionStream.FlushAsync(cancellationToken);
@@ -182,25 +186,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             return _response.Headers[HeaderNames.ContentRange] == StringValues.Empty &&     // The response is not partial
                 _response.Headers[HeaderNames.ContentEncoding] == StringValues.Empty &&    // Not specific encoding already set
-                IsMimeTypeCompressable(_response.ContentType);      // MIME type in the authorized list
-        }
-
-        private bool IsMimeTypeCompressable(string mimeType)
-        {
-            if (string.IsNullOrEmpty(mimeType))
-            {
-                return false;
-            }
-
-            var separator = mimeType.IndexOf(';');
-            if (separator >= 0)
-            {
-                // Remove the content-type optional parameters
-                mimeType = mimeType.Substring(0, separator);
-                mimeType = mimeType.Trim();
-            }
-
-            return _mimeTypes.Contains(mimeType);
+                _shouldCompressResponse(_response.HttpContext);
         }
     }
 }
