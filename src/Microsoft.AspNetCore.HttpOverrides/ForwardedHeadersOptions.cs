@@ -10,36 +10,40 @@ namespace Microsoft.AspNetCore.Builder
     public class ForwardedHeadersOptions
     {
         /// <summary>
-        /// X-Forwarded-For
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XForwardedForHeaderName"/>
         /// </summary>
-        public const string DefaultForwardedForHeaderName = "X-Forwarded-For";
+        /// <seealso cref="Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersDefaults"/>
+        public string ForwardedForHeaderName { get; set; } = ForwardedHeadersDefaults.XForwardedForHeaderName;
 
         /// <summary>
-        /// X-Forwarded-Host
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XForwardedHostHeaderName"/>
         /// </summary>
-        public const string DefaultForwardedHostHeaderName = "X-Forwarded-Host";
+        /// <seealso cref="ForwardedHeadersDefaults"/>
+        public string ForwardedHostHeaderName { get; set; } = ForwardedHeadersDefaults.XForwardedHostHeaderName;
 
         /// <summary>
-        /// X-Forwarded-Proto
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XForwardedProtoHeaderName"/>
         /// </summary>
-        public const string DefaultForwardedProtoHeaderName = "X-Forwarded-Proto";
+        /// <seealso cref="ForwardedHeadersDefaults"/>
+        public string ForwardedProtoHeaderName { get; set; } = ForwardedHeadersDefaults.XForwardedProtoHeaderName;
 
         /// <summary>
-        /// Use this header name instead of X-Forwarded-For
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XOriginalForHeaderName"/>
         /// </summary>
-        public string ForwardedForHeaderName { get; set; } = DefaultForwardedForHeaderName;
+        /// <seealso cref="ForwardedHeadersDefaults"/>
+        public string OriginalForHeaderName { get; set; } = ForwardedHeadersDefaults.XOriginalForHeaderName;
 
         /// <summary>
-        /// Use this header name instead of X-Forwarded-Host
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XOriginalHostHeaderName"/>
         /// </summary>
-        /// <seealso cref="ForwardedForHeaderName" />
-        public string ForwardedHostHeaderName { get; set; } = DefaultForwardedHostHeaderName;
+        /// <seealso cref="ForwardedHeadersDefaults"/>
+        public string OriginalHostHeaderName { get; set; } = ForwardedHeadersDefaults.XOriginalHostHeaderName;
 
         /// <summary>
-        /// Use this header name instead of X-Forwarded-Proto
+        /// Use this header instead of <see cref="ForwardedHeadersDefaults.XOriginalProtoHeaderName"/>
         /// </summary>
-        /// <seealso cref="ForwardedForHeaderName" />
-        public string ForwardedProtoHeaderName { get; set; } = DefaultForwardedProtoHeaderName;
+        /// <seealso cref="ForwardedHeadersDefaults"/>
+        public string OriginalProtoHeaderName { get; set; } = ForwardedHeadersDefaults.XOriginalProtoHeaderName;
 
         /// <summary>
         /// Identifies which forwarders should be processed.
