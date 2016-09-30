@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Microsoft.AspNetCore.HttpOverrides
 {
-    public class IPNetwork
+    public class IPNetwork : IEquatable<IPNetwork>
     {
         private static readonly char[] PrefixLengthSeparators = new char[] { '/' };
 
@@ -126,7 +126,10 @@ namespace Microsoft.AspNetCore.HttpOverrides
             PrefixLength = prefixLength;
             PrefixBytes = Prefix.GetAddressBytes();
             Mask = CreateMask();
+            HashCode = ToString().GetHashCode();
         }
+
+        private readonly int HashCode;
 
         public IPAddress Prefix { get; }
 
@@ -284,5 +287,32 @@ namespace Microsoft.AspNetCore.HttpOverrides
 
             return new IPNetwork(prefix, length);
         }
+
+        #region Equals
+        public override bool Equals (object obj)
+        {
+            return Equals(obj as IPNetwork);
+        }
+
+        public bool Equals(IPNetwork other)
+        {
+            return other != null && other.GetHashCode() == GetHashCode();
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode;
+        }
+
+        public static bool operator ==(IPNetwork a, IPNetwork b)
+        {
+            return a != null && a.Equals(b);
+        }
+
+        public static bool operator !=(IPNetwork a, IPNetwork b)
+        {
+            return !(a == b);
+        }
+        #endregion
     }
 }
