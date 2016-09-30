@@ -47,11 +47,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
         public static readonly IPNetwork IPv4Private192 = Parse("192.168.0.0/16");
 
         /// <summary>
-        /// IPv4 Multicast range 224.0.0.0/4
-        /// </summary>
-        public static readonly IPNetwork IPv4Multicast = Parse("224.0.0.0/4");
-
-        /// <summary>
         /// RFC1918 Private IPv4 Addresses 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
         /// </summary>
         /// <seealso cref="IPv4PrivateNetworks" />
@@ -84,16 +79,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
         public static readonly IPNetwork IPv6Private = Parse("fc00::/7");
 
         /// <summary>
-        /// IPv6 Teredo range 2001::/32
-        /// </summary>
-        public static readonly IPNetwork Teredo = Parse("2001::/32");
-
-        /// <summary>
-        /// 6to4 IPv6 tunneling 2002::/16
-        /// </summary>
-        public static readonly IPNetwork IPv6to4 = Parse("2002::/16");
-
-        /// <summary>
         /// Link-local IPv6 range fe80::/10
         /// </summary>
         public static readonly IPNetwork IPv6LinkLocal = Parse("fe80::/10");
@@ -102,11 +87,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
         /// IPv6 Multicast range ff00::/8
         /// </summary>
         public static readonly IPNetwork IPv6Multicast = Parse("ff00::/8");
-
-        /// <summary>
-        /// IPv6 Orchid range 2001:0010::/28
-        /// </summary>
-        public static readonly IPNetwork IPv6Orchid = Parse("2001:0010::/28");
 
         /// <summary>
         /// Private IPv6 Addresses localhost, link-local, and rfc1918 equivalent.
@@ -135,12 +115,82 @@ namespace Microsoft.AspNetCore.HttpOverrides
             IPv6LinkLocal,
             IPv6Private);
 
+        public IPNetwork(IPAddress prefix)
+            : this(prefix, prefix.AddressFamily == AddressFamily.InterNetwork ? 32 : 128)
+        {
+        }
+
+        public IPNetwork(IPAddress prefix, int prefixLength)
+        {
+            Prefix = prefix;
+            PrefixLength = prefixLength;
+            PrefixBytes = Prefix.GetAddressBytes();
+            Mask = CreateMask();
+        }
+
+        public IPAddress Prefix { get; }
+
+        private byte[] PrefixBytes { get; }
+
+        /// <summary>
+        /// The CIDR notation of the subnet mask
+        /// </summary>
+        public int PrefixLength { get; }
+
+        private byte[] Mask { get; }
+
+        public bool Contains(IPAddress address)
+        {
+            if (Prefix.AddressFamily != address.AddressFamily)
+            {
+                return false;
+            }
+
+            var addressBytes = address.GetAddressBytes();
+            for (int i = 0; i < PrefixBytes.Length && Mask[i] != 0; i++)
+            {
+                if (PrefixBytes[i] != (addressBytes[i] & Mask[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private byte[] CreateMask()
+        {
+            var mask = new byte[PrefixBytes.Length];
+            int remainingBits = PrefixLength;
+            int i = 0;
+            while (remainingBits >= 8)
+            {
+                mask[i] = 0xFF;
+                i++;
+                remainingBits -= 8;
+            }
+            if (remainingBits > 0)
+            {
+                mask[i] = (byte)(0xFF << (8 - remainingBits));
+            }
+
+            return mask;
+        }
+
+        /// <summary>
+        /// Returns x.x.x.x/y or ipv6 equivalent
+        /// </summary>
+        public override string ToString()
+        {
+            return Prefix.ToString() + "/" + PrefixLength.ToString(CultureInfo.InvariantCulture);
+        }
+
         // Helper method for Parse/TryParse
         private static bool TryParsePrefixLength(IPAddress prefix, string[] parts, out byte length)
         {
             if (parts.Length > 1)
             {
-                return byte.TryParse(parts[1], NumberStyles.Number, null, out length)
+                return byte.TryParse(parts[1], NumberStyles.Number, CultureInfo.InvariantCulture, out length)
                     && !(length > 32 && prefix.AddressFamily == AddressFamily.InterNetwork)
                     && !(length > 128 && prefix.AddressFamily == AddressFamily.InterNetworkV6);
             }
@@ -233,73 +283,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
             }
 
             return new IPNetwork(prefix, length);
-        }
-
-        public IPNetwork(IPAddress prefix)
-            : this(prefix, prefix.AddressFamily == AddressFamily.InterNetwork ? 32 : 128)
-        {
-        }
-
-        public IPNetwork(IPAddress prefix, int prefixLength)
-        {
-            Prefix = prefix;
-            PrefixLength = prefixLength;
-            PrefixBytes = Prefix.GetAddressBytes();
-            Mask = CreateMask();
-        }
-
-        public IPAddress Prefix { get; }
-
-        private byte[] PrefixBytes { get; }
-
-        /// <summary>
-        /// The CIDR notation of the subnet mask
-        /// </summary>
-        public int PrefixLength { get; }
-
-        private byte[] Mask { get; }
-
-        public bool Contains(IPAddress address)
-        {
-            if (Prefix.AddressFamily != address.AddressFamily)
-            {
-                return false;
-            }
-
-            var addressBytes = address.GetAddressBytes();
-            for (int i = 0; i < PrefixBytes.Length && Mask[i] != 0; i++)
-            {
-                if (PrefixBytes[i] != (addressBytes[i] & Mask[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private byte[] CreateMask()
-        {
-            var mask = new byte[PrefixBytes.Length];
-            int remainingBits = PrefixLength;
-            int i = 0;
-            while (remainingBits >= 8)
-            {
-                mask[i] = 0xFF;
-                i++;
-                remainingBits -= 8;
-            }
-            if (remainingBits > 0)
-            {
-                mask[i] = (byte)(0xFF << (8 - remainingBits));
-            }
-
-            return mask;
-        }
-
-        public override string ToString()
-        {
-            return Prefix.ToString() + "/" + PrefixLength;
         }
     }
 }

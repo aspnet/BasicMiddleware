@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Address ranges of known proxies to accept forwarded headers from.
         /// </summary>
-        public IList<IPNetwork> KnownNetworks { get; } = new List<IPNetwork>() { new IPNetwork(IPAddress.Loopback, 8) };
+        public IList<IPNetwork> KnownNetworks { get; } = new List<IPNetwork>() { IPNetwork.IPv4Loopback };
 
         /// <summary>
         /// Require the number of header values to be in sync between the different headers being processed.
