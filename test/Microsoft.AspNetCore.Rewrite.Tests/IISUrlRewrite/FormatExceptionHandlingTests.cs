@@ -46,7 +46,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             <match url = ""(.*)"" />
             <conditions>
                 <add input=""{HTTPS"" pattern=""^OFF$"" />
-
             </conditions>
             <action type=""Rewrite"" url =""foo"" />
         </rule>
