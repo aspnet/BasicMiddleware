@@ -12,31 +12,31 @@ namespace Microsoft.AspNetCore.HttpOverrides
         /// <summary>
         /// X-Forwarded-For
         /// </summary>
-        public const string XForwardedForHeaderName = "X-Forwarded-For";
+        public static string XForwardedForHeaderName { get; } = "X-Forwarded-For";
 
         /// <summary>
         /// X-Forwarded-Host
         /// </summary>
-        public const string XForwardedHostHeaderName = "X-Forwarded-Host";
+        public static string XForwardedHostHeaderName { get; } = "X-Forwarded-Host";
 
         /// <summary>
         /// X-Forwarded-Proto
         /// </summary>
-        public const string XForwardedProtoHeaderName = "X-Forwarded-Proto";
+        public static string XForwardedProtoHeaderName { get; } = "X-Forwarded-Proto";
 
         /// <summary>
         /// X-Original-For
         /// </summary>
-        public const string XOriginalForHeaderName = "X-Original-For";
+        public static string XOriginalForHeaderName { get; } = "X-Original-For";
 
         /// <summary>
         /// X-Original-Host
         /// </summary>
-        public const string XOriginalHostHeaderName = "X-Original-Host";
+        public static string XOriginalHostHeaderName { get; } = "X-Original-Host";
 
         /// <summary>
         /// X-Original-Proto
         /// </summary>
-        public const string XOriginalProtoHeaderName = "X-Original-Proto";
+        public static string XOriginalProtoHeaderName { get; } = "X-Original-Proto";
     }
 }
