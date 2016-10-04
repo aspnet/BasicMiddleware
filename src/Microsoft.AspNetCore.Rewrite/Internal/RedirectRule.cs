@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             }
             else
             {
-                initMatchResults = InitialMatch.Match(path.ToString().Substring(1));
+                initMatchResults = InitialMatch.Match(path.ToString());
             }
 
             if (initMatchResults.Success)

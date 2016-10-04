@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Rewrite
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Creates a new instance of <see cref="RewriteMiddleware"/> 
+        /// Creates a new instance of <see cref="RewriteMiddleware"/>
         /// </summary>
         /// <param name="next">The delegate representing the next middleware in the request pipeline.</param>
         /// <param name="hostingEnvironment">The Hosting Environment.</param>
