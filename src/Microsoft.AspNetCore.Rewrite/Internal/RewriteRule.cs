@@ -34,15 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         public virtual void ApplyRule(RewriteContext context)
         {
             var path = context.HttpContext.Request.Path;
-            Match initMatchResults;
-            if (path == PathString.Empty)
-            {
-                initMatchResults = InitialMatch.Match(path.ToString());
-            }
-            else
-            {
-                initMatchResults = InitialMatch.Match(path.ToString().Substring(1));
-            }
+            var initMatchResults = InitialMatch.Match(path.ToString());
 
             if (initMatchResults.Success)
             {

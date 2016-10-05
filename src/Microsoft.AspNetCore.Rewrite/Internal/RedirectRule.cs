@@ -35,16 +35,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             var path = context.HttpContext.Request.Path;
             var pathBase = context.HttpContext.Request.PathBase;
-
-            Match initMatchResults;
-            if (path == PathString.Empty)
-            {
-                initMatchResults = InitialMatch.Match(path.ToString());
-            }
-            else
-            {
-                initMatchResults = InitialMatch.Match(path.ToString().Substring(1));
-            }
+            var  initMatchResults = InitialMatch.Match(path.ToString());
 
             if (initMatchResults.Success)
             {

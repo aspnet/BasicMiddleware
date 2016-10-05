@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Builder
             {
                 throw new ArgumentNullException(nameof(options));
             }
-            // put middleware in pipeline
+
             return app.UseMiddleware<RewriteMiddleware>(options);
         }
     }
