@@ -72,7 +72,6 @@ namespace Microsoft.AspNetCore.Rewrite
                 Result = RuleResult.ContinueRules
             };
 
-            context.Items.Add("originalUrl", $"{context.Request.Path + context.Request.QueryString}");
             foreach (var rule in _options.Rules)
             {
                 rule.ApplyRule(rewriteContext);
@@ -83,7 +82,6 @@ namespace Microsoft.AspNetCore.Rewrite
                         _logger.RewriteMiddlewareRequestContinueResults(currentUrl);
                         break;
                     case RuleResult.EndResponse:
-                        //_logger.RewriteMiddlewareRequestStopRules($"{context.Request.Path + context.Request.QueryString}");
                         _logger.RewriteMiddlewareRequestResponseComplete(
                             context.Response.Headers[HeaderNames.Location],
                             context.Response.StatusCode);
