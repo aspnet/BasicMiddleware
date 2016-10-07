@@ -75,7 +75,11 @@ namespace Microsoft.AspNetCore.Rewrite
             foreach (var rule in _options.Rules)
             {
                 rule.ApplyRule(rewriteContext);
-                var currentUrl = $"{context.Request.Path + context.Request.QueryString}";
+                var currentUrl = string.Empty;
+                if (rewriteContext.Logger.IsEnabled(LogLevel.Debug))
+                {
+                    currentUrl = $"{context.Request.Path + context.Request.QueryString}";
+                }
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:
