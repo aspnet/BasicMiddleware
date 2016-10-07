@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
 {
     internal static class RewriteMiddlewareLoggingExtensions
     {
-        private static readonly Action<ILogger, string,Exception> _requestContinueResults;
+        private static readonly Action<ILogger, string, Exception> _requestContinueResults;
         private static readonly Action<ILogger, string, int, Exception> _requestResponseComplete;
         private static readonly Action<ILogger, string, Exception> _requestStopRules;
         private static readonly Action<ILogger, string, Exception> _urlRewriteDidNotMatchRule;
