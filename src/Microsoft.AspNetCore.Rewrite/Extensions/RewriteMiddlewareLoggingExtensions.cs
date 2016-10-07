@@ -23,14 +23,17 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
                             LogLevel.Debug,
                             1,
                             "Request is continuing in applying rules. Current url is {currentUrl}");
+
             _requestResponseComplete = LoggerMessage.Define<string, int>(
                             LogLevel.Debug,
                             2,
                             "Request is done processing, Location header '{Location}' with status code '{StatusCode}'.");
+
             _requestStopRules = LoggerMessage.Define<string>(
                             LogLevel.Debug,
                             3,
                             "Request is done applying rules. Url was rewritten to {rewrittenUrl}");
+
             _urlRewriteDidNotMatchRule = LoggerMessage.Define<string>(
                             LogLevel.Debug,
                             4,
@@ -86,6 +89,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         {
             _modRewriteDidNotMatchRule(logger, null);
         }
+
         public static void ModRewriteMatchedRule(this ILogger logger)
         {
             _modRewriteMatchedRule(logger, null);
