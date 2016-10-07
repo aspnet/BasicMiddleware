@@ -76,7 +76,8 @@ namespace Microsoft.AspNetCore.Rewrite
             {
                 rule.ApplyRule(rewriteContext);
                 var currentUrl = string.Empty;
-                if (rewriteContext.Logger.IsEnabled(LogLevel.Debug))
+
+                if (rewriteContext.Logger?.IsEnabled(LogLevel.Debug) == true)
                 {
                     currentUrl = $"{context.Request.Path + context.Request.QueryString}";
                 }
