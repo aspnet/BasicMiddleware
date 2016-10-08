@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         private static readonly Action<ILogger, Exception> _modRewriteDidNotMatchRule;
         private static readonly Action<ILogger, Exception> _modRewriteMatchedRule;
         private static readonly Action<ILogger, Exception> _redirectedToHttps;
+        private static readonly Action<ILogger, string, Exception> _rewriteSummary;
 
         static RewriteMiddlewareLoggingExtensions()
         {
@@ -27,7 +28,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
             _requestResponseComplete = LoggerMessage.Define<string, int>(
                             LogLevel.Debug,
                             2,
-                            "Request is done processing, Location header '{Location}' with status code '{StatusCode}'.");
+                            "Request is done processing. Location header '{Location}' with status code '{StatusCode}'.");
 
             _requestStopRules = LoggerMessage.Define<string>(
                             LogLevel.Debug,
@@ -58,6 +59,11 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
                             LogLevel.Debug,
                             8,
                             "Request redirected to HTTPS");
+
+            _rewriteSummary = LoggerMessage.Define<string>(
+                            LogLevel.Information,
+                            9,
+                            "Request was rewritten to {rewrittenUrl}");
         }
 
         public static void RewriteMiddlewareRequestContinueResults(this ILogger logger, string currentUrl)
@@ -98,6 +104,11 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         public static void RedirectedToHttps(this ILogger logger)
         {
             _redirectedToHttps(logger, null);
+        }
+
+        public static void RewriteSummary(this ILogger logger, string rewrittenUrl)
+        {
+            _rewriteSummary(logger, rewrittenUrl, null);
         }
     }
 }

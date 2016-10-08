@@ -77,10 +77,11 @@ namespace Microsoft.AspNetCore.Rewrite
                 rule.ApplyRule(rewriteContext);
                 var currentUrl = string.Empty;
 
-                if (rewriteContext.Logger?.IsEnabled(LogLevel.Debug) == true)
+                if (rewriteContext.Logger?.IsEnabled(LogLevel.Debug | LogLevel.Information) == true)
                 {
-                    currentUrl = $"{context.Request.Path + context.Request.QueryString}";
+                    currentUrl = context.Request.Path + context.Request.QueryString;
                 }
+
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:
@@ -97,6 +98,7 @@ namespace Microsoft.AspNetCore.Rewrite
                     default:
                         throw new ArgumentOutOfRangeException($"Invalid rule termination {rewriteContext.Result}");
                 }
+                _logger.RewriteSummary(currentUrl);
             }
             return _next(context);
         }
