@@ -75,17 +75,11 @@ namespace Microsoft.AspNetCore.Rewrite
             foreach (var rule in _options.Rules)
             {
                 rule.ApplyRule(rewriteContext);
-                var currentUrl = string.Empty;
-                var logger = rewriteContext.Logger;
-                if (logger?.IsEnabled(LogLevel.Debug) == true || logger?.IsEnabled(LogLevel.Information) == true)
-                {
-                    currentUrl = context.Request.Path + context.Request.QueryString;
-                }
-
+                var currentUrl = new Lazy<string>(() => context.Request.Path + context.Request.QueryString);
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:
-                        _logger.RewriteMiddlewareRequestContinueResults(currentUrl);
+                        _logger.RewriteMiddlewareRequestContinueResults(currentUrl.Value);
                         break;
                     case RuleResult.EndResponse:
                         _logger.RewriteMiddlewareRequestResponseComplete(
@@ -93,7 +87,7 @@ namespace Microsoft.AspNetCore.Rewrite
                             context.Response.StatusCode);
                         return TaskCache.CompletedTask;
                     case RuleResult.SkipRemainingRules:
-                        _logger.RewriteMiddlewareRequestStopRules(currentUrl);
+                        _logger.RewriteMiddlewareRequestStopRules(currentUrl.Value);
                         return _next(context);
                     default:
                         throw new ArgumentOutOfRangeException($"Invalid rule termination {rewriteContext.Result}");

@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         private static readonly Action<ILogger, Exception> _modRewriteDidNotMatchRule;
         private static readonly Action<ILogger, Exception> _modRewriteMatchedRule;
         private static readonly Action<ILogger, Exception> _redirectedToHttps;
+        private static readonly Action<ILogger, string, Exception> _redirectSummary;
         private static readonly Action<ILogger, string, Exception> _rewriteSummary;
 
         static RewriteMiddlewareLoggingExtensions()
@@ -56,13 +57,18 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
                             "Request matched current ModRewriteRule.");
 
             _redirectedToHttps = LoggerMessage.Define(
-                            LogLevel.Debug,
+                            LogLevel.Information,
                             8,
                             "Request redirected to HTTPS");
 
-            _rewriteSummary = LoggerMessage.Define<string>(
+            _redirectSummary = LoggerMessage.Define<string>(
                             LogLevel.Information,
                             9,
+                            "Request was redirected to {redirectedUrl}");
+
+            _rewriteSummary = LoggerMessage.Define<string>(
+                            LogLevel.Information,
+                            10,
                             "Request was rewritten to {rewrittenUrl}");
         }
 
@@ -104,6 +110,11 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         public static void RedirectedToHttps(this ILogger logger)
         {
             _redirectedToHttps(logger, null);
+        }
+
+        public static void RedirectedSummary(this ILogger logger, string redirectedUrl)
+        {
+            _redirectSummary(logger, redirectedUrl, null);
         }
 
         public static void RewriteSummary(this ILogger logger, string rewrittenUrl)

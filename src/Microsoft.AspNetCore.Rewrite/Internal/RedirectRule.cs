@@ -47,6 +47,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 initMatchResults = InitialMatch.Match(path.ToString().Substring(1));
             }
 
+
             if (initMatchResults.Success)
             {
                 var newPath = initMatchResults.Result(Replacement);
@@ -80,7 +81,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     response.Headers[HeaderNames.Location] = pathBase + newPath;
                 }
 
-                context.Logger?.RewriteSummary(newPath);
+                context.Logger?.RedirectedSummary(newPath);
             }
         }
     }
