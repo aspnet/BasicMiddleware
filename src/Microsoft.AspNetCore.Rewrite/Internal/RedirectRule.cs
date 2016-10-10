@@ -5,6 +5,7 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Rewrite.Logging;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
@@ -78,6 +79,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 {
                     response.Headers[HeaderNames.Location] = pathBase + newPath;
                 }
+
+                context.Logger?.RewriteSummary(newPath);
             }
         }
     }

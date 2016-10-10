@@ -76,8 +76,8 @@ namespace Microsoft.AspNetCore.Rewrite
             {
                 rule.ApplyRule(rewriteContext);
                 var currentUrl = string.Empty;
-
-                if (rewriteContext.Logger?.IsEnabled(LogLevel.Debug | LogLevel.Information) == true)
+                var logger = rewriteContext.Logger;
+                if (logger?.IsEnabled(LogLevel.Debug) == true || logger?.IsEnabled(LogLevel.Information) == true)
                 {
                     currentUrl = context.Request.Path + context.Request.QueryString;
                 }
@@ -98,7 +98,6 @@ namespace Microsoft.AspNetCore.Rewrite
                     default:
                         throw new ArgumentOutOfRangeException($"Invalid rule termination {rewriteContext.Result}");
                 }
-                _logger.RewriteSummary(currentUrl);
             }
             return _next(context);
         }
