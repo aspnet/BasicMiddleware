@@ -1,5 +1,4 @@
 {
-  "version": "1.0.0-*",
   "dependencies": {
     "Microsoft.AspNetCore.Rewrite": "1.0.0-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.0-*",
