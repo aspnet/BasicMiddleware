@@ -115,11 +115,6 @@ namespace Microsoft.AspNetCore.HttpOverrides
             IPv6LinkLocal,
             IPv6Private);
 
-        public IPNetwork(IPAddress prefix)
-            : this(prefix, prefix.AddressFamily == AddressFamily.InterNetwork ? 32 : 128)
-        {
-        }
-
         public IPNetwork(IPAddress prefix, int prefixLength)
         {
             Prefix = prefix;
