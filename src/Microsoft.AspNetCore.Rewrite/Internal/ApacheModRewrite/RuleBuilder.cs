@@ -14,6 +14,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private IList<Condition> _conditions;
         private IList<UrlAction> _actions = new List<UrlAction>();
         private UrlMatch _match;
+        private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
         private readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
 
@@ -172,14 +173,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             string flag;
             if (flags.GetValue(FlagType.Cookie, out flag))
             {
-                // parse cookie
-                _actions.Add(new ChangeCookieAction(flag));
+                var action = _cookieActionFactory.Create(flag);
+                _actions.Add(action);
             }
 
             if (flags.GetValue(FlagType.Env, out flag))
             {
-                // parse env
-                _actions.Add(new ChangeEnvironmentAction(flag));
+                throw new NotSupportedException(Resources.Error_ChangeEnvironmentNotSupported);
             }
 
             if (flags.HasFlag(FlagType.Forbidden))
@@ -210,7 +210,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 else
                 {
                     var last = flags.HasFlag(FlagType.End) || flags.HasFlag(FlagType.Last);
-                    var termination = last ? RuleTermination.StopRules : RuleTermination.Continue;
+                    var termination = last ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules;
                     _actions.Add(new RewriteAction(termination, pattern, queryStringAppend, queryStringDelete, escapeBackReference));
                 }
             }

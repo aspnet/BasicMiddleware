@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Rewrite;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// Extension methods for the <see cref="RewriteMiddleware"/> 
+    /// Extension methods for the <see cref="RewriteMiddleware"/>
     /// </summary>
     public static class RewriteBuilderExtensions
     {
         /// <summary>
         /// Checks if a given Url matches rules and conditions, and modifies the HttpContext on match.
         /// </summary>
-        /// <param name="app"></param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/></param>
         /// <param name="options">Options for rewrite.</param>
         /// <returns></returns>
         public static IApplicationBuilder UseRewriter(this IApplicationBuilder app, RewriteOptions options)

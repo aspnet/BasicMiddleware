@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
                     QueryString.FromUriComponent(
                         pattern.Substring(split)));
 
-                // not using the response.redirect here because status codes may be 301, 302, 307, 308 
+                // not using the response.redirect here because status codes may be 301, 302, 307, 308
                 response.Headers[HeaderNames.Location] = pathBase + pattern.Substring(0, split) + query;
             }
             else
@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
                     response.Headers[HeaderNames.Location] = pathBase + pattern + context.HttpContext.Request.QueryString;
                 }
             }
-            context.Result = RuleTermination.ResponseComplete;
+            context.Result = RuleResult.EndResponse;
         }
     }
 }

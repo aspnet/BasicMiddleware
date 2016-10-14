@@ -9,10 +9,10 @@
   },
   "frameworks": {
     "net451": {},
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.1.0-*",
           "type": "platform"
         }
       }

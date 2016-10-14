@@ -5,10 +5,11 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Rewrite.Logging;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
-    public class RedirectRule : Rule
+    public class RedirectRule : IRule
     {
         private readonly TimeSpan _regexTimeout = TimeSpan.FromSeconds(1);
         public Regex InitialMatch { get; }
@@ -18,12 +19,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             if (string.IsNullOrEmpty(regex))
             {
-                throw new ArgumentNullException(nameof(regex));
+                throw new ArgumentException(nameof(regex));
             }
 
             if (string.IsNullOrEmpty(replacement))
             {
-                throw new ArgumentNullException(nameof(replacement));
+                throw new ArgumentException(nameof(replacement));
             }
 
             InitialMatch = new Regex(regex, RegexOptions.Compiled | RegexOptions.CultureInvariant, _regexTimeout);
@@ -31,7 +32,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             StatusCode = statusCode;
         }
 
-        public override void ApplyRule(RewriteContext context)
+        public virtual void ApplyRule(RewriteContext context)
         {
             var path = context.HttpContext.Request.Path;
             var pathBase = context.HttpContext.Request.PathBase;
@@ -46,13 +47,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 initMatchResults = InitialMatch.Match(path.ToString().Substring(1));
             }
 
+
             if (initMatchResults.Success)
             {
                 var newPath = initMatchResults.Result(Replacement);
                 var response = context.HttpContext.Response;
 
                 response.StatusCode = StatusCode;
-                context.Result = RuleTermination.ResponseComplete;
+                context.Result = RuleResult.EndResponse;
 
                 if (string.IsNullOrEmpty(newPath))
                 {
@@ -78,6 +80,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 {
                     response.Headers[HeaderNames.Location] = pathBase + newPath;
                 }
+
+                context.Logger?.RedirectedSummary(newPath);
             }
         }
     }

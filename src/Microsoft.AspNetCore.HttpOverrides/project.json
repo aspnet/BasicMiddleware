@@ -25,7 +25,8 @@
     "Microsoft.AspNetCore.Http.Extensions": "1.1.0-*",
     "Microsoft.Extensions.Logging.Abstractions": "1.1.0-*",
     "Microsoft.Extensions.Options": "1.1.0-*",
-    "System.Collections.Immutable": "1.2.0"
+    "System.Collections.Immutable": "1.2.0",
+    "NETStandard.Library": "1.6.1-*"
   },
   "frameworks": {
     "net451": {},

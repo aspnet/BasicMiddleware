@@ -5,10 +5,11 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Rewrite.Logging;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
-    public class RewriteRule : Rule
+    public class RewriteRule : IRule
     {
         private readonly TimeSpan _regexTimeout = TimeSpan.FromSeconds(1);
         public Regex InitialMatch { get; }
@@ -18,12 +19,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             if (string.IsNullOrEmpty(regex))
             {
-                throw new ArgumentNullException(nameof(regex));
+                throw new ArgumentException(nameof(regex));
             }
 
             if (string.IsNullOrEmpty(replacement))
             {
-                throw new ArgumentNullException(nameof(replacement));
+                throw new ArgumentException(nameof(replacement));
             }
 
             InitialMatch = new Regex(regex, RegexOptions.Compiled | RegexOptions.CultureInvariant, _regexTimeout);
@@ -31,7 +32,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             StopProcessing = stopProcessing;
         }
 
-        public override void ApplyRule(RewriteContext context)
+        public virtual void ApplyRule(RewriteContext context)
         {
             var path = context.HttpContext.Request.Path;
             Match initMatchResults;
@@ -51,7 +52,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 if (StopProcessing)
                 {
-                    context.Result = RuleTermination.StopRules;
+                    context.Result = RuleResult.SkipRemainingRules;
                 }
 
                 if (string.IsNullOrEmpty(result))
@@ -103,6 +104,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                         }
                     }
                 }
+
+                context.Logger?.RewriteSummary(result);
             }
         }
     }

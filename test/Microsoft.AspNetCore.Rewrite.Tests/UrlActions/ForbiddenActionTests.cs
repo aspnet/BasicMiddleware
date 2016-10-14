@@ -12,16 +12,14 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
         [Fact]
         public void Forbidden_Verify403IsInStatusCode()
         {
-            // Arrange
-            var context = new RewriteContext {HttpContext = new DefaultHttpContext()};
+
+            var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
             var action = new ForbiddenAction();
 
-            // Act
             action.ApplyAction(context, null, null);
-            
-            // Assert
-            Assert.Equal(context.Result, RuleTermination.ResponseComplete);
-            Assert.Equal(context.HttpContext.Response.StatusCode, StatusCodes.Status403Forbidden);
+
+            Assert.Equal(RuleResult.EndResponse, context.Result);
+            Assert.Equal(StatusCodes.Status403Forbidden, context.HttpContext.Response.StatusCode);
         }
     }
 }

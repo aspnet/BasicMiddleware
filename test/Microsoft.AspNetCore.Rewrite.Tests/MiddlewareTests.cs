@@ -16,11 +16,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
         [Fact]
         public async Task CheckRewritePath()
         {
-            var options = new RewriteOptions().AddRewrite("(.*)", "http://example.com/$1");
+            var options = new RewriteOptions().AddRewrite("(.*)", "http://example.com/$1", skipRemainingRules: false);
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    app.UseRewriter(options);
                     app.UseRewriter(options);
                     app.Run(context => context.Response.WriteAsync(
                         context.Request.Scheme +
@@ -33,13 +32,13 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
 
             var response = await server.CreateClient().GetStringAsync("foo");
 
-            Assert.Equal(response, "http://example.com/foo");
+            Assert.Equal("http://example.com/foo", response);
         }
 
         [Fact]
         public async Task CheckRedirectPath()
         {
-            var options = new RewriteOptions().AddRedirect("(.*)","http://example.com/$1", statusCode: 301);
+            var options = new RewriteOptions().AddRedirect("(.*)","http://example.com/$1", statusCode: StatusCodes.Status301MovedPermanently);
             var builder = new WebHostBuilder()
             .Configure(app =>
             {
@@ -49,13 +48,13 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
 
             var response = await server.CreateClient().GetAsync("foo");
 
-            Assert.Equal(response.Headers.Location.OriginalString, "http://example.com/foo");
+            Assert.Equal("http://example.com/foo", response.Headers.Location.OriginalString);
         }
 
         [Fact]
         public async Task CheckRedirectToHttps()
         {
-            var options = new RewriteOptions().AddRedirectToHttps(statusCode: 301);
+            var options = new RewriteOptions().AddRedirectToHttps(statusCode: StatusCodes.Status301MovedPermanently);
             var builder = new WebHostBuilder()
             .Configure(app =>
             {
@@ -65,14 +64,14 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
 
             var response = await server.CreateClient().GetAsync(new Uri("http://example.com"));
 
-            Assert.Equal(response.Headers.Location.OriginalString, "https://example.com/");
+            Assert.Equal("https://example.com/", response.Headers.Location.OriginalString);
         }
 
 
         [Fact]
         public async Task CheckIfEmptyStringRedirectCorrectly()
         {
-            var options = new RewriteOptions().AddRedirect("(.*)", "$1", statusCode: 301);
+            var options = new RewriteOptions().AddRedirect("(.*)", "$1", statusCode: StatusCodes.Status301MovedPermanently);
             var builder = new WebHostBuilder()
             .Configure(app =>
             {
@@ -87,7 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
         [Fact]
         public async Task CheckIfEmptyStringRewriteCorrectly()
         {
-            var options = new RewriteOptions().AddRewrite("(.*)", "$1");
+            var options = new RewriteOptions().AddRewrite("(.*)", "$1", skipRemainingRules: false);
             var builder = new WebHostBuilder()
             .Configure(app =>
             {
