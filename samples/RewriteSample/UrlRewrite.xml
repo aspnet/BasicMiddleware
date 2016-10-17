@@ -7,5 +7,9 @@
       </conditions>
       <action type="Rewrite" url="app?id=10" appendQueryString="false"/>
     </rule>
+    <rule name="Abort Request" stopProcessing="true">
+      <match url="^abort$" />
+      <action type="AbortRequest"/>
+    </rule>
   </rules>
 </rewrite>
