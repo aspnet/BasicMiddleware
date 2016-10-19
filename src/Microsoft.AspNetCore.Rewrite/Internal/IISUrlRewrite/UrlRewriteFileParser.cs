@@ -38,7 +38,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            if(string.Equals(rules.Name.ToString(), "GlobalRules", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(rules.Name.ToString(), "GlobalRules", StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException("Support for global rules has not been implemented yet");
             }
@@ -66,7 +66,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             else
             {
-                builder.Enabled = enabled;
+                if (enabled)
+                {
+                    builder.Enabled = enabled;
+                }
+                else
+                {
+                    return;
+                }
             }
 
             PatternSyntax patternSyntax;
