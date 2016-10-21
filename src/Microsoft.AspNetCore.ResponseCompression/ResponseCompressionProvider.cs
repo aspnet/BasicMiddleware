@@ -103,6 +103,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <inheritdoc />
         public virtual bool ShouldCompressResponse(HttpContext context)
         {
+            if (context.Response.Headers.ContainsKey(HeaderNames.ContentRange))
+            {
+                return false;
+            }
+
             var mimeType = context.Response.ContentType;
 
             if (string.IsNullOrEmpty(mimeType))
@@ -120,6 +125,12 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             // TODO PERF: StringSegments?
             return _mimeTypes.Contains(mimeType);
+        }
+
+        /// <inheritdoc />
+        public bool ShouldCompressRequest(HttpContext context)
+        {
+            return !string.IsNullOrEmpty(context.Request.Headers[HeaderNames.AcceptEncoding]);
         }
     }
 }

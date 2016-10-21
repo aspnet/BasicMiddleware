@@ -17,23 +17,23 @@ namespace Microsoft.AspNetCore.ResponseCompression
     /// </summary>
     internal class BodyWrapperStream : Stream, IHttpBufferingFeature, IHttpSendFileFeature
     {
-        private readonly HttpResponse _response;
+        private readonly HttpContext _context;
         private readonly Stream _bodyOriginalStream;
         private readonly IResponseCompressionProvider _provider;
-        private readonly ICompressionProvider _compressionProvider;
         private readonly IHttpBufferingFeature _innerBufferFeature;
         private readonly IHttpSendFileFeature _innerSendFileFeature;
 
+        private ICompressionProvider _compressionProvider = null;
         private bool _compressionChecked = false;
         private Stream _compressionStream = null;
+        private bool _providerCreated = false;
 
-        internal BodyWrapperStream(HttpResponse response, Stream bodyOriginalStream, IResponseCompressionProvider provider, ICompressionProvider compressionProvider,
+        internal BodyWrapperStream(HttpContext context, Stream bodyOriginalStream, IResponseCompressionProvider provider,
             IHttpBufferingFeature innerBufferFeature, IHttpSendFileFeature innerSendFileFeature)
         {
-            _response = response;
+            _context = context;
             _bodyOriginalStream = bodyOriginalStream;
             _provider = provider;
-            _compressionProvider = compressionProvider;
             _innerBufferFeature = innerBufferFeature;
             _innerSendFileFeature = innerSendFileFeature;
         }
@@ -179,21 +179,33 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 _compressionChecked = true;
 
-                if (IsCompressable())
+                if (_provider.ShouldCompressResponse(_context))
                 {
-                    _response.Headers.Append(HeaderNames.ContentEncoding, _compressionProvider.EncodingName);
-                    _response.Headers.Remove(HeaderNames.ContentMD5); // Reset the MD5 because the content changed.
-                    _response.Headers.Remove(HeaderNames.ContentLength);
+                    var compressionProvider = CompressionProvider;
+                    if (compressionProvider != null)
+                    {
+                        _context.Response.Headers.Append(HeaderNames.ContentEncoding, compressionProvider.EncodingName);
+                        _context.Response.Headers.Remove(HeaderNames.ContentMD5); // Reset the MD5 because the content changed.
+                        _context.Response.Headers.Remove(HeaderNames.ContentLength);
 
-                    _compressionStream = _compressionProvider.CreateStream(_bodyOriginalStream);
+                        _compressionStream = compressionProvider.CreateStream(_bodyOriginalStream);
+                    }
                 }
             }
         }
 
-        private bool IsCompressable()
+        private ICompressionProvider CompressionProvider
         {
-            return !_response.Headers.ContainsKey(HeaderNames.ContentRange) &&     // The response is not partial
-                _provider.ShouldCompressResponse(_response.HttpContext);
+            get
+            {
+                if (!_providerCreated)
+                {
+                    _providerCreated = true;
+                    _compressionProvider = _provider.GetCompressionProvider(_context);
+                }
+
+                return _compressionProvider;
+            }
         }
 
         public void DisableRequestBuffering()
@@ -205,13 +217,12 @@ namespace Microsoft.AspNetCore.ResponseCompression
         // For this to be effective it needs to be called before the first write.
         public void DisableResponseBuffering()
         {
-            if (!_compressionProvider.SupportsFlush)
+            if (CompressionProvider?.SupportsFlush == false)
             {
                 // Don't compress, some of the providers don't implement Flush (e.g. .NET 4.5.1 GZip/Deflate stream)
                 // which would block real-time responses like SignalR.
                 _compressionChecked = true;
             }
-
             _innerBufferFeature?.DisableResponseBuffering();
         }
 

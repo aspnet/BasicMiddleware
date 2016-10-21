@@ -53,14 +53,13 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
-            ICompressionProvider compressionProvider = null;
-
+            var shouldCompress = false;
             if (!context.Request.IsHttps || _enableForHttps)
             {
-                compressionProvider = _provider.GetCompressionProvider(context);
+                shouldCompress = _provider.ShouldCompressRequest(context);
             }
 
-            if (compressionProvider == null)
+            if (!shouldCompress)
             {
                 await _next(context);
                 return;
@@ -70,7 +69,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
             var originalBufferFeature = context.Features.Get<IHttpBufferingFeature>();
             var originalSendFileFeature = context.Features.Get<IHttpSendFileFeature>();
 
-            var bodyWrapperStream = new BodyWrapperStream(context.Response, bodyStream, _provider, compressionProvider,
+            var bodyWrapperStream = new BodyWrapperStream(context, bodyStream, _provider,
                 originalBufferFeature, originalSendFileFeature);
             context.Response.Body = bodyWrapperStream;
             context.Features.Set<IHttpBufferingFeature>(bodyWrapperStream);
