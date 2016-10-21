@@ -16,12 +16,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         /// <summary>
         /// Translates mod_rewrite server variables strings to an enum of different server variables.
         /// </summary>
-        /// <param name="variable">The server variable string.</param>
+        /// <param name="serverVariable">The server variable string.</param>
         /// <param name="context">The Parser context</param>
         /// <returns>The appropriate enum if the server variable exists, else ServerVariable.None</returns>
-        public static PatternSegment FindServerVariable(string variable, ParserContext context)
+        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context)
         {
-            switch (variable)
+            switch (serverVariable)
             {
                 case "HTTP_ACCEPT":
                     return new HeaderSegment(HeaderNames.Accept);
@@ -84,21 +84,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "SERVER_SOFTWARE":
                     throw new NotSupportedException("Rules using the SERVER_SOFTWARE server variable are not supported");
                 case "TIME_YEAR":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_MON":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_DAY":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_HOUR":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_MIN":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_SEC":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME_WDAY":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "TIME":
-                    return new DateTimeSegment(variable);
+                    return new DateTimeSegment(serverVariable);
                 case "API_VERSION":
                     throw new NotSupportedException();
                 case "HTTPS":
@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "THE_REQUEST":
                     throw new NotSupportedException("Rules using the THE_REQUEST server variable are not supported");
                 default:
-                    throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(variable, context.Index));
+                    throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
         }
     }
