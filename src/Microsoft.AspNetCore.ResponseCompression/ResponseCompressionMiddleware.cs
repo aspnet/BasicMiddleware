@@ -18,15 +18,13 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly IResponseCompressionProvider _provider;
 
-        private readonly bool _enableForHttps;
 
         /// <summary>
         /// Initialize the Response Compression middleware.
         /// </summary>
         /// <param name="next"></param>
         /// <param name="provider"></param>
-        /// <param name="options"></param>
-        public ResponseCompressionMiddleware(RequestDelegate next, IResponseCompressionProvider provider, IOptions<ResponseCompressionOptions> options)
+        public ResponseCompressionMiddleware(RequestDelegate next, IResponseCompressionProvider provider)
         {
             if (next == null)
             {
@@ -36,14 +34,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 throw new ArgumentNullException(nameof(provider));
             }
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
 
             _next = next;
             _provider = provider;
-            _enableForHttps = options.Value.EnableForHttps;
         }
 
         /// <summary>
@@ -53,13 +46,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
-            var shouldCompress = false;
-            if (!context.Request.IsHttps || _enableForHttps)
-            {
-                shouldCompress = _provider.ShouldCompressRequest(context);
-            }
-
-            if (!shouldCompress)
+            if (!_provider.CheckRequestAcceptsCompression(context))
             {
                 await _next(context);
                 return;

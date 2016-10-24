@@ -29,6 +29,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        bool ShouldCompressRequest(HttpContext context);
+        bool CheckRequestAcceptsCompression(HttpContext context);
     }
 }

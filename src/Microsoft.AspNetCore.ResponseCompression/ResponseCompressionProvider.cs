@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
     {
         private readonly ICompressionProvider[] _providers;
         private readonly HashSet<string> _mimeTypes;
+        private readonly bool _enableForHttps;
 
         /// <summary>
         /// If no compression providers are specified then GZip is used by default.
@@ -54,6 +55,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 mimeTypes = ResponseCompressionDefaults.MimeTypes;
             }
             _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
+
+            _enableForHttps = options.Value.EnableForHttps;
         }
 
         /// <inheritdoc />
@@ -128,8 +131,12 @@ namespace Microsoft.AspNetCore.ResponseCompression
         }
 
         /// <inheritdoc />
-        public bool ShouldCompressRequest(HttpContext context)
+        public bool CheckRequestAcceptsCompression(HttpContext context)
         {
+            if (context.Request.IsHttps && !_enableForHttps)
+            {
+                return false;
+            }
             return !string.IsNullOrEmpty(context.Request.Headers[HeaderNames.AcceptEncoding]);
         }
     }

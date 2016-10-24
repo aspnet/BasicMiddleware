@@ -178,7 +178,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
             if (!_compressionChecked)
             {
                 _compressionChecked = true;
-
                 if (_provider.ShouldCompressResponse(_context))
                 {
                     var compressionProvider = CompressionProvider;
