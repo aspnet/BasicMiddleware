@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [InlineData("HTTP_USER_AGENT", "useragent")]
         [InlineData("HTTP_CONNECTION", "connection")]
         [InlineData("HTTP_URL", "/foo")]
-        [InlineData("QUERY_STRING", "?bar=1")]
+        [InlineData("QUERY_STRING", "bar=1")]
         [InlineData("REQUEST_FILENAME", "/foo")]
         public void CheckServerVariableParsingAndApplication(string variable, string expected)
         {
