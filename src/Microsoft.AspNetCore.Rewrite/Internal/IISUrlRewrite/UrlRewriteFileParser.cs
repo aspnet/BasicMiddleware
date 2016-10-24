@@ -135,7 +135,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             LogicalGrouping grouping;
-            if (!Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, out grouping))
+            if (!Enum.TryParse(conditions.Attribute(RewriteTags.LogicalGrouping)?.Value, out grouping))
             {
                 grouping = LogicalGrouping.MatchAll;
             }
