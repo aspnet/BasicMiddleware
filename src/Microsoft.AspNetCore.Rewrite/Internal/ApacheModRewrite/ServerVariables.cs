@@ -100,7 +100,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "TIME":
                     return new DateTimeSegment(serverVariable);
                 case "API_VERSION":
-                    throw new NotSupportedException();
+                    throw new NotSupportedException("Rules using the API_VERSION server variable are not supported");
                 case "HTTPS":
                     return new IsHttpsModSegment();
                 case "HTTP2":
