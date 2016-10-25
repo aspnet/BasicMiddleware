@@ -27,6 +27,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
         private bool _compressionChecked = false;
         private Stream _compressionStream = null;
         private bool _providerCreated = false;
+        private bool _autoFlush = false;
 
         internal BodyWrapperStream(HttpContext context, Stream bodyOriginalStream, IResponseCompressionProvider provider,
             IHttpBufferingFeature innerBufferFeature, IHttpSendFileFeature innerSendFileFeature)
@@ -125,6 +126,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
             if (_compressionStream != null)
             {
                 _compressionStream.Write(buffer, offset, count);
+                if (_autoFlush)
+                {
+                    _compressionStream.Flush();
+                }
             }
             else
             {
@@ -133,44 +138,70 @@ namespace Microsoft.AspNetCore.ResponseCompression
         }
 
 #if NET451
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
         {
-            OnWrite();
+            var tcs = new TaskCompletionSource<object>(state);
+            InternalWriteAsync(buffer, offset, count, callback, tcs);
+            return tcs.Task;
+        }
 
-            if (_compressionStream != null)
+        private async void InternalWriteAsync(byte[] buffer, int offset, int count, AsyncCallback callback, TaskCompletionSource<object> tcs)
+        {
+            try
             {
-                return _compressionStream.BeginWrite(buffer, offset, count, callback, state);
+                await WriteAsync(buffer, offset, count);
+                tcs.TrySetResult(null);
             }
-            return _bodyOriginalStream.BeginWrite(buffer, offset, count, callback, state);
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+
+            if (callback != null)
+            {
+                // Offload callbacks to avoid stack dives on sync completions.
+                var ignored = Task.Run(() =>
+                {
+                    try
+                    {
+                        callback(tcs.Task);
+                    }
+                    catch (Exception)
+                    {
+                        // Suppress exceptions on background threads.
+                    }
+                });
+            }
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
         {
-            if (!_compressionChecked)
+            if (asyncResult == null)
             {
-                throw new InvalidOperationException("BeginWrite was not called before EndWrite");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
-            if (_compressionStream != null)
-            {
-                _compressionStream.EndWrite(asyncResult);
-            }
-            else
-            {
-                _bodyOriginalStream.EndWrite(asyncResult);
-            }
+            var task = (Task)asyncResult;
+            task.GetAwaiter().GetResult();
         }
 #endif
 
-        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             OnWrite();
 
             if (_compressionStream != null)
             {
-                return _compressionStream.WriteAsync(buffer, offset, count, cancellationToken);
+                await _compressionStream.WriteAsync(buffer, offset, count, cancellationToken);
+                if (_autoFlush)
+                {
+                    await _compressionStream.FlushAsync(cancellationToken);
+                }
             }
-            return _bodyOriginalStream.WriteAsync(buffer, offset, count, cancellationToken);
+            else
+            {
+                await _bodyOriginalStream.WriteAsync(buffer, offset, count, cancellationToken);
+            }
         }
 
         private void OnWrite()
@@ -180,7 +211,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 _compressionChecked = true;
                 if (_provider.ShouldCompressResponse(_context))
                 {
-                    var compressionProvider = CompressionProvider;
+                    var compressionProvider = ResolveCompressionProvider();
                     if (compressionProvider != null)
                     {
                         _context.Response.Headers.Append(HeaderNames.ContentEncoding, compressionProvider.EncodingName);
@@ -193,18 +224,15 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
         }
 
-        private ICompressionProvider CompressionProvider
+        private ICompressionProvider ResolveCompressionProvider()
         {
-            get
+            if (!_providerCreated)
             {
-                if (!_providerCreated)
-                {
-                    _providerCreated = true;
-                    _compressionProvider = _provider.GetCompressionProvider(_context);
-                }
-
-                return _compressionProvider;
+                _providerCreated = true;
+                _compressionProvider = _provider.GetCompressionProvider(_context);
             }
+
+            return _compressionProvider;
         }
 
         public void DisableRequestBuffering()
@@ -216,11 +244,15 @@ namespace Microsoft.AspNetCore.ResponseCompression
         // For this to be effective it needs to be called before the first write.
         public void DisableResponseBuffering()
         {
-            if (CompressionProvider?.SupportsFlush == false)
+            if (ResolveCompressionProvider()?.SupportsFlush == false)
             {
                 // Don't compress, some of the providers don't implement Flush (e.g. .NET 4.5.1 GZip/Deflate stream)
                 // which would block real-time responses like SignalR.
                 _compressionChecked = true;
+            }
+            else
+            {
+                _autoFlush = true;
             }
             _innerBufferFeature?.DisableResponseBuffering();
         }
@@ -267,6 +299,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 fileStream.Seek(offset, SeekOrigin.Begin);
                 await StreamCopyOperation.CopyToAsync(fileStream, _compressionStream, count, cancellation);
+
+                if (_autoFlush)
+                {
+                    await _compressionStream.FlushAsync(cancellation);
+                }
             }
         }
     }
