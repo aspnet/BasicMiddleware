@@ -61,5 +61,17 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
             return new MatchResults { BackReference = match.Groups, Success = match.Success };
         }
+
+        [Fact]
+        private void EmptyQueryStringCheck()
+        {
+            var context = new DefaultHttpContext();
+            var rewriteContext = new RewriteContext { HttpContext = context };
+            var testParserContext = new ParserContext("test");
+            var serverVar = ServerVariables.FindServerVariable("QUERY_STRING", testParserContext);
+            var lookup = serverVar.Evaluate(rewriteContext, CreateTestRuleMatch(), CreateTestCondMatch());
+
+            Assert.Equal(string.Empty, lookup);
+        }
     }
 }
