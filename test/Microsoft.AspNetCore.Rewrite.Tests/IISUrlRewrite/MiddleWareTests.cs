@@ -336,5 +336,32 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             Assert.Equal(response.Headers.Location.OriginalString, "/foo");
         }
+
+        [Fact]
+        public async Task VerifyIsFileAndIsDirectoryParsing()
+        {
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Test"">
+                <match url=""(.*[^/])$"" />
+                <conditions>
+                <add input=""{REQUEST_FILENAME}"" matchType=""iSfIlE"" negate=""true""/>
+                <add input=""{REQUEST_FILENAME}"" matchType=""iSdIrEctOrY"" negate=""true""/>
+                </conditions>
+                <action type=""Redirect"" url=""{R:1}/"" />
+                </rule>
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("hey/hello");
+
+            Assert.Equal("/hey/hello/", response.Headers.Location.OriginalString); ;
+        }
     }
 }

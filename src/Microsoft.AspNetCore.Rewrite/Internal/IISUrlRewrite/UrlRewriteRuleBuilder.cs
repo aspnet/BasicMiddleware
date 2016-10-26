@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate)
         {
-            // If there are no conditions specified, 
+            // If there are no conditions specified,
             if (_conditions == null)
             {
                 AddUrlConditions(LogicalGrouping.MatchAll, trackingAllCaptures: false);
@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     {
                         switch (matchType)
                         {
-                            case MatchType.pattern:
+                            case MatchType.Pattern:
                                 {
                                     if (string.IsNullOrEmpty(pattern))
                                     {
@@ -114,12 +114,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                     _conditions.Add(new Condition { Input = input, Match = new RegexMatch(regex, negate), OrNext = _matchAny });
                                     break;
                                 }
-                            case MatchType.isDirectory:
+                            case MatchType.IsDirectory:
                                 {
                                     _conditions.Add(new Condition { Input = input, Match = new IsDirectoryMatch(negate), OrNext = _matchAny });
                                     break;
                                 }
-                            case MatchType.isFile:
+                            case MatchType.IsFile:
                                 {
                                     _conditions.Add(new Condition { Input = input, Match = new IsFileMatch(negate), OrNext = _matchAny });
                                     break;
