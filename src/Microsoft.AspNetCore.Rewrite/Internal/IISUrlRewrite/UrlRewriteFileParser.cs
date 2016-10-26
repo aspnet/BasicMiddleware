@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             PatternSyntax patternSyntax;
-            if (!Enum.TryParse(rule.Attribute(RewriteTags.PatternSyntax)?.Value, out patternSyntax))
+            if (!Enum.TryParse(rule.Attribute(RewriteTags.PatternSyntax)?.Value, true, out patternSyntax))
             {
                 patternSyntax = PatternSyntax.ECMAScript;
             }
@@ -135,7 +135,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             LogicalGrouping grouping;
-            if (!Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, out grouping))
+            if (!Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, true, out grouping))
             {
                 grouping = LogicalGrouping.MatchAll;
             }
@@ -169,7 +169,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             MatchType matchType;
-            if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, out matchType))
+            if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, true, out matchType))
             {
                 matchType = MatchType.Pattern;
             }
@@ -195,7 +195,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
             ActionType actionType;
-            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, out actionType))
+            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, true, out actionType))
             {
                 actionType = ActionType.None;
             }
@@ -207,7 +207,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             RedirectType redirectType;
-            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType)?.Value, out redirectType))
+            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType)?.Value, true, out redirectType))
             {
                 redirectType = RedirectType.Permanent;
             }

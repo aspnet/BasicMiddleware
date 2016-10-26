@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         }
                         break;
                     }
-                case PatternSyntax.WildCard:
+                case PatternSyntax.Wildcard:
                     throw new NotSupportedException("Wildcard syntax is not supported");
                 case PatternSyntax.ExactMatch:
                     _initialMatch = new ExactMatch(ignoreCase, input, negate);
@@ -114,12 +114,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                     _conditions.Add(new Condition { Input = input, Match = new RegexMatch(regex, negate), OrNext = _matchAny });
                                     break;
                                 }
-                            case MatchType.IsDirectory:
+                            case MatchType.isDirectory:
                                 {
                                     _conditions.Add(new Condition { Input = input, Match = new IsDirectoryMatch(negate), OrNext = _matchAny });
                                     break;
                                 }
-                            case MatchType.IsFile:
+                            case MatchType.isFile:
                                 {
                                     _conditions.Add(new Condition { Input = input, Match = new IsFileMatch(negate), OrNext = _matchAny });
                                     break;
@@ -129,7 +129,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         }
                         break;
                     }
-                case PatternSyntax.WildCard:
+                case PatternSyntax.Wildcard:
                     throw new NotSupportedException("Wildcard syntax is not supported");
                 case PatternSyntax.ExactMatch:
                     if (pattern == null)
