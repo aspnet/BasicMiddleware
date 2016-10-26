@@ -5,7 +5,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public enum MatchType
     {
-        Pattern,
+        pattern,
         isFile,
         isDirectory
     }

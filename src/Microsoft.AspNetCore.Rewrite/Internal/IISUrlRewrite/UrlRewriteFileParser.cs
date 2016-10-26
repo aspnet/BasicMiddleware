@@ -171,7 +171,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             MatchType matchType;
             if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, true, out matchType))
             {
-                matchType = MatchType.Pattern;
+                matchType = MatchType.pattern;
             }
 
             var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;

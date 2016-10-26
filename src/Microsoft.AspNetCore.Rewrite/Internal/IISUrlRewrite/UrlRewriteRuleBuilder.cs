@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     {
                         switch (matchType)
                         {
-                            case MatchType.Pattern:
+                            case MatchType.pattern:
                                 {
                                     if (string.IsNullOrEmpty(pattern))
                                     {
