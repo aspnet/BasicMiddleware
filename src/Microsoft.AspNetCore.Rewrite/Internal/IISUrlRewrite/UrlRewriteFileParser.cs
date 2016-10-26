@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             PatternSyntax patternSyntax;
-            if (!Enum.TryParse(rule.Attribute(RewriteTags.PatternSyntax)?.Value, true, out patternSyntax))
+            if (!Enum.TryParse(rule.Attribute(RewriteTags.PatternSyntax)?.Value, ignoreCase:true, result:out patternSyntax))
             {
                 patternSyntax = PatternSyntax.ECMAScript;
             }
@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             bool ignoreCase;
             if (!bool.TryParse(match.Attribute(RewriteTags.IgnoreCase)?.Value, out ignoreCase))
             {
-                ignoreCase = true; // default
+                ignoreCase = true;
             }
 
             bool negate;
@@ -135,7 +135,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             LogicalGrouping grouping;
-            if (!Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, true, out grouping))
+            if (!Enum.TryParse(conditions.Attribute(RewriteTags.MatchType)?.Value, ignoreCase:true, result:out grouping))
             {
                 grouping = LogicalGrouping.MatchAll;
             }
@@ -169,7 +169,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             MatchType matchType;
-            if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, true, out matchType))
+            if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType)?.Value, ignoreCase:true, result:out matchType))
             {
                 matchType = MatchType.Pattern;
             }
@@ -195,7 +195,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
             ActionType actionType;
-            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, true, out actionType))
+            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.Type)?.Value, ignoreCase:true, result:out actionType))
             {
                 actionType = ActionType.None;
             }
@@ -207,9 +207,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             RedirectType redirectType;
-            if (!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType)?.Value, true, out redirectType))
+            if(urlAction.Attribute(RewriteTags.RedirectType) == null)
             {
                 redirectType = RedirectType.Permanent;
+            }
+            else
+            {
+                if(!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType)?.Value, ignoreCase: true, result: out redirectType))
+                {
+                    ThrowParameterFormatException(urlAction, "The redirectType parameter was unrecognized");
+                }
             }
 
             string url = string.Empty;
@@ -245,6 +252,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             var line = ((IXmlLineInfo)element).LineNumber;
             var col = ((IXmlLineInfo)element).LinePosition;
             throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col), ex);
+        }
+
+        private static void ThrowParameterFormatException(XElement element, string message)
+        {
+            var line = ((IXmlLineInfo)element).LineNumber;
+            var col = ((IXmlLineInfo)element).LinePosition;
+            throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col));
         }
     }
 }
