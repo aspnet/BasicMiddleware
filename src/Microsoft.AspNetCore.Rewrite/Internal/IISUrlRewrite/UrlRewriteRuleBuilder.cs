@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate)
         {
-            // If there are no conditions specified,
+            // If there are no conditions specified
             if (_conditions == null)
             {
                 AddUrlConditions(LogicalGrouping.MatchAll, trackingAllCaptures: false);

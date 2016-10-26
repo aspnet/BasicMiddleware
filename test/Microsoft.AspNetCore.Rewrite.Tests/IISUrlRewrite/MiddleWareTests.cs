@@ -337,18 +337,21 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Equal(response.Headers.Location.OriginalString, "/foo");
         }
 
-        [Fact]
-        public async Task VerifyIsFileAndIsDirectoryParsing()
+        [Theory]
+        [InlineData("IsFile")]
+        [InlineData("isfile")]
+        [InlineData("IsDirectory")]
+        [InlineData("isdirectory")]
+        public async Task VerifyIsFileAndIsDirectoryParsing(string matchType)
         {
-            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader($@"<rewrite>
                 <rules>
                 <rule name=""Test"">
                 <match url=""(.*[^/])$"" />
                 <conditions>
-                <add input=""{REQUEST_FILENAME}"" matchType=""iSfIlE"" negate=""true""/>
-                <add input=""{REQUEST_FILENAME}"" matchType=""iSdIrEctOrY"" negate=""true""/>
+                <add input=""{{REQUEST_FILENAME}}"" matchType=""{matchType}"" negate=""true""/>
                 </conditions>
-                <action type=""Redirect"" url=""{R:1}/"" />
+                <action type=""Redirect"" url=""{{R:1}}/"" />
                 </rule>
                 </rules>
                 </rewrite>"));
