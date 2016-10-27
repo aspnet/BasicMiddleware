@@ -183,7 +183,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             else if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType).Value, ignoreCase: true, result: out matchType))
             {
-                ThrowParameterFormatException(condition, $"The {RewriteTags.MatchType} parameter '{condition.Attribute(RewriteTags.MatchType).Value}' wasn't recognized");
+                ThrowParameterFormatException(condition, $"The {RewriteTags.MatchType} parameter '{condition.Attribute(RewriteTags.MatchType).Value}' was not recognized");
             }
 
             var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
@@ -229,7 +229,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             else if (!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType).Value, ignoreCase: true, result: out redirectType))
             {
-                ThrowParameterFormatException(urlAction, $"The {RewriteTags.RedirectType} parameter '{urlAction.Attribute(RewriteTags.RedirectType).Value}' was unrecognized");
+                ThrowParameterFormatException(urlAction, $"The {RewriteTags.RedirectType} parameter '{urlAction.Attribute(RewriteTags.RedirectType).Value}' was not recognized");
             }
 
             string url = string.Empty;
