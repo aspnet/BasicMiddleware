@@ -223,7 +223,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             RedirectType redirectType;
-            if(urlAction.Attribute(RewriteTags.RedirectType) == null)
+            if (urlAction.Attribute(RewriteTags.RedirectType) == null)
             {
                 redirectType = RedirectType.Permanent;
             }
