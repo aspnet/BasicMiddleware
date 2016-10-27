@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'The redirectType parameter: foo, was unrecognized'. Line number '5': '14'.")]
+            "Could not parse the UrlRewrite file. Message: 'The redirectType parameter 'foo' was unrecognized'. Line number '5': '14'.")]
         [InlineData(
 @"<rewrite>
     <rules>
@@ -120,7 +120,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'The type parameter: foo, was not recognized'. Line number '5': '14'.")]
+            "Could not parse the UrlRewrite file. Message: 'The type parameter 'foo' was not recognized'. Line number '5': '14'.")]
         [InlineData(
 @"<rewrite>
     <rules>
@@ -133,7 +133,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'The logicalGrouping parameter: foo, was not recognized'. Line number '5': '14'.")]
+            "Could not parse the UrlRewrite file. Message: 'The logicalGrouping parameter 'foo' was not recognized'. Line number '5': '14'.")]
         [InlineData(
 @"<rewrite>
     <rules>
@@ -143,7 +143,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'The patternSyntax parameter: foo, was not recognized'. Line number '3': '10'.")]
+            "Could not parse the UrlRewrite file. Message: 'The patternSyntax parameter 'foo' was not recognized'. Line number '3': '10'.")]
         [InlineData(
 @"<rewrite>
     <rules>
@@ -156,7 +156,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'The matchType parameter: foo, wasn't recognized'. Line number '6': '18'.")]
+            "Could not parse the UrlRewrite file. Message: 'The matchType parameter 'foo' wasn't recognized'. Line number '6': '18'.")]
         public void ThrowFormatExceptionWithCorrectMessage(string input, string expected)
         {
             // Arrange, Act, Assert
