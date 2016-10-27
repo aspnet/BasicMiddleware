@@ -111,6 +111,52 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
     </rules>
 </rewrite>",
             "Could not parse the UrlRewrite file. Message: 'The redirectType parameter was unrecognized'. Line number '5': '14'.")]
+        [InlineData(
+@"<rewrite>
+    <rules>
+        <rule name=""Remove trailing slash"">
+            <match url = ""(.*)/$"" />
+            <action type=""foo"" url =""{R:1}"" />
+        </rule>
+    </rules>
+</rewrite>",
+            "Could not parse the UrlRewrite file. Message: 'The action type parameter was not recognized'. Line number '5': '14'.")]
+        [InlineData(
+@"<rewrite>
+    <rules>
+        <rule name=""Remove trailing slash"">
+            <match url = ""(.*)/$"" />
+            <conditions logicalGrouping=""foo"">
+                <add input=""{REQUEST_FILENAME}"" matchType=""isFile"" negate=""true""/>
+            </conditions>
+            <action type=""Redirect"" url =""{R:1}"" />
+        </rule>
+    </rules>
+</rewrite>",
+            "Could not parse the UrlRewrite file. Message: 'The logicalGrouping parameter was not recognized'. Line number '5': '14'.")]
+        [InlineData(
+@"<rewrite>
+    <rules>
+        <rule name=""Remove trailing slash"" patternSyntax=""foo"">
+            <match url = ""(.*)/$"" />
+            <action type=""Redirect"" url =""{R:1}"" />
+        </rule>
+    </rules>
+</rewrite>",
+            "Could not parse the UrlRewrite file. Message: 'The patternSyntax parameter was not recognized'. Line number '3': '10'.")]
+        [InlineData(
+@"<rewrite>
+    <rules>
+        <rule name=""Remove trailing slash"">
+            <match url = ""(.*)/$"" />
+            <conditions>
+                <add input=""{REQUEST_FILENAME}"" matchType=""foo"" negate=""true""/>
+            </conditions>
+            <action type=""Redirect"" url =""{R:1}"" />
+        </rule>
+    </rules>
+</rewrite>",
+            "Could not parse the UrlRewrite file. Message: 'The matchType parameter wasn't recognized'. Line number '6': '18'.")]
         public void ThrowFormatExceptionWithCorrectMessage(string input, string expected)
         {
             // Arrange, Act, Assert
