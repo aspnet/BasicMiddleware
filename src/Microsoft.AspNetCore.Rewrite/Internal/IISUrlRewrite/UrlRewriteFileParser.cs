@@ -169,7 +169,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 trackingAllCaptures = false;
             }
-            else if (!bool.TryParse(conditions.Attribute(RewriteTags.TrackingAllCaptures)?.Value, out trackingAllCaptures))
+            else if (!bool.TryParse(conditions.Attribute(RewriteTags.TrackingAllCaptures).Value, out trackingAllCaptures))
             {
                 ThrowParameterFormatException(conditions, $"The {RewriteTags.TrackingAllCaptures} parameter '{conditions.Attribute(RewriteTags.TrackingAllCaptures).Value}' was not recognized");
             }
