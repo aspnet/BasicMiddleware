@@ -59,25 +59,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             builder.Name = rule.Attribute(RewriteTags.Name)?.Value;
 
-            bool enabled;
-            if (rule.Attribute(RewriteTags.Enabled) == null)
+            if (ParseBool(rule, RewriteTags.Enabled, defaultValue: true))
             {
                 builder.Enabled = true;
             }
-            else if (!bool.TryParse(rule.Attribute(RewriteTags.Enabled).Value, out enabled))
-            {
-                ThrowParameterFormatException(rule, $"The {RewriteTags.Enabled} parameter '{rule.Attribute(RewriteTags.Enabled).Value}' was not recognized");
-            }
             else
             {
-                if (enabled)
-                {
-                    builder.Enabled = enabled;
-                }
-                else
-                {
-                    return;
-                }
+                return;
             }
 
             PatternSyntax patternSyntax;
@@ -90,15 +78,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ThrowParameterFormatException(rule, $"The {RewriteTags.PatternSyntax} parameter '{rule.Attribute(RewriteTags.PatternSyntax).Value}' was not recognized");
             }
 
-            bool stopProcessing;
-            if (rule.Attribute(RewriteTags.StopProcessing) == null)
-            {
-                stopProcessing = false;
-            }
-            else if (!bool.TryParse(rule.Attribute(RewriteTags.StopProcessing).Value, out stopProcessing))
-            {
-                ThrowParameterFormatException(rule, $"The {RewriteTags.StopProcessing} parameter '{rule.Attribute(RewriteTags.StopProcessing).Value}' was not recognized");
-            }
+            var stopProcessing = ParseBool(rule, RewriteTags.StopProcessing, defaultValue: false);
 
             var match = rule.Element(RewriteTags.Match);
             if (match == null)
@@ -125,25 +105,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ThrowUrlFormatException(match, "Match must have Url Attribute");
             }
 
-            bool ignoreCase;
-            if (match.Attribute(RewriteTags.IgnoreCase) == null)
-            {
-                ignoreCase = true;
-            }
-            else if (!bool.TryParse(match.Attribute(RewriteTags.IgnoreCase).Value, out ignoreCase))
-            {
-                ThrowParameterFormatException(match, $"The {RewriteTags.IgnoreCase} parameter '{match.Attribute(RewriteTags.IgnoreCase).Value}' was not recognized");
-            }
-
-            bool negate;
-            if(match.Attribute(RewriteTags.Negate) == null)
-            {
-                negate = false;
-            }
-            else if (!bool.TryParse(match.Attribute(RewriteTags.Negate).Value, out negate))
-            {
-                ThrowParameterFormatException(match, $"The {RewriteTags.Negate} parameter '{match.Attribute(RewriteTags.Negate).Value}' was not recognized");
-            }
+            var ignoreCase = ParseBool(match, RewriteTags.IgnoreCase, defaultValue: true);
+            var negate = ParseBool(match, RewriteTags.Negate, defaultValue: false);
             builder.AddUrlMatch(parsedInputString, ignoreCase, negate, patternSyntax);
         }
 
@@ -164,16 +127,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ThrowParameterFormatException(conditions, $"The {RewriteTags.LogicalGrouping} parameter '{conditions.Attribute(RewriteTags.LogicalGrouping).Value}' was not recognized");
             }
 
-            bool trackingAllCaptures;
-            if (conditions.Attribute(RewriteTags.TrackingAllCaptures) == null)
-            {
-                trackingAllCaptures = false;
-            }
-            else if (!bool.TryParse(conditions.Attribute(RewriteTags.TrackingAllCaptures).Value, out trackingAllCaptures))
-            {
-                ThrowParameterFormatException(conditions, $"The {RewriteTags.TrackingAllCaptures} parameter '{conditions.Attribute(RewriteTags.TrackingAllCaptures).Value}' was not recognized");
-            }
-
+            var trackingAllCaptures = ParseBool(conditions, RewriteTags.TrackingAllCaptures, defaultValue: false);
             builder.AddUrlConditions(grouping, trackingAllCaptures);
 
             foreach (var cond in conditions.Elements(RewriteTags.Add))
@@ -184,25 +138,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private void ParseCondition(XElement condition, UrlRewriteRuleBuilder builder, PatternSyntax patternSyntax)
         {
-            bool ignoreCase;
-            if (condition.Attribute(RewriteTags.IgnoreCase) == null)
-            {
-                ignoreCase = true;
-            }
-            else if (!bool.TryParse(condition.Attribute(RewriteTags.IgnoreCase).Value, out ignoreCase))
-            {
-                ThrowParameterFormatException(condition, $"The {RewriteTags.IgnoreCase} parameter '{condition.Attribute(RewriteTags.IgnoreCase).Value}' was not recognized");
-            }
-
-            bool negate;
-            if(condition.Attribute(RewriteTags.Negate) == null)
-            {
-                negate = false;
-            }
-            else if (!bool.TryParse(condition.Attribute(RewriteTags.Negate).Value, out negate))
-            {
-                ThrowParameterFormatException(condition, $"The {RewriteTags.Negate} parameter '{condition.Attribute(RewriteTags.Negate).Value}' was not recognized");
-            }
+            var ignoreCase = ParseBool(condition, RewriteTags.IgnoreCase, defaultValue: true);
+            var negate = ParseBool(condition, RewriteTags.Negate, defaultValue: false);
 
             MatchType matchType;
             if (condition.Attribute(RewriteTags.MatchType) == null)
@@ -244,15 +181,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ThrowParameterFormatException(urlAction, $"The {RewriteTags.Type} parameter '{urlAction.Attribute(RewriteTags.Type).Value}' was not recognized");
             }
 
-            bool appendQuery;
-            if (urlAction.Attribute(RewriteTags.AppendQueryString) == null)
-            {
-                appendQuery = true;
-            }
-            else if (!bool.TryParse(urlAction.Attribute(RewriteTags.AppendQueryString).Value, out appendQuery))
-            {
-                ThrowParameterFormatException(urlAction, $"The {RewriteTags.AppendQueryString} parameter '{urlAction.Attribute(RewriteTags.AppendQueryString).Value}' was not recognized");
-            }
+            var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
 
             RedirectType redirectType;
             if (urlAction.Attribute(RewriteTags.RedirectType) == null)
@@ -307,6 +236,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             var line = lineInfo.LineNumber;
             var col = lineInfo.LinePosition;
             throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col));
+        }
+
+        private bool ParseBool(XElement element, string rewriteTag, bool defaultValue)
+        {
+            bool result;
+            var attribute = element.Attribute(rewriteTag);
+            if (attribute == null)
+            {
+                return defaultValue;
+            }
+            else if (!bool.TryParse(attribute.Value, out result))
+            {
+                ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
+            }
+            return result;
         }
     }
 }
