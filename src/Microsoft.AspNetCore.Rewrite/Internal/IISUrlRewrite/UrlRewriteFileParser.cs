@@ -68,18 +68,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            PatternSyntax patternSyntax;
-            if (rule.Attribute(RewriteTags.PatternSyntax) == null)
-            {
-                patternSyntax = PatternSyntax.ECMAScript;
-            }
-            else if (!Enum.TryParse(rule.Attribute(RewriteTags.PatternSyntax).Value, ignoreCase: true, result: out patternSyntax))
-            {
-                ThrowParameterFormatException(rule, $"The {RewriteTags.PatternSyntax} parameter '{rule.Attribute(RewriteTags.PatternSyntax).Value}' was not recognized");
-            }
-
+            var patternSyntax = ParsePatternSyntaxEnum(rule);
             var stopProcessing = ParseBool(rule, RewriteTags.StopProcessing, defaultValue: false);
-
             var match = rule.Element(RewriteTags.Match);
             if (match == null)
             {
@@ -117,16 +107,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            LogicalGrouping grouping;
-            if (conditions.Attribute(RewriteTags.LogicalGrouping) == null)
-            {
-                grouping = LogicalGrouping.MatchAll;
-            }
-            else if (!Enum.TryParse(conditions.Attribute(RewriteTags.LogicalGrouping).Value, ignoreCase: true, result: out grouping))
-            {
-                ThrowParameterFormatException(conditions, $"The {RewriteTags.LogicalGrouping} parameter '{conditions.Attribute(RewriteTags.LogicalGrouping).Value}' was not recognized");
-            }
-
+            var grouping = ParseLogicalGroupingSyntaxEnum(conditions);
             var trackingAllCaptures = ParseBool(conditions, RewriteTags.TrackingAllCaptures, defaultValue: false);
             builder.AddUrlConditions(grouping, trackingAllCaptures);
 
@@ -140,18 +121,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             var ignoreCase = ParseBool(condition, RewriteTags.IgnoreCase, defaultValue: true);
             var negate = ParseBool(condition, RewriteTags.Negate, defaultValue: false);
-
-            MatchType matchType;
-            if (condition.Attribute(RewriteTags.MatchType) == null)
-            {
-                matchType = MatchType.Pattern;
-            }
-            else if (!Enum.TryParse(condition.Attribute(RewriteTags.MatchType).Value, ignoreCase: true, result: out matchType))
-            {
-                ThrowParameterFormatException(condition, $"The {RewriteTags.MatchType} parameter '{condition.Attribute(RewriteTags.MatchType).Value}' was not recognized");
-            }
-
+            var matchType = ParseMatchTypeSyntaxEnum(condition);
             var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
+
             if (parsedInputString == null)
             {
                 ThrowUrlFormatException(condition, "Conditions must have an input attribute");
@@ -171,27 +143,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
-            ActionType actionType;
-            if (urlAction.Attribute(RewriteTags.Type) == null)
-            {
-                actionType = ActionType.None;
-            }
-            else if (!Enum.TryParse(urlAction.Attribute(RewriteTags.Type).Value, ignoreCase: true, result: out actionType))
-            {
-                ThrowParameterFormatException(urlAction, $"The {RewriteTags.Type} parameter '{urlAction.Attribute(RewriteTags.Type).Value}' was not recognized");
-            }
-
+            var actionType = ParseActionTypeSyntaxEnum(urlAction);
             var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
-
-            RedirectType redirectType;
-            if (urlAction.Attribute(RewriteTags.RedirectType) == null)
-            {
-                redirectType = RedirectType.Permanent;
-            }
-            else if (!Enum.TryParse(urlAction.Attribute(RewriteTags.RedirectType).Value, ignoreCase: true, result: out redirectType))
-            {
-                ThrowParameterFormatException(urlAction, $"The {RewriteTags.RedirectType} parameter '{urlAction.Attribute(RewriteTags.RedirectType).Value}' was not recognized");
-            }
+            var redirectType = ParseRedirectTypeSyntaxEnum(urlAction);
 
             string url = string.Empty;
             if (urlAction.Attribute(RewriteTags.Url) != null)
@@ -251,6 +205,81 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
             }
             return result;
+        }
+
+        private PatternSyntax ParsePatternSyntaxEnum(XElement element)
+        {
+            PatternSyntax patternSyntax;
+            var attribute = element.Attribute(RewriteTags.PatternSyntax);
+            if (attribute == null)
+            {
+                return PatternSyntax.ECMAScript;
+            }
+            else if (!Enum.TryParse(element.Attribute(RewriteTags.PatternSyntax).Value, ignoreCase: true, result: out patternSyntax))
+                {
+                ThrowParameterFormatException(element, $"The {RewriteTags.PatternSyntax} parameter '{attribute.Value}' was not recognized");
+            }
+            return patternSyntax;
+        }
+
+        private LogicalGrouping ParseLogicalGroupingSyntaxEnum(XElement element)
+        {
+            LogicalGrouping logicalGrouping;
+            var attribute = element.Attribute(RewriteTags.LogicalGrouping);
+            if(attribute == null)
+            {
+                return LogicalGrouping.MatchAll;
+            }
+            else if (!Enum.TryParse(element.Attribute(RewriteTags.LogicalGrouping).Value, ignoreCase: true, result: out logicalGrouping))
+            {
+                ThrowParameterFormatException(element, $"The {RewriteTags.LogicalGrouping} parameter '{attribute.Value}' was not recognized");
+            }
+            return logicalGrouping;
+        }
+
+        private MatchType ParseMatchTypeSyntaxEnum(XElement element)
+        {
+            MatchType matchType;
+            var attribute = element.Attribute(RewriteTags.MatchType);
+            if (attribute == null)
+            {
+                return MatchType.Pattern;
+            }
+            else if (!Enum.TryParse(element.Attribute(RewriteTags.MatchType).Value, ignoreCase: true, result: out matchType))
+            {
+                ThrowParameterFormatException(element, $"The {RewriteTags.MatchType} parameter '{attribute.Value}' was not recognized");
+            }
+            return matchType;
+        }
+
+        private ActionType ParseActionTypeSyntaxEnum(XElement element)
+        {
+            ActionType actionType;
+            var attribute = element.Attribute(RewriteTags.Type);
+            if (attribute == null)
+            {
+                return ActionType.None;
+            }
+            else if (!Enum.TryParse(element.Attribute(RewriteTags.Type).Value, ignoreCase: true, result: out actionType))
+            {
+                ThrowParameterFormatException(element, $"The {RewriteTags.Type} parameter '{attribute.Value}' was not recognized");
+            }
+            return actionType;
+        }
+
+        private RedirectType ParseRedirectTypeSyntaxEnum(XElement element)
+        {
+            RedirectType redirectType;
+            var attribute = element.Attribute(RewriteTags.RedirectType);
+            if (attribute == null)
+            {
+                return RedirectType.Permanent;
+            }
+            else if (!Enum.TryParse(element.Attribute(RewriteTags.RedirectType).Value, ignoreCase: true, result: out redirectType))
+            {
+                ThrowParameterFormatException(element, $"The {RewriteTags.RedirectType} parameter '{attribute.Value}' was not recognized");
+            }
+            return redirectType;
         }
     }
 }
