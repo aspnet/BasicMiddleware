@@ -208,19 +208,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return result;
         }
 
-        private T ParseEnum<T>(XElement element, string rewriteTag, T defaultValue)
+        private TEnum ParseEnum<TEnum>(XElement element, string rewriteTag, TEnum defaultValue)
+            where TEnum : struct
         {
-            T enumResult = default(T);
+            TEnum enumResult = default(TEnum);
             var attribute = element.Attribute(rewriteTag);
             if (attribute == null)
             {
                 return defaultValue;
             }
-            try
-            {
-                enumResult = (T)Enum.Parse(typeof(T), attribute.Value, ignoreCase: true);
-            }
-            catch
+            else if(!Enum.TryParse(attribute.Value, ignoreCase: true, result: out enumResult))
             {
                 ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
             }
