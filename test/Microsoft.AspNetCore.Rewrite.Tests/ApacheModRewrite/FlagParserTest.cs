@@ -48,6 +48,17 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.ModRewrite
             Assert.True(DictionaryContentsEqual(expected.FlagDictionary, results.FlagDictionary));
         }
 
+        [Fact]
+        public void FlagParser_CheckDefaultRedirectStatusCode()
+        {
+            var results = new FlagParser().Parse("[R]");
+            var dict = new Dictionary<FlagType, string>();
+            dict.Add(FlagType.Redirect, "302");
+            var expected = new Flags(dict);
+
+            Assert.True(DictionaryContentsEqual(expected.FlagDictionary, results.FlagDictionary));
+        }
+
         [Theory]
         [InlineData("]", "Flags should start and end with square brackets: [flags]")]
         [InlineData("[", "Flags should start and end with square brackets: [flags]")]

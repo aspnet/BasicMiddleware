@@ -75,17 +75,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             var flags = new Flags();
             foreach (var token in tokens)
             {
-                var hasPayload = token.Split('=');
+                var payload = token.Split('=');
 
                 FlagType flag;
-                if (!_ruleFlagLookup.TryGetValue(hasPayload[0], out flag))
+                if (!_ruleFlagLookup.TryGetValue(payload[0], out flag))
                 {
-                    throw new FormatException($"Unrecognized flag: '{hasPayload[0]}'");
+                    throw new FormatException($"Unrecognized flag: '{payload[0]}'");
                 }
 
-                if (hasPayload.Length == 2)
+                if (payload.Length == 2)
                 {
-                    flags.SetFlag(flag, hasPayload[1]);
+                    flags.SetFlag(flag, payload[1]);
+                }
+                else if (string.Equals(payload[0], "R", StringComparison.OrdinalIgnoreCase))
+                {
+                    flags.SetFlag(flag, "302");
                 }
                 else
                 {
