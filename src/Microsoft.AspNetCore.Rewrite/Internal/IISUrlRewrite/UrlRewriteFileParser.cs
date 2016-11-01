@@ -68,8 +68,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            var patternSyntax = ParsePatternSyntaxEnum(rule);
+            var patternSyntax = ParseEnum(rule, RewriteTags.PatternSyntax, PatternSyntax.ECMAScript);
             var stopProcessing = ParseBool(rule, RewriteTags.StopProcessing, defaultValue: false);
+
             var match = rule.Element(RewriteTags.Match);
             if (match == null)
             {
@@ -107,7 +108,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            var grouping = ParseLogicalGroupingSyntaxEnum(conditions);
+            var grouping = ParseEnum(conditions, RewriteTags.LogicalGrouping, LogicalGrouping.MatchAll);
             var trackingAllCaptures = ParseBool(conditions, RewriteTags.TrackingAllCaptures, defaultValue: false);
             builder.AddUrlConditions(grouping, trackingAllCaptures);
 
@@ -121,7 +122,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             var ignoreCase = ParseBool(condition, RewriteTags.IgnoreCase, defaultValue: true);
             var negate = ParseBool(condition, RewriteTags.Negate, defaultValue: false);
-            var matchType = ParseMatchTypeSyntaxEnum(condition);
+            var matchType = ParseEnum(condition, RewriteTags.MatchType, MatchType.Pattern);
             var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
 
             if (parsedInputString == null)
@@ -143,9 +144,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
-            var actionType = ParseActionTypeSyntaxEnum(urlAction);
+            var actionType = ParseEnum(urlAction, RewriteTags.Type, ActionType.None);
+            var redirectType = ParseEnum(urlAction, RewriteTags.RedirectType, RedirectType.Permanent);
             var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
-            var redirectType = ParseRedirectTypeSyntaxEnum(urlAction);
 
             string url = string.Empty;
             if (urlAction.Attribute(RewriteTags.Url) != null)
@@ -207,79 +208,23 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return result;
         }
 
-        private PatternSyntax ParsePatternSyntaxEnum(XElement element)
+        private T ParseEnum<T>(XElement element, string rewriteTag, T defaultValue)
         {
-            PatternSyntax patternSyntax;
-            var attribute = element.Attribute(RewriteTags.PatternSyntax);
+            T enumResult = default(T);
+            var attribute = element.Attribute(rewriteTag);
             if (attribute == null)
             {
-                return PatternSyntax.ECMAScript;
+                return defaultValue;
             }
-            else if (!Enum.TryParse(element.Attribute(RewriteTags.PatternSyntax).Value, ignoreCase: true, result: out patternSyntax))
-                {
-                ThrowParameterFormatException(element, $"The {RewriteTags.PatternSyntax} parameter '{attribute.Value}' was not recognized");
-            }
-            return patternSyntax;
-        }
-
-        private LogicalGrouping ParseLogicalGroupingSyntaxEnum(XElement element)
-        {
-            LogicalGrouping logicalGrouping;
-            var attribute = element.Attribute(RewriteTags.LogicalGrouping);
-            if(attribute == null)
+            try
             {
-                return LogicalGrouping.MatchAll;
+                enumResult = (T)Enum.Parse(typeof(T), attribute.Value, ignoreCase: true);
             }
-            else if (!Enum.TryParse(element.Attribute(RewriteTags.LogicalGrouping).Value, ignoreCase: true, result: out logicalGrouping))
+            catch
             {
-                ThrowParameterFormatException(element, $"The {RewriteTags.LogicalGrouping} parameter '{attribute.Value}' was not recognized");
+                ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
             }
-            return logicalGrouping;
-        }
-
-        private MatchType ParseMatchTypeSyntaxEnum(XElement element)
-        {
-            MatchType matchType;
-            var attribute = element.Attribute(RewriteTags.MatchType);
-            if (attribute == null)
-            {
-                return MatchType.Pattern;
-            }
-            else if (!Enum.TryParse(element.Attribute(RewriteTags.MatchType).Value, ignoreCase: true, result: out matchType))
-            {
-                ThrowParameterFormatException(element, $"The {RewriteTags.MatchType} parameter '{attribute.Value}' was not recognized");
-            }
-            return matchType;
-        }
-
-        private ActionType ParseActionTypeSyntaxEnum(XElement element)
-        {
-            ActionType actionType;
-            var attribute = element.Attribute(RewriteTags.Type);
-            if (attribute == null)
-            {
-                return ActionType.None;
-            }
-            else if (!Enum.TryParse(element.Attribute(RewriteTags.Type).Value, ignoreCase: true, result: out actionType))
-            {
-                ThrowParameterFormatException(element, $"The {RewriteTags.Type} parameter '{attribute.Value}' was not recognized");
-            }
-            return actionType;
-        }
-
-        private RedirectType ParseRedirectTypeSyntaxEnum(XElement element)
-        {
-            RedirectType redirectType;
-            var attribute = element.Attribute(RewriteTags.RedirectType);
-            if (attribute == null)
-            {
-                return RedirectType.Permanent;
-            }
-            else if (!Enum.TryParse(element.Attribute(RewriteTags.RedirectType).Value, ignoreCase: true, result: out redirectType))
-            {
-                ThrowParameterFormatException(element, $"The {RewriteTags.RedirectType} parameter '{attribute.Value}' was not recognized");
-            }
-            return redirectType;
+            return enumResult;
         }
     }
 }
