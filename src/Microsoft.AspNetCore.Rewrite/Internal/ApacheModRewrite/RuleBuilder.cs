@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 using Microsoft.AspNetCore.Http;
+using System.Globalization;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
@@ -202,13 +203,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 if (flags.GetValue(FlagType.Redirect, out statusCode))
                 {
                     int res;
-                    if (!int.TryParse(statusCode, out res))
+                    if (string.IsNullOrEmpty(statusCode))
                     {
-                        if (!string.IsNullOrEmpty(statusCode))
-                        {
-                            throw new FormatException(Resources.FormatError_InputParserInvalidInteger(statusCode, -1));
-                        }
                         res = StatusCodes.Status302Found;
+                    }
+                    else if (!int.TryParse(statusCode,NumberStyles.None, CultureInfo.InvariantCulture, out res))
+                    {
+                        throw new FormatException(Resources.FormatError_InputParserInvalidInteger(statusCode, -1));
                     }
                     _actions.Add(new RedirectAction(res, pattern, queryStringAppend, queryStringDelete, escapeBackReference));
                 }
