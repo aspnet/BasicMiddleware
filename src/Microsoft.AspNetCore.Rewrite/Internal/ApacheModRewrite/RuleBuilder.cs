@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
     public class RuleBuilder
     {
         private IList<Condition> _conditions;
-        private IList<UrlAction> _actions = new List<UrlAction>();
+        internal IList<UrlAction> _actions = new List<UrlAction>();
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
@@ -203,7 +204,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                     int res;
                     if (!int.TryParse(statusCode, out res))
                     {
-                        throw new FormatException(Resources.FormatError_InputParserInvalidInteger(statusCode, -1));
+                        if (!string.IsNullOrEmpty(statusCode))
+                        {
+                            throw new FormatException(Resources.FormatError_InputParserInvalidInteger(statusCode, -1));
+                        }
+                        res = StatusCodes.Status302Found;
                     }
                     _actions.Add(new RedirectAction(res, pattern, queryStringAppend, queryStringDelete, escapeBackReference));
                 }
