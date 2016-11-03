@@ -38,51 +38,51 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "HTTP_FORWARDED":
                     return new HeaderSegment("Forwarded");
                 case "AUTH_TYPE":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("AUTH_TYPE"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "CONN_REMOTE_ADDR":
                     return new RemoteAddressSegment();
                 case "CONTEXT_PREFIX":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("CONTEXT_PREFIX"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "CONTEXT_DOCUMENT_ROOT":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("CONTEXT_DOCUMENT_ROOT"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "IPV6":
                     return new IsIPV6Segment();
                 case "PATH_INFO":
-                    throw new NotImplementedException(Resources.FormatError_UnsupportedServerVariable("PATH_INFO"));
+                    throw new NotImplementedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "QUERY_STRING":
                     return new QueryStringSegment();
                 case "REMOTE_ADDR":
                     return new RemoteAddressSegment();
                 case "REMOTE_HOST":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_HOST"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REMOTE_IDENT":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_IDENT"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REMOTE_PORT":
                     return new RemotePortSegment();
                 case "REMOTE_USER":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_USER"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REQUEST_METHOD":
                     return new RequestMethodSegment();
                 case "SCRIPT_FILENAME":
                     return new RequestFileNameSegment();
                 case "DOCUMENT_ROOT":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("DOCUMENT_ROOT"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "SCRIPT_GROUP":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SCRIPT_GROUP"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "SCRIPT_USER":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SCRIPT_USER"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "SERVER_ADDR":
                     return new LocalAddressSegment();
                 case "SERVER_ADMIN":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_ADMIN"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "SERVER_NAME":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_NAME"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "SERVER_PORT":
                     return new LocalPortSegment();
                 case "SERVER_PROTOCOL":
                     return new ServerProtocolSegment();
                 case "SERVER_SOFTWARE":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_SOFTWARE"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "TIME_YEAR":
                     return new DateTimeSegment(serverVariable);
                 case "TIME_MON":
@@ -100,13 +100,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "TIME":
                     return new DateTimeSegment(serverVariable);
                 case "API_VERSION":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("API_VERSION"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "HTTPS":
                     return new IsHttpsModSegment();
                 case "HTTP2":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("HTTP2"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "IS_SUBREQ":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("IS_SUBREQ"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REQUEST_FILENAME":
                     return new RequestFileNameSegment();
                 case "REQUEST_SCHEME":
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "REQUEST_URI":
                     return new UrlSegment();
                 case "THE_REQUEST":
-                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("THE_REQUEST"));
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
