@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
-using Microsoft.AspNetCore.Http;
-using System.Globalization;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
@@ -202,16 +202,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 string statusCode;
                 if (flags.GetValue(FlagType.Redirect, out statusCode))
                 {
-                    int res;
+                    int responseStatusCode;
                     if (string.IsNullOrEmpty(statusCode))
                     {
-                        res = StatusCodes.Status302Found;
+                        responseStatusCode = StatusCodes.Status302Found;
                     }
-                    else if (!int.TryParse(statusCode,NumberStyles.None, CultureInfo.InvariantCulture, out res))
+                    else if (!int.TryParse(statusCode, NumberStyles.None, CultureInfo.InvariantCulture, out responseStatusCode))
                     {
                         throw new FormatException(Resources.FormatError_InputParserInvalidInteger(statusCode, -1));
                     }
-                    _actions.Add(new RedirectAction(res, pattern, queryStringAppend, queryStringDelete, escapeBackReference));
+                    _actions.Add(new RedirectAction(responseStatusCode, pattern, queryStringAppend, queryStringDelete, escapeBackReference));
                 }
                 else
                 {
