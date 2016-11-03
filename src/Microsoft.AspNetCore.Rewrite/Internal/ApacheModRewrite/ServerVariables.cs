@@ -38,51 +38,51 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "HTTP_FORWARDED":
                     return new HeaderSegment("Forwarded");
                 case "AUTH_TYPE":
-                    throw new NotSupportedException("Rules using the AUTH_TYPE server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("AUTH_TYPE"));
                 case "CONN_REMOTE_ADDR":
                     return new RemoteAddressSegment();
                 case "CONTEXT_PREFIX":
-                    throw new NotSupportedException("Rules using the CONTEXT_PREFIX server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("CONTEXT_PREFIX"));
                 case "CONTEXT_DOCUMENT_ROOT":
-                    throw new NotSupportedException("Rules using the CONTEXT_DOCUMENT_ROOT server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("CONTEXT_DOCUMENT_ROOT"));
                 case "IPV6":
                     return new IsIPV6Segment();
                 case "PATH_INFO":
-                    throw new NotImplementedException("Rules using the PATH_INFO server variable are not implemented");
+                    throw new NotImplementedException(Resources.FormatError_UnsupportedServerVariable("PATH_INFO"));
                 case "QUERY_STRING":
                     return new QueryStringSegment();
                 case "REMOTE_ADDR":
                     return new RemoteAddressSegment();
                 case "REMOTE_HOST":
-                    throw new NotSupportedException("Rules using the REMOTE_HOST server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_HOST"));
                 case "REMOTE_IDENT":
-                    throw new NotSupportedException("Rules using the REMOTE_IDENT server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_IDENT"));
                 case "REMOTE_PORT":
                     return new RemotePortSegment();
                 case "REMOTE_USER":
-                    throw new NotSupportedException("Rules using the REMOTE_USER server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("REMOTE_USER"));
                 case "REQUEST_METHOD":
                     return new RequestMethodSegment();
                 case "SCRIPT_FILENAME":
                     return new RequestFileNameSegment();
                 case "DOCUMENT_ROOT":
-                    throw new NotSupportedException("Rules using the DOCUMENT_ROOT server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("DOCUMENT_ROOT"));
                 case "SCRIPT_GROUP":
-                    throw new NotSupportedException("Rules using the SCRIPT_GROUP server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SCRIPT_GROUP"));
                 case "SCRIPT_USER":
-                    throw new NotSupportedException("Rules using the SCRIPT_USER server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SCRIPT_USER"));
                 case "SERVER_ADDR":
                     return new LocalAddressSegment();
                 case "SERVER_ADMIN":
-                    throw new NotSupportedException("Rules using the SERVER_ADMIN server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_ADMIN"));
                 case "SERVER_NAME":
-                    throw new NotSupportedException("Rules using the SERVER_NAME server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_NAME"));
                 case "SERVER_PORT":
                     return new LocalPortSegment();
                 case "SERVER_PROTOCOL":
                     return new ServerProtocolSegment();
                 case "SERVER_SOFTWARE":
-                    throw new NotSupportedException("Rules using the SERVER_SOFTWARE server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("SERVER_SOFTWARE"));
                 case "TIME_YEAR":
                     return new DateTimeSegment(serverVariable);
                 case "TIME_MON":
@@ -100,13 +100,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "TIME":
                     return new DateTimeSegment(serverVariable);
                 case "API_VERSION":
-                    throw new NotSupportedException("Rules using the API_VERSION server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("API_VERSION"));
                 case "HTTPS":
                     return new IsHttpsModSegment();
                 case "HTTP2":
-                    throw new NotSupportedException("Rules using the HTTP2 server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("HTTP2"));
                 case "IS_SUBREQ":
-                    throw new NotSupportedException("Rules using the IS_SUBREQ server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("IS_SUBREQ"));
                 case "REQUEST_FILENAME":
                     return new RequestFileNameSegment();
                 case "REQUEST_SCHEME":
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case "REQUEST_URI":
                     return new UrlSegment();
                 case "THE_REQUEST":
-                    throw new NotSupportedException("Rules using the THE_REQUEST server variable are not supported");
+                    throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable("THE_REQUEST"));
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
