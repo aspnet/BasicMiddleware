@@ -128,6 +128,37 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             AssertUrlRewriteRuleEquality(expected, res);
         }
 
+        [Fact]
+        public void Should_parse_global_rules()
+        {
+            // arrange
+            var xml = @"<rewrite>
+                            <globalRules>
+                                <rule name=""httpsOnly"" patternSyntax=""ECMAScript"" stopProcessing=""true"">
+                                    <match url="".*"" />
+                                    <conditions logicalGrouping=""MatchAll"" trackAllCaptures=""false"">
+                                        <add input=""{HTTPS}"" pattern=""off"" />
+                                    </conditions>
+                                    <action type=""Redirect"" url=""https://{HTTP_HOST}{REQUEST_URI}"" />
+                                </rule>
+                            </globalRules>
+                            <rules>
+                                <rule name=""Rewrite to article.aspx"">
+                                    <match url = ""^article/([0-9]+)/([_0-9a-z-]+)"" />
+                                    <action type=""Rewrite"" url =""article.aspx?id={R:1}&amp;title={R:2}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+
+            // act
+            var rules = new UrlRewriteFileParser().Parse(new StringReader(xml));
+
+            // assert
+            Assert.Equal(2, rules.Count);
+            Assert.True(rules[0].Global);
+            Assert.False(rules[1].Global);
+        }
+
         // Creates a rule with appropriate default values of the url rewrite rule.
         private IISUrlRewriteRule CreateTestRule(List<Condition> conditions,
             LogicalGrouping condGrouping = LogicalGrouping.MatchAll,
