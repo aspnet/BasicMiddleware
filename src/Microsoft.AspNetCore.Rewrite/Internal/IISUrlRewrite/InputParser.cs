@@ -12,6 +12,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char Colon = ':';
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
+        private readonly IDictionary<string, IISRewriteMap> _rewriteMaps;
+
+        public InputParser(IDictionary<string, IISRewriteMap> rewriteMaps = null)
+        {
+            _rewriteMaps = rewriteMaps;
+        }
 
         /// <summary>
         /// Creates a pattern, which is a template to create a new test string to
@@ -30,7 +36,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return ParseString(context);
         }
 
-        private static Pattern ParseString(ParserContext context)
+        private Pattern ParseString(ParserContext context)
         {
             var results = new List<PatternSegment>();
             while (context.Next())
@@ -59,7 +65,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new Pattern(results);
         }
 
-        private static void ParseParameter(ParserContext context, IList<PatternSegment> results)
+        private void ParseParameter(ParserContext context, IList<PatternSegment> results)
         {
             context.Mark();
             // Four main cases:
@@ -127,6 +133,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                 return;
                             }
                         default:
+                            IISRewriteMap rewriteMap;
+                            if (_rewriteMaps != null && _rewriteMaps.TryGetValue(parameter, out rewriteMap))
+                            {
+                                Pattern pattern = ParseString(context);
+                                results.Add(new RewriteMapSegment(rewriteMap, pattern));
+                                return;
+                            }
                             throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(parameter, context.Index));
                     }
                 }
