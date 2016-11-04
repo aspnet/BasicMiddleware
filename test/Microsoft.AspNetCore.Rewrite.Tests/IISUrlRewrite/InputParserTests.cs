@@ -2,10 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.PatternSegments;
+using Microsoft.Extensions.Logging.Testing;
+
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
@@ -88,11 +93,48 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Throws<FormatException>(() => new InputParser().ParseInputString(testString));
         }
 
+        [Fact]
+        public void Should_throw_FormatException_if_no_rewrite_maps_are_defined()
+        {
+            Assert.Throws<FormatException>(() => new InputParser(null).ParseInputString("{apiMap:{R:1}}"));
+        }
+
+        [Fact]
+        public void Should_throw_FormatException_if_rewrite_map_not_found()
+        {
+            const string definedMapName = "testMap";
+            const string undefinedMapName = "apiMap";
+            var map = new IISRewriteMap(definedMapName);
+            var maps = new Dictionary<string, IISRewriteMap> { { map.Name, map } };
+            Assert.Throws<FormatException>(() => new InputParser(maps).ParseInputString($"{{{undefinedMapName}:{{R:1}}}}"));
+        }
+
+        [Fact]
+        public void Should_parse_RewriteMapSegment_and_successfully_evaluate_result()
+        {
+            const string expectedMapName = "apiMap";
+            const string expectedKey = "api.test.com";
+            const string expectedValue = "test.com/api";
+            var map = new IISRewriteMap(expectedMapName);
+            map.AddOrUpdateEntry(expectedKey, expectedValue);
+            var maps = new Dictionary<string, IISRewriteMap> { { map.Name, map } };
+
+            string inputString = $"{{{expectedMapName}:{{R:1}}}}";
+            Pattern pattern = new InputParser(maps).ParseInputString(inputString);
+            Assert.Equal(1, pattern.PatternSegments.Count);
+
+            PatternSegment segment = pattern.PatternSegments.Single();
+            var rewriteMapSegment = segment as RewriteMapSegment;
+            Assert.NotNull(rewriteMapSegment);
+
+            var result = rewriteMapSegment.Evaluate(CreateTestRewriteContext(), CreateRewriteMapRuleMatch(expectedKey), CreateRewriteMapConditionMatch(inputString));
+            Assert.Equal(expectedValue, result);
+        }
+
         private RewriteContext CreateTestRewriteContext()
         {
-
             var context = new DefaultHttpContext();
-            return new RewriteContext { HttpContext = context, StaticFileProvider = null };
+            return new RewriteContext { HttpContext = context, StaticFileProvider = null, Logger = new NullLogger() };
         }
 
         private MatchResults CreateTestRuleMatch()
@@ -104,6 +146,18 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         private MatchResults CreateTestCondMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
+            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+        }
+
+        private MatchResults CreateRewriteMapRuleMatch(string input)
+        {
+            var match = Regex.Match(input, "([^/]*)/?(.*)");
+            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+        }
+
+        private MatchResults CreateRewriteMapConditionMatch(string input)
+        {
+            var match = Regex.Match(input, "(.+)");
             return new MatchResults { BackReference = match.Groups, Success = match.Success };
         }
     }

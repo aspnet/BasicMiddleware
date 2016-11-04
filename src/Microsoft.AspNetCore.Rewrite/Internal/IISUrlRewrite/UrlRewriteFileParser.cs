@@ -21,7 +21,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             if (xmlRoot != null)
             {
-                _inputParser = new InputParser(ParseRewriteMaps(xmlRoot));
+                var rewriteMapParser = new RewriteMapParser();
+                _inputParser = new InputParser(rewriteMapParser.Parse(xmlRoot));
 
                 var result = new List<IISUrlRewriteRule>();
                 // TODO Global rules are currently not treated differently than normal rules, fix.
@@ -31,28 +32,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return result;
             }
             return null;
-        }
-
-        private IDictionary<string, IISRewriteMap> ParseRewriteMaps(XElement xmlRoot)
-        {
-            var mapsElement = xmlRoot.Descendants(RewriteTags.RewriteMaps).SingleOrDefault();
-            if (mapsElement == null)
-            {
-                return null;
-            }
-
-            var rewriteMaps = new Dictionary<string, IISRewriteMap>();
-            foreach (XElement mapElement in mapsElement.Elements(RewriteTags.RewriteMap))
-            {
-                var map = new IISRewriteMap(mapElement.Attribute(RewriteTags.Name)?.Value);
-                foreach (XElement addElement in mapElement.Elements(RewriteTags.Add))
-                {
-                    map.AddOrUpdateEntry(addElement.Attribute(RewriteTags.Key)?.Value, addElement.Attribute(RewriteTags.Value)?.Value);
-                }
-                rewriteMaps.Add(map.Name, map);
-            }
-
-            return rewriteMaps;
         }
 
         private void ParseRules(XElement rules, IList<IISUrlRewriteRule> result)
