@@ -13,16 +13,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public UrlMatch InitialMatch { get; }
         public IList<Condition> Conditions { get; }
         public UrlAction Action { get; }
+        public bool Global { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
             IList<Condition> conditions,
-            UrlAction action)
+            UrlAction action,
+            bool? global = null)
         {
             Name = name;
             InitialMatch = initialMatch;
             Conditions = conditions;
             Action = action;
+            Global = global ?? false;
         }
 
         public virtual void ApplyRule(RewriteContext context)

@@ -22,25 +22,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             if (xmlRoot != null)
             {
                 var result = new List<IISUrlRewriteRule>();
-                // TODO Global rules are currently not treated differently than normal rules, fix.
-                // See: https://github.com/aspnet/BasicMiddleware/issues/59
-                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result);
-                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result);
+                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result, true);
+                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result, false);
                 return result;
             }
             return null;
         }
 
-        private void ParseRules(XElement rules, IList<IISUrlRewriteRule> result)
+        private void ParseRules(XElement rules, IList<IISUrlRewriteRule> result, bool global)
         {
             if (rules == null)
             {
                 return;
-            }
-
-            if (string.Equals(rules.Name.ToString(), "GlobalRules", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new NotSupportedException("Support for global rules has not been implemented yet");
             }
 
             foreach (var rule in rules.Elements(RewriteTags.Rule))
@@ -50,7 +43,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
                 if (builder.Enabled)
                 {
-                    result.Add(builder.Build());
+                    result.Add(builder.Build(global));
                 }
             }
         }
