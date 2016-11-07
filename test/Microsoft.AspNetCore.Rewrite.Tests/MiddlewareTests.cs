@@ -65,6 +65,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
             var response = await server.CreateClient().GetAsync(new Uri("http://example.com"));
 
             Assert.Equal("https://example.com/", response.Headers.Location.OriginalString);
+            Assert.Equal(StatusCodes.Status301MovedPermanently, (int)response.StatusCode);
         }
 
 
