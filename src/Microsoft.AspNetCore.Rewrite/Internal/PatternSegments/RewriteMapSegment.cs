@@ -1,7 +1,4 @@
-﻿using System;
-
-using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 {
@@ -18,15 +15,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 
         public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            string key = _pattern.Evaluate(context, ruleMatch, condMatch);
+            var key = _pattern.Evaluate(context, ruleMatch, condMatch);
             string value;
-            if (_rewriteMap.TryGetEntry(key, out value))
-            {
-                return value;
-            }
-            var exception = new Exception($"Rewrite map entry not found: '{key}'");
-            context.Logger.LogError(context.HttpContext.TraceIdentifier, exception);
-            throw exception;
+            return _rewriteMap.TryGetEntry(key, out value) ? value : null;
         }
     }
 }
