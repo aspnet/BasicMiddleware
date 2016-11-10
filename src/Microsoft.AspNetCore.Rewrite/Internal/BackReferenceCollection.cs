@@ -30,12 +30,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     backReferences.Add(currentBackReference[i].Value);
                 }
             }
-            else
+            else if (!string.IsNullOrEmpty(matchResults.ExactBackReference))
             {
-                if (!string.IsNullOrEmpty(matchResults.ExactBackReference))
-                {
-                    backReferences.Add(matchResults.ExactBackReference);
-                }
+                backReferences.Add(matchResults.ExactBackReference);
             }
         }
 

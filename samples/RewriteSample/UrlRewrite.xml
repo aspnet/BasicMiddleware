@@ -2,9 +2,8 @@
   <rules>
     <rule name="Rewrite 20 to 10" stopProcessing="true">
       <match url="^app$" />
-      <conditions trackAllCaptures="true">
-        <add input="{QUERY_STRING}" pattern="p1=([0-9]+)" />
-        <add input="{QUERY_STRING}" pattern="p2=([a-z]+)" />
+      <conditions>
+        <add input="{QUERY_STRING}" pattern="id=20" />
       </conditions>
       <action type="Rewrite" url="app?id=10" appendQueryString="false"/>
     </rule>
