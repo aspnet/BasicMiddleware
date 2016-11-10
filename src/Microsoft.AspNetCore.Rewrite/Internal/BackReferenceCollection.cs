@@ -20,29 +20,30 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             return backReferences[index];
         }
 
-        public void AddStringBackReference(string reference)
+        public void AddBackReferences(MatchResults matchResults)
         {
-            backReferences.Add(reference);
-        }
-
-        public void AddEnumerableBackReferences(IEnumerator references)
-        {
-            do
+            var currentBackReference = matchResults.BackReference;
+            if (currentBackReference != null )
             {
-                backReferences.Add((string)references.Current);
-            } while (references.MoveNext());
+                for ( var i = 0; i < currentBackReference.Count; i++)
+                {
+                    backReferences.Add(currentBackReference[i].Value);
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(matchResults.ExactBackReference))
+                {
+                    backReferences.Add(matchResults.ExactBackReference);
+                }
+            }
         }
 
-        public void ReplaceAllBackreferences(IEnumerator references)
+        public void ReplaceAllBackreferences(MatchResults matchResults)
         {
             backReferences.Clear();
-            AddEnumerableBackReferences(references);
+            AddBackReferences(matchResults);
         }
 
-        public void ReplaceAllBackreferences(string references)
-        {
-            backReferences.Clear();
-            AddStringBackReference(references);
-        }
     }
 }

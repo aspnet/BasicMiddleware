@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
     public static class ConditionHelper
     {
 
-        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, MatchResults ruleMatch)
+        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferenceCollection = null)
         {
             MatchResults prevCond = null;
             var orSucceeded = false;
@@ -25,6 +25,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 }
 
                 prevCond = condition.Evaluate(context, ruleMatch, prevCond);
+                if (backReferenceCollection != null)
+                {
+                    if (condition.TrackAllCaptures)
+                    {
+                        backReferenceCollection.AddBackReferences(prevCond);
+                    }
+                    else
+                    {
+                        backReferenceCollection.ReplaceAllBackreferences(prevCond);
+                    }
+                }
+
+                prevCond.BackReferences = backReferenceCollection;
 
                 if (condition.OrNext)
                 {

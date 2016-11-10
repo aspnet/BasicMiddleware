@@ -31,7 +31,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
         private static MatchResults CreateTestMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return new MatchResults {BackReference = match.Groups, Success = match.Success};
+            BackReferenceCollection brc = new BackReferenceCollection();
+            var matchresult = new MatchResults { BackReference = match.Groups};
+            brc.AddBackReferences(matchresult);
+            return new MatchResults {BackReferences = brc, Success = match.Success};
         }
     }
 }

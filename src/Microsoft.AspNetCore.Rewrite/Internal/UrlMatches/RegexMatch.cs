@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlMatches
     {
         private readonly Regex _match;
 
-        public RegexMatch(Regex match, bool negate)
+        public RegexMatch(Regex match, bool negate, bool trackAllCaptures = false)
         {
             _match = match;
             Negate = negate;

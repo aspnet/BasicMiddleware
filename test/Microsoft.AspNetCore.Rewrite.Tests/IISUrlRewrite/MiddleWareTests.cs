@@ -366,5 +366,33 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             Assert.Equal("/hey/hello/", response.Headers.Location.OriginalString); ;
         }
+
+
+        public async Task VerifyTrackAllCaptures(string matchType)
+        {
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Test"">
+                <match url = ""(.*)"" ignoreCase=""false"" />
+                <conditions trackAllCaptures = ""true"" >
+                <add input = ""{REQUEST_URI}"" pattern = ""^/([a-zA-Z]+)/([0-9]+)$"" />
+                < add input = ""{QUERY_STRING}"" pattern = ""p2=([a-z]+)"" />
+                </ conditions >
+                < action type = ""Redirect"" url = ""article.aspx/{C:3}"" />
+                < !--rewrite action uses back - references to both conditions-- >
+                </rule>
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("article/23?p1=123&p2=abc");
+
+            Assert.Equal("article.aspx/p2=abc", response.Headers.Location.OriginalString); ;
+        }
     }
 }

@@ -49,7 +49,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             MatchResults condMatchRes = null;
             if (Conditions != null)
             {
-                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchResults);
+                BackReferenceCollection backReferenceCollection = new BackReferenceCollection();
+                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchResults, backReferenceCollection);
                 if (!condMatchRes.Success)
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);
