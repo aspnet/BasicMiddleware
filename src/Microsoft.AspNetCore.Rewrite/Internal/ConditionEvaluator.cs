@@ -27,14 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 prevCond = condition.Evaluate(context, ruleMatch, prevCond);
                 if (backReferenceCollection != null)
                 {
-                    if (condition.TrackAllCaptures)
-                    {
-                        backReferenceCollection.AddBackReferences(prevCond);
-                    }
-                    else
-                    {
-                        backReferenceCollection.ReplaceAllBackreferences(prevCond);
-                    }
+                    backReferenceCollection.AddBackReferences(prevCond, condition.TrackAllCaptures);
                 }
 
                 prevCond.BackReferences = backReferenceCollection;

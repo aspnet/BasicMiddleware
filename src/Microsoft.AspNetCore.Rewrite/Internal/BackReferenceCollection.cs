@@ -8,24 +8,24 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public class BackReferenceCollection
     {
-        private List<string> backReferences;
-
-        public BackReferenceCollection()
-        {
-            backReferences = new List<string>();
-        }
+        private List<string> backReferences = new List<string>();
 
         public string GetBackReferenceAtIndex(int index)
         {
             return backReferences[index];
         }
 
-        public void AddBackReferences(MatchResults matchResults)
+        public void AddBackReferences(MatchResults matchResults, bool trackAllCaptures = false)
         {
-            var currentBackReference = matchResults.BackReference;
-            if (currentBackReference != null )
+            if (!trackAllCaptures)
             {
-                for ( var i = 0; i < currentBackReference.Count; i++)
+                backReferences.Clear();
+            }
+
+            var currentBackReference = matchResults.BackReference;
+            if (currentBackReference != null)
+            {
+                for (var i = 0; i < currentBackReference.Count; i++)
                 {
                     backReferences.Add(currentBackReference[i].Value);
                 }
@@ -35,12 +35,5 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 backReferences.Add(matchResults.ExactBackReference);
             }
         }
-
-        public void ReplaceAllBackreferences(MatchResults matchResults)
-        {
-            backReferences.Clear();
-            AddBackReferences(matchResults);
-        }
-
     }
 }

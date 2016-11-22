@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 
         public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            if ( condMatch.BackReferences != null)
+            if (condMatch.BackReferences != null)
             {
                 //Url Rewrite
                 return condMatch.BackReferences.GetBackReferenceAtIndex(_index);
@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
             else
             {
                 // For mod_rewrite
-                return condMatch?.BackReference[_index].Value;
+                return condMatch.BackReference[_index].Value;
             }
         }
     }
