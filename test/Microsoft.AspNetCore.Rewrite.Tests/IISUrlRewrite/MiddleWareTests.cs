@@ -364,7 +364,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             var response = await server.CreateClient().GetAsync("hey/hello");
 
-            Assert.Equal("/hey/hello/", response.Headers.Location.OriginalString); ;
+            Assert.Equal("/hey/hello/", response.Headers.Location.OriginalString);
         }
 
         [Fact]
@@ -391,7 +391,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var server = new TestServer(builder);
 
             var response = await server.CreateClient().GetAsync("article/23?p1=123&p2=abc");
-             Assert.Equal("/blogposts/article/abc", response.Headers.Location.OriginalString); ;
+
+            Assert.Equal("/blogposts/article/abc", response.Headers.Location.OriginalString);
         }
 
         [Fact]
@@ -418,7 +419,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var server = new TestServer(builder);
 
             var response = await server.CreateClient().GetAsync("article/23?p1=123&p2=abc");
-            Assert.Equal("/blog/article/23/abc", response.Headers.Location.OriginalString); ;
+
+            Assert.Equal("/blog/article/23/abc", response.Headers.Location.OriginalString);
         }
     }
 }
