@@ -13,16 +13,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public UrlMatch InitialMatch { get; }
         public IList<Condition> Conditions { get; }
         public UrlAction Action { get; }
+        public bool TrackAllCaptures { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
             IList<Condition> conditions,
-            UrlAction action)
+            UrlAction action,
+            bool trackAllCaptures)
         {
             Name = name;
             InitialMatch = initialMatch;
             Conditions = conditions;
             Action = action;
+            TrackAllCaptures = trackAllCaptures;
         }
 
         public virtual void ApplyRule(RewriteContext context)
@@ -49,7 +52,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             MatchResults condMatchRes = null;
             if (Conditions != null)
             {
-                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchResults);
+                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchResults, TrackAllCaptures);
                 if (!condMatchRes.Success)
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);

@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 
         public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return ruleMatch?.BackReference[_index].Value;
+            return ruleMatch?.BackReferences?[_index];
         }
     }
 }

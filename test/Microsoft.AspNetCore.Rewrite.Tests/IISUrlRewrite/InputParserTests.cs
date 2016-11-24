@@ -98,13 +98,13 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         private MatchResults CreateTestRuleMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new MatchResults { BackReferences = new BackReferenceCollection(match.Groups), Success = match.Success };
         }
 
         private MatchResults CreateTestCondMatch()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new MatchResults { BackReferences = new BackReferenceCollection(match.Groups), Success = match.Success };
         }
     }
 }
