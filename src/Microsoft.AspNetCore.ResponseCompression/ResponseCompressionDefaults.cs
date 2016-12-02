@@ -18,15 +18,22 @@ namespace Microsoft.AspNetCore.ResponseCompression
         {
             // General
             "text/plain",
-            // Static files
             "text/css",
             "application/javascript",
-            // MVC
             "text/html",
             "application/xml",
             "text/xml",
+            "application/rss+xml",
+            "application/atom+xml",
             "application/json",
-            "text/json",
+            "text/json"
+            // Images
+            "image/svg+xml",
+            "image/x-icon",
+            // Fonts
+            "application/vnd.ms-fontobject",
+            "application/x-font-ttf",
+            "font/otf"
         };
     }
 }
