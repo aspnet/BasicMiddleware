@@ -9,8 +9,8 @@
 				"target": "project",
 				"version": "1.0.0-*"
 			},
-    "Microsoft.AspNetCore.TestHost": "1.2.0-*",
-    "Microsoft.Extensions.Logging.Testing": "1.2.0-*",
+    "Microsoft.AspNetCore.TestHost": "1.1.0-*",
+    "Microsoft.Extensions.Logging.Testing": "1.1.0-*",
     "xunit": "2.2.0-*"
   },
   "frameworks": {
