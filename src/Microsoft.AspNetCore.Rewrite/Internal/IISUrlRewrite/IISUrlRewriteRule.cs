@@ -64,19 +64,25 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             foreach (ServerVariable serverVariable in ServerVariables)
             {
+                var name = serverVariable.Name;
+                var value = serverVariable.Evaluate(context, initMatchResults, condMatchRes);
+
                 IHeaderDictionary headerDictionary;
                 switch (serverVariable.Type)
                 {
                     case ServerVariableType.Request:
                         headerDictionary = context.HttpContext.Request.Headers;
+                        context.Logger?.RequestHeaderAdded(name, value);
                         break;
                     case ServerVariableType.Response:
                         headerDictionary = context.HttpContext.Response.Headers;
+                        context.Logger?.ResponseHeaderAdded(name, value);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                headerDictionary.Append(serverVariable.Name, serverVariable.Evaluate(context, initMatchResults, condMatchRes));
+
+                headerDictionary.Append(name, value);
             }
 
             context.Logger?.UrlRewriteMatchedRule(Name);
