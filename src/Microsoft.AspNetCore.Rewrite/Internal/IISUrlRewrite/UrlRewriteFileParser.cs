@@ -21,8 +21,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             if (xmlRoot != null)
             {
-                var rewriteMapParser = new RewriteMapParser();
-                _inputParser = new InputParser(rewriteMapParser.Parse(xmlRoot));
+                _inputParser = new InputParser(RewriteMapParser.Parse(xmlRoot));
 
                 var result = new List<IISUrlRewriteRule>();
                 // TODO Global rules are currently not treated differently than normal rules, fix.

@@ -1,13 +1,19 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
-    public class RewriteMapParser
+    public static class RewriteMapParser
     {
-        public IDictionary<string, IISRewriteMap> Parse(XElement xmlRoot)
+        public static IDictionary<string, IISRewriteMap> Parse(XElement xmlRoot)
         {
+            if (xmlRoot == null)
+            {
+                throw new ArgumentException(nameof(xmlRoot));
+            }
+
             var mapsElement = xmlRoot.Descendants(RewriteTags.RewriteMaps).SingleOrDefault();
             if (mapsElement == null)
             {

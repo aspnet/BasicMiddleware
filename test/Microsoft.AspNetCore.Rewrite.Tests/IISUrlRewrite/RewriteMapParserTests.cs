@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
             const string expectedMapName = "apiMap";
             const string expectedKey = "api.test.com";
             const string expectedValue = "test.com/api";
-            string xml = $@"<rewrite>
+            var xml = $@"<rewrite>
                                 <rewriteMaps>
                                     <rewriteMap name=""{expectedMapName}"">
                                         <add key=""{expectedKey}"" value=""{expectedValue}"" />
@@ -27,9 +27,9 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
                             </rewrite>";
 
             // act
-            XDocument xmlDoc = XDocument.Load(new StringReader(xml), LoadOptions.SetLineInfo);
-            XElement xmlRoot = xmlDoc.Descendants(RewriteTags.Rewrite).FirstOrDefault();
-            IDictionary<string, IISRewriteMap> actualMaps = new RewriteMapParser().Parse(xmlRoot);
+            var xmlDoc = XDocument.Load(new StringReader(xml), LoadOptions.SetLineInfo);
+            var xmlRoot = xmlDoc.Descendants(RewriteTags.Rewrite).FirstOrDefault();
+            var actualMaps = RewriteMapParser.Parse(xmlRoot);
 
             // assert
             Assert.Equal(1, actualMaps.Count);
