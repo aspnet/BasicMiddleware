@@ -64,18 +64,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             foreach (ServerVariable serverVariable in ServerVariables)
             {
-                if (serverVariable.Name.StartsWith(ServerVariableConstants.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+                IHeaderDictionary headerDictionary;
+                switch (serverVariable.Type)
                 {
-                    context.HttpContext.Request.Headers.Append(
-                        serverVariable.Name.Substring(ServerVariableConstants.RequestHeaderPrefix.Length).Replace('_', '-'),
-                        serverVariable.Evaluate(context, initMatchResults, condMatchRes));
+                    case ServerVariableType.Request:
+                        headerDictionary = context.HttpContext.Request.Headers;
+                        break;
+                    case ServerVariableType.Response:
+                        headerDictionary = context.HttpContext.Response.Headers;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                else if (serverVariable.Name.StartsWith(ServerVariableConstants.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    context.HttpContext.Response.Headers.Append(
-                        serverVariable.Name.Substring(ServerVariableConstants.ResponseHeaderPrefix.Length).Replace('_', '-'),
-                        serverVariable.Evaluate(context, initMatchResults, condMatchRes));
-                }
+                headerDictionary.Append(serverVariable.Name, serverVariable.Evaluate(context, initMatchResults, condMatchRes));
             }
 
             context.Logger?.UrlRewriteMatchedRule(Name);

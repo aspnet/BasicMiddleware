@@ -151,9 +151,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
         }
 
-        public void AddOrUpdateServerVariable(string name, Pattern pattern)
+        public void AddOrUpdateServerVariable(string name, Pattern pattern, ServerVariableType type)
         {
-            _serverVariables[name] = new ServerVariable(name, pattern);
+            _serverVariables[name] = new ServerVariable(name, pattern, type);
         }
     }
 }
