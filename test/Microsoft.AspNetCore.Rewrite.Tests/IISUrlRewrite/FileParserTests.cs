@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite;
@@ -147,7 +148,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             )
         {
             return new IISUrlRewriteRule(name, new RegexMatch(new Regex("^OFF$"), false), conditions,
-                new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url), queryStringAppend: false));
+                Enumerable.Empty<ServerVariable>(), new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url), queryStringAppend: false));
         }
 
         // TODO make rules comparable?

@@ -26,9 +26,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public const string RedirectType = "redirectType";
         public const string Rule = "rule";
         public const string Rules = "rules";
+        public const string ServerVariables = "serverVariables";
+        public const string Set = "set";
         public const string StopProcessing = "stopProcessing";
         public const string TrackAllCaptures = "trackAllCaptures";
         public const string Type = "type";
         public const string Url = "url";
+        public const string Value = "value";
     }
 }

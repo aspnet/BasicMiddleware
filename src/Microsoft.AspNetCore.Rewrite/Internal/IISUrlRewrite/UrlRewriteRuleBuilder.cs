@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private UrlMatch _initialMatch;
         private IList<Condition> _conditions;
+        private readonly IList<ServerVariable> _serverVariables = new List<ServerVariable>();
         private UrlAction _action;
         private bool _matchAny;
 
@@ -29,7 +30,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 throw new InvalidOperationException("Cannot create UrlRewriteRule without action and match");
             }
 
-            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action);
+            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _serverVariables, _action);
         }
 
         public void AddUrlAction(
@@ -87,13 +88,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate)
         {
-            // If there are no conditions specified
-            if (_conditions == null)
-            {
-                AddUrlConditions(LogicalGrouping.MatchAll, trackAllCaptures: false);
-            }
+			// If there are no conditions specified
+			if (_conditions == null)
+			{
+				AddUrlConditions(LogicalGrouping.MatchAll, trackAllCaptures: false);
+			}
 
-            switch (patternSyntax)
+			switch (patternSyntax)
             {
                 case PatternSyntax.ECMAScript:
                     {
@@ -148,6 +149,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             _conditions = new List<Condition>();
             _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
+        }
+
+        public void AddServerVariable(string name, Pattern pattern)
+        {
+            _serverVariables.Add(new ServerVariable(name, pattern));
         }
     }
 }

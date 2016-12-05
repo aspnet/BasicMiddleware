@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
@@ -9,19 +11,25 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class IISUrlRewriteRule : IRule
     {
+        private const string RequestHeaderPrefix = "HTTP_";
+        private const string ResponseHeaderPrefix = "RESPONSE_";
+
         public string Name { get; }
         public UrlMatch InitialMatch { get; }
         public IList<Condition> Conditions { get; }
+        public IEnumerable<ServerVariable> ServerVariables { get; }
         public UrlAction Action { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
             IList<Condition> conditions,
+            IEnumerable<ServerVariable> serverVariables,
             UrlAction action)
         {
             Name = name;
             InitialMatch = initialMatch;
             Conditions = conditions;
+            ServerVariables = serverVariables;
             Action = action;
         }
 
@@ -54,6 +62,22 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);
                     return;
+                }
+            }
+
+            foreach (ServerVariable serverVariable in ServerVariables)
+            {
+                if (serverVariable.Name.StartsWith(RequestHeaderPrefix, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    context.HttpContext.Request.Headers.Add(
+                        serverVariable.Name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'),
+                        serverVariable.Evaluate(context, initMatchResults, condMatchRes));
+                }
+                else if (serverVariable.Name.StartsWith(ResponseHeaderPrefix, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    context.HttpContext.Response.Headers.Add(
+                        serverVariable.Name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'),
+                        serverVariable.Evaluate(context, initMatchResults, condMatchRes));
                 }
             }
 

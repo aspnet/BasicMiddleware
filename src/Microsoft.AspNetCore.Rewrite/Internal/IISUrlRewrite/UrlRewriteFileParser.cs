@@ -85,6 +85,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             ParseMatch(match, builder, patternSyntax);
             ParseConditions(rule.Element(RewriteTags.Conditions), builder, patternSyntax);
+            ParseServerVariables(rule.Element(RewriteTags.ServerVariables), builder);
             ParseUrlAction(action, builder, stopProcessing);
         }
 
@@ -139,6 +140,33 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             catch (FormatException formatException)
             {
                 ThrowUrlFormatException(condition, formatException.Message, formatException);
+            }
+        }
+
+        private void ParseServerVariables(XElement serverVariables, UrlRewriteRuleBuilder builder)
+        {
+            if (serverVariables == null)
+            {
+                return;
+            }
+
+            foreach (var serverVariable in serverVariables.Elements(RewriteTags.Set))
+            {
+                ParseServerVariable(serverVariable, builder);
+            }
+        }
+
+        private void ParseServerVariable(XElement serverVariable, UrlRewriteRuleBuilder builder)
+        {
+            try
+            {
+                builder.AddServerVariable(
+                    serverVariable.Attribute(RewriteTags.Name).Value,
+                    _inputParser.ParseInputString(serverVariable.Attribute(RewriteTags.Value).Value));
+            }
+            catch (FormatException formatException)
+            {
+                ThrowUrlFormatException(serverVariable, formatException.Message, formatException);
             }
         }
 
