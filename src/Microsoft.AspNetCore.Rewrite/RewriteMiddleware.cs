@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite.Extensions;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.Rewrite.Logging;
 using Microsoft.Extensions.FileProviders;
@@ -75,25 +76,13 @@ namespace Microsoft.AspNetCore.Rewrite
 
             foreach (var rule in _options.Rules)
             {
-                rule.ApplyRule(rewriteContext);
-                var currentUrl = new Lazy<string>(() =>
+                var iisRule = rule as IISUrlRewriteRule;
+                if (iisRule != null)
                 {
-                    if ((rule as IISUrlRewriteRule)?.Global == true)
-                    {
-                        var uriBuilder = new UriBuilder(context.Request.Scheme, context.Request.Host.Host);
-                        if (context.Request.Host.Port.HasValue)
-                        {
-                            uriBuilder.Port = context.Request.Host.Port.Value;
-                        }
-                        uriBuilder.Path = context.Request.Path;
-                        if (context.Request.QueryString.HasValue)
-                        {
-                            uriBuilder.Query = context.Request.QueryString.Value;
-                        }
-                        return uriBuilder.Uri.AbsoluteUri;
-                    }
-                    return context.Request.Path + context.Request.QueryString;
-                });
+                    rewriteContext.GlobalRule = iisRule.Global;
+                }
+                rule.ApplyRule(rewriteContext);
+                var currentUrl = new Lazy<string>(() => context.Request.ToUri().AbsoluteUri);
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:

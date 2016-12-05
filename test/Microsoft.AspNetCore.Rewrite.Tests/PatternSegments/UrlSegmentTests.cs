@@ -9,18 +9,30 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
 {
     public class UrlSegmentTests
     {
-        [Fact]
-        public void LocalPortSegment_AssertSegmentIsCorrect()
+        [Theory]
+        [InlineData(false, "http", "localhost", 80, "/foo/bar", "/foo/bar")]
+        [InlineData(true, "http", "localhost", 80, "", "http://localhost/")]
+        [InlineData(true, "http", "localhost", 80, "/foo/bar", "http://localhost/foo/bar")]
+        [InlineData(true, "http", "localhost", 81, "/foo/bar", "http://localhost:81/foo/bar")]
+        [InlineData(true, "https", "localhost", 443, "/foo/bar", "https://localhost/foo/bar")]
+        public void AssertSegmentIsCorrect(bool globalRule, string scheme, string host, int port, string path, string expectedResult)
         {
             // Arrange
-            var segement = new UrlSegment();
-            var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
-            context.HttpContext.Request.Path = new PathString("/foo/bar");
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Scheme = scheme;
+            httpContext.Request.Host = new HostString(host, port);
+            httpContext.Request.Path = new PathString(path);
+
+            var context = new RewriteContext { HttpContext = httpContext, GlobalRule = globalRule };
+            context.HttpContext = httpContext;
+
+            var segment = new UrlSegment();
+
             // Act
-            var results = segement.Evaluate(context, null, null);
+            var results = segment.Evaluate(context, null, null);
 
             // Assert
-            Assert.Equal("/foo/bar", results);
+            Assert.Equal(expectedResult, results);
         }
     }
 }

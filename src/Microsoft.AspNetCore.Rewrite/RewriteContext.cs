@@ -34,6 +34,11 @@ namespace Microsoft.AspNetCore.Rewrite
         /// </summary>
         public RuleResult Result { get; set; }
 
+        /// <summary>
+        /// Represents whether or not the rule is a global rule
+        /// </summary>
+        public bool GlobalRule { get; set; }
+
         internal StringBuilder Builder { get; set; } = new StringBuilder(64);
     }
 }
