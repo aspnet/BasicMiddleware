@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Rewrite.Extensions
             {
                 uriBuilder.Port = request.Host.Port.Value;
             }
-            uriBuilder.Path = request.Path;
+            uriBuilder.Path = request.PathBase + request.Path;
             if (request.QueryString.HasValue)
             {
                 uriBuilder.Query = request.QueryString.Value.Substring(1);

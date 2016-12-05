@@ -11,9 +11,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class IISUrlRewriteRule : IRule
     {
-        private const string RequestHeaderPrefix = "HTTP_";
-        private const string ResponseHeaderPrefix = "RESPONSE_";
-
         public string Name { get; }
         public UrlMatch InitialMatch { get; }
         public IList<Condition> Conditions { get; }
@@ -67,16 +64,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             foreach (ServerVariable serverVariable in ServerVariables)
             {
-                if (serverVariable.Name.StartsWith(RequestHeaderPrefix, StringComparison.CurrentCultureIgnoreCase))
+                if (serverVariable.Name.StartsWith(ServerVariableConstants.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    context.HttpContext.Request.Headers.Add(
-                        serverVariable.Name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'),
+                    context.HttpContext.Request.Headers.Append(
+                        serverVariable.Name.Substring(ServerVariableConstants.RequestHeaderPrefix.Length).Replace('_', '-'),
                         serverVariable.Evaluate(context, initMatchResults, condMatchRes));
                 }
-                else if (serverVariable.Name.StartsWith(ResponseHeaderPrefix, StringComparison.CurrentCultureIgnoreCase))
+                else if (serverVariable.Name.StartsWith(ServerVariableConstants.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    context.HttpContext.Response.Headers.Add(
-                        serverVariable.Name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'),
+                    context.HttpContext.Response.Headers.Append(
+                        serverVariable.Name.Substring(ServerVariableConstants.ResponseHeaderPrefix.Length).Replace('_', '-'),
                         serverVariable.Evaluate(context, initMatchResults, condMatchRes));
                 }
             }

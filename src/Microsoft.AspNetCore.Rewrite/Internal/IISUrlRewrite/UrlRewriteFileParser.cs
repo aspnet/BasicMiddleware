@@ -160,9 +160,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             try
             {
-                builder.AddServerVariable(
-                    serverVariable.Attribute(RewriteTags.Name).Value,
-                    _inputParser.ParseInputString(serverVariable.Attribute(RewriteTags.Value).Value));
+                var name = serverVariable.Attribute(RewriteTags.Name).Value;
+                if (!name.StartsWith(ServerVariableConstants.RequestHeaderPrefix) || !name.StartsWith(ServerVariableConstants.ResponseHeaderPrefix))
+                {
+                    throw new NotSupportedException($"Custom server variables must start with '{ServerVariableConstants.RequestHeaderPrefix}' or '{ServerVariableConstants.ResponseHeaderPrefix}'");
+                }
+                builder.AddServerVariable(name, _inputParser.ParseInputString(serverVariable.Attribute(RewriteTags.Value).Value));
             }
             catch (FormatException formatException)
             {
