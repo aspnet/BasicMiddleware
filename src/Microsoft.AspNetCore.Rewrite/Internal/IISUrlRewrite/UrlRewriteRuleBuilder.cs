@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private UrlMatch _initialMatch;
         private IList<Condition> _conditions;
-        private readonly IList<ServerVariable> _serverVariables = new List<ServerVariable>();
+        private readonly IDictionary<string, ServerVariable> _serverVariables = new Dictionary<string, ServerVariable>();
         private UrlAction _action;
         private bool _matchAny;
 
@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 throw new InvalidOperationException("Cannot create UrlRewriteRule without action and match");
             }
 
-            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _serverVariables, _action);
+            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _serverVariables.Values, _action);
         }
 
         public void AddUrlAction(
@@ -151,9 +151,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
         }
 
-        public void AddServerVariable(string name, Pattern pattern)
+        public void AddOrUpdateServerVariable(string name, Pattern pattern)
         {
-            _serverVariables.Add(new ServerVariable(name, pattern));
+            _serverVariables[name] = new ServerVariable(name, pattern);
         }
     }
 }
