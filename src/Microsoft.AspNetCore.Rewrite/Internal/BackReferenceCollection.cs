@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             get
             {
-                if(index < _backReferences.Count)
+                if (index < _backReferences.Count)
                 {
                     return _backReferences[index];
                 }
