@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -8,7 +9,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public class BackReferenceCollection
     {
-        private List<string> backReferences = new List<string>();
+        private List<string> _backReferences = new List<string>();
 
         public BackReferenceCollection(GroupCollection references)
         {
@@ -16,27 +17,36 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             {
                 for (var i = 0; i < references.Count; i++)
                 {
-                    backReferences.Add(references[i].Value);
+                    _backReferences.Add(references[i].Value);
                 }
             }
         }
 
         public BackReferenceCollection(string reference)
         {
-            backReferences.Add(reference);
+            _backReferences.Add(reference);
         }
 
         public string this[int index]
         {
-            // TODO: index out of range error handling?
-            get { return backReferences[index]; }
+            get
+            {
+                if(index < _backReferences.Count)
+                {
+                    return _backReferences[index];
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException($"Cannot access back reference at index {index}. Only {_backReferences.Count} back references were captured.");
+                }
+            }
         }
 
         public void Add(BackReferenceCollection references)
         {
             if (references != null)
             {
-                backReferences.AddRange(references.backReferences);
+                _backReferences.AddRange(references._backReferences);
             }
         }
     }
