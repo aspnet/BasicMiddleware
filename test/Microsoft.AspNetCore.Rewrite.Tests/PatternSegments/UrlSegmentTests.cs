@@ -11,10 +11,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
     {
         [Theory]
         [InlineData(false, "http", "localhost", 80, "/foo/bar", "/foo/bar")]
-        [InlineData(true, "http", "localhost", 80, "", "http://localhost/")]
-        [InlineData(true, "http", "localhost", 80, "/foo/bar", "http://localhost/foo/bar")]
+        [InlineData(true, "http", "localhost", 80, "", "http://localhost:80/")]
+        [InlineData(true, "http", "localhost", 80, "/foo/bar", "http://localhost:80/foo/bar")]
         [InlineData(true, "http", "localhost", 81, "/foo/bar", "http://localhost:81/foo/bar")]
-        [InlineData(true, "https", "localhost", 443, "/foo/bar", "https://localhost/foo/bar")]
+        [InlineData(true, "https", "localhost", 443, "/foo/bar", "https://localhost:443/foo/bar")]
         public void AssertSegmentIsCorrect(bool globalRule, string scheme, string host, int port, string path, string expectedResult)
         {
             // Arrange
