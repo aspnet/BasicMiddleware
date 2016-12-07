@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.Rewrite
                     rewriteContext.GlobalRule = iisRule.Global;
                 }
                 rule.ApplyRule(rewriteContext);
-                var currentUrl = new Lazy<string>(() => context.Request.ToUri().AbsoluteUri);
+                var currentUrl = new Lazy<string>(() => context.Request.ToAbsoluteUri());
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:

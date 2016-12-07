@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
     {
         public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return context.GlobalRule ? context.HttpContext.Request.ToUri().AbsoluteUri : (string)context.HttpContext.Request.Path;
+            return context.GlobalRule ? context.HttpContext.Request.ToAbsoluteUri() : (string)context.HttpContext.Request.Path;
         }
     }
 }
