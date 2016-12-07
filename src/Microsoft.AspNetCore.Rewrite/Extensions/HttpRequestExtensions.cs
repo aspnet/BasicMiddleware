@@ -1,24 +1,21 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Microsoft.AspNetCore.Rewrite.Extensions
 {
     public static class HttpRequestExtensions
     {
-        public static Uri ToUri(this HttpRequest request)
+        public static string ToAbsoluteUri(this HttpRequest request)
         {
-            var uriBuilder = new UriBuilder(request.Scheme, request.Host.Host);
-            if (request.Host.Port.HasValue)
-            {
-                uriBuilder.Port = request.Host.Port.Value;
-            }
-            uriBuilder.Path = request.PathBase + request.Path;
-            if (request.QueryString.HasValue)
-            {
-                uriBuilder.Query = request.QueryString.Value.Substring(1);
-            }
-            return uriBuilder.Uri;
+            return UriHelper.BuildAbsolute(
+                request.Scheme,
+                request.Host,
+                request.PathBase,
+                request.Path,
+                request.QueryString);
         }
     }
 }

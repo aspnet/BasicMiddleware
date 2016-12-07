@@ -540,7 +540,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToUri().AbsoluteUri));
+                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetAsync("/article/10/hey");
@@ -570,7 +570,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToUri().AbsoluteUri));
+                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
                 });
             var server = new TestServer(builder);
             const string requestPath = "article/10/hey";
@@ -604,7 +604,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToUri().AbsoluteUri));
+                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
                 });
             var server = new TestServer(builder);
             var tenantId = Guid.NewGuid();
@@ -636,7 +636,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToUri().AbsoluteUri));
+                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetAsync("article/10/hey");

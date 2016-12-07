@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
@@ -62,27 +61,30 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 }
             }
 
-            foreach (ServerVariable serverVariable in ServerVariables)
+            if (ServerVariables != null)
             {
-                var name = serverVariable.Name;
-                var value = serverVariable.Evaluate(context, initMatchResults, condMatchRes);
-
-                IHeaderDictionary headerDictionary;
-                switch (serverVariable.Type)
+                foreach (ServerVariable serverVariable in ServerVariables)
                 {
-                    case ServerVariableType.Request:
-                        headerDictionary = context.HttpContext.Request.Headers;
-                        context.Logger?.RequestHeaderAdded(name, value);
-                        break;
-                    case ServerVariableType.Response:
-                        headerDictionary = context.HttpContext.Response.Headers;
-                        context.Logger?.ResponseHeaderAdded(name, value);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    var name = serverVariable.Name;
+                    var value = serverVariable.Evaluate(context, initMatchResults, condMatchRes);
 
-                headerDictionary.Append(name, value);
+                    IHeaderDictionary headerDictionary;
+                    switch (serverVariable.Type)
+                    {
+                        case ServerVariableType.Request:
+                            headerDictionary = context.HttpContext.Request.Headers;
+                            context.Logger?.RequestHeaderAdded(name, value);
+                            break;
+                        case ServerVariableType.Response:
+                            headerDictionary = context.HttpContext.Response.Headers;
+                            context.Logger?.ResponseHeaderAdded(name, value);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException($"Unexpected server variable: `{serverVariable.Type}`");
+                    }
+
+                    headerDictionary.Append(name, value);
+                }
             }
 
             context.Logger?.UrlRewriteMatchedRule(Name);
