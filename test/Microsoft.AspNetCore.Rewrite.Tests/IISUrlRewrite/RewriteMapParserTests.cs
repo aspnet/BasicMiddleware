@@ -38,10 +38,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
             Assert.True(actualMaps.TryGetValue(expectedMapName, out actualMap));
             Assert.NotNull(actualMap);
             Assert.Equal(expectedMapName, actualMap.Name);
-
-            string actualValue;
-            Assert.True(actualMap.TryGetEntry(expectedKey, out actualValue));
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Equal(expectedValue, actualMap[expectedKey]);
         }
     }
 }

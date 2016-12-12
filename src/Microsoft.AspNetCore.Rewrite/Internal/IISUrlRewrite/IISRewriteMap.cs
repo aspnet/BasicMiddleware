@@ -30,9 +30,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             _map[key] = value;
         }
 
-        public bool TryGetEntry(string key, out string value)
+        public string this[string key]
         {
-            return _map.TryGetValue(key, out value);
+            get
+            {
+                string value;
+                return _map.TryGetValue(key, out value) ? value : null;
+            }
         }
     }
 }
