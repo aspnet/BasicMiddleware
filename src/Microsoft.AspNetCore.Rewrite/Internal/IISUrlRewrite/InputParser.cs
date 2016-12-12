@@ -14,7 +14,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char CloseBrace = '}';
         private readonly IDictionary<string, IISRewriteMap> _rewriteMaps;
 
-        public InputParser(IDictionary<string, IISRewriteMap> rewriteMaps = null)
+        public InputParser()
+        {
+        }
+
+        public InputParser(IDictionary<string, IISRewriteMap> rewriteMaps)
         {
             _rewriteMaps = rewriteMaps;
         }
