@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Rewrite.Extensions;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Primitives;
@@ -540,7 +540,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetAsync("/article/10/hey");
@@ -570,7 +570,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
                 });
             var server = new TestServer(builder);
             const string requestPath = "article/10/hey";
@@ -604,7 +604,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
                 });
             var server = new TestServer(builder);
             var tenantId = Guid.NewGuid();
@@ -636,7 +636,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 .Configure(app =>
                 {
                     app.UseRewriter(options);
-                    app.Run(context => context.Response.WriteAsync(context.Request.ToAbsoluteUri()));
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetAsync("article/10/hey");
