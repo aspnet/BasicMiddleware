@@ -164,19 +164,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 ServerVariableType type;
                 var name = serverVariable.Attribute(RewriteTags.Name).Value;
 
-                if (name.StartsWith(ServerVariableConstants.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+                if (name.StartsWith(ServerVariables.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    prefix = ServerVariableConstants.RequestHeaderPrefix;
+                    prefix = ServerVariables.RequestHeaderPrefix;
                     type = ServerVariableType.RequestHeader;
                 }
-                else if (name.StartsWith(ServerVariableConstants.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+                else if (name.StartsWith(ServerVariables.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    prefix = ServerVariableConstants.ResponseHeaderPrefix;
+                    prefix = ServerVariables.ResponseHeaderPrefix;
                     type = ServerVariableType.ResponseHeader;
                 }
                 else
                 {
-                    throw new NotSupportedException($"Custom server variables must start with '{ServerVariableConstants.RequestHeaderPrefix}' or '{ServerVariableConstants.ResponseHeaderPrefix}'");
+                    throw new NotSupportedException($"Custom server variables must start with '{ServerVariables.RequestHeaderPrefix}' or '{ServerVariables.ResponseHeaderPrefix}'");
                 }
 
                 builder.AddOrUpdateServerVariable(

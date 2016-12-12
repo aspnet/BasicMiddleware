@@ -9,6 +9,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class ServerVariables
     {
+        public const string RequestHeaderPrefix = "HTTP_";
+        public const string ResponseHeaderPrefix = "RESPONSE_";
+
         public static PatternSegment FindServerVariable(string serverVariable, ParserContext context)
         {
             switch (serverVariable)
