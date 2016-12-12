@@ -71,11 +71,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     IHeaderDictionary headerDictionary;
                     switch (serverVariable.Type)
                     {
-                        case ServerVariableType.Request:
+                        case ServerVariableType.RequestHeader:
                             headerDictionary = context.HttpContext.Request.Headers;
                             context.Logger?.RequestHeaderAdded(name, value);
                             break;
-                        case ServerVariableType.Response:
+                        case ServerVariableType.ResponseHeader:
                             headerDictionary = context.HttpContext.Response.Headers;
                             context.Logger?.ResponseHeaderAdded(name, value);
                             break;

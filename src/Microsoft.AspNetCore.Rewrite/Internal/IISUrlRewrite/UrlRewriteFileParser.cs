@@ -167,12 +167,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 if (name.StartsWith(ServerVariableConstants.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     prefix = ServerVariableConstants.RequestHeaderPrefix;
-                    type = ServerVariableType.Request;
+                    type = ServerVariableType.RequestHeader;
                 }
                 else if (name.StartsWith(ServerVariableConstants.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     prefix = ServerVariableConstants.ResponseHeaderPrefix;
-                    type = ServerVariableType.Response;
+                    type = ServerVariableType.ResponseHeader;
                 }
                 else
                 {
