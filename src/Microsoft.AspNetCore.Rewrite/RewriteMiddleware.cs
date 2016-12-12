@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Rewrite.Extensions;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.Rewrite.Logging;
 using Microsoft.Extensions.FileProviders;
@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.Rewrite
                     rewriteContext.GlobalRule = iisRule.Global;
                 }
                 rule.ApplyRule(rewriteContext);
-                var currentUrl = new Lazy<string>(() => context.Request.ToAbsoluteUri());
+                var currentUrl = new Lazy<string>(() => context.Request.GetEncodedUrl());
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:
