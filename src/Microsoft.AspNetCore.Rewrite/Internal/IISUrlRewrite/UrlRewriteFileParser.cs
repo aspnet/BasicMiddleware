@@ -179,7 +179,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     throw new NotSupportedException($"Custom server variables must start with '{ServerVariables.RequestHeaderPrefix}' or '{ServerVariables.ResponseHeaderPrefix}'");
                 }
 
-                builder.AddOrUpdateServerVariable(
+                builder.SetServerVariable(
                     name.Substring(prefix.Length).Replace('_', '-'),
                     _inputParser.ParseInputString(serverVariable.Attribute(RewriteTags.Value).Value),
                     type);
