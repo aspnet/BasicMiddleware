@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             const string expectedKey = "api.test.com";
             const string expectedValue = "test.com/api";
             var map = new IISRewriteMap(expectedMapName);
-            map.AddOrUpdateEntry(expectedKey, expectedValue);
+            map.SetEntry(expectedKey, expectedValue);
             var maps = new Dictionary<string, IISRewriteMap> { { map.Name, map } };
 
             string inputString = $"{{{expectedMapName}:{{R:1}}}}";

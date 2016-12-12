@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Name = name;
         }
 
-        public void AddOrUpdateEntry(string key, string value)
+        public void SetEntry(string key, string value)
         {
             if (string.IsNullOrEmpty(key))
             {
