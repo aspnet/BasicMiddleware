@@ -6,7 +6,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
     public class IISRewriteMap
     {
         private readonly Dictionary<string, string> _map = new Dictionary<string, string>();
-        public string Name { get; }
 
         public IISRewriteMap(string name)
         {
@@ -17,18 +16,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Name = name;
         }
 
-        public void SetEntry(string key, string value)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException(nameof(key));
-            }
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentException(nameof(value));
-            }
-            _map[key] = value;
-        }
+        public string Name { get; }
 
         public string this[string key]
         {
@@ -36,6 +24,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 string value;
                 return _map.TryGetValue(key, out value) ? value : null;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new ArgumentException(nameof(key));
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException(nameof(value));
+                }
+                _map[key] = value;
             }
         }
     }
