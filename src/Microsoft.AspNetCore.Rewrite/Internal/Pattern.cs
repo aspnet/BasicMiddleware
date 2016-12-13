@@ -8,6 +8,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
     public class Pattern
     {
         public IList<PatternSegment> PatternSegments { get; }
+
+        public Pattern(PatternSegment patternSegment)
+        {
+            PatternSegments = new[] { patternSegment };
+        }
+
         public Pattern(IList<PatternSegment> patternSegments)
         {
             PatternSegments = patternSegments;

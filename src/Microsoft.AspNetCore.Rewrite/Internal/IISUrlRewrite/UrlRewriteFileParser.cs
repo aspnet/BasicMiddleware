@@ -160,29 +160,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             try
             {
-                string prefix;
-                ServerVariableType type;
-                var name = serverVariable.Attribute(RewriteTags.Name).Value;
-
-                if (name.StartsWith(ServerVariables.RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    prefix = ServerVariables.RequestHeaderPrefix;
-                    type = ServerVariableType.RequestHeader;
-                }
-                else if (name.StartsWith(ServerVariables.ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    prefix = ServerVariables.ResponseHeaderPrefix;
-                    type = ServerVariableType.ResponseHeader;
-                }
-                else
-                {
-                    throw new NotSupportedException($"Custom server variables must start with '{ServerVariables.RequestHeaderPrefix}' or '{ServerVariables.ResponseHeaderPrefix}'");
-                }
-
                 builder.SetServerVariable(
-                    name.Substring(prefix.Length).Replace('_', '-'),
-                    _inputParser.ParseInputString(serverVariable.Attribute(RewriteTags.Value).Value),
-                    type);
+                    ServerVariables.ParseCustomServerVariable(
+                        serverVariable.Attribute(RewriteTags.Name).Value,
+                        serverVariable.Attribute(RewriteTags.Value).Value));
             }
             catch (FormatException formatException)
             {

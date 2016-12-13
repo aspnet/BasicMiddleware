@@ -9,11 +9,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class ServerVariables
     {
+        private static readonly InputParser _inputParser = new InputParser();
+
         public const string RequestHeaderPrefix = "HTTP_";
         public const string ResponseHeaderPrefix = "RESPONSE_";
 
-        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context)
+        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context)
         {
+            PatternSegment patternSegment;
+
             switch (serverVariable)
             {
                 // TODO Add all server variables here.
@@ -22,44 +26,75 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 case "APP_POOL_ID":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "CONTENT_LENGTH":
-                    return new HeaderSegment(HeaderNames.ContentLength);
+                    patternSegment = new HeaderSegment(HeaderNames.ContentLength);
+                    break;
                 case "CONTENT_TYPE":
-                    return new HeaderSegment(HeaderNames.ContentType);
+                    patternSegment = new HeaderSegment(HeaderNames.ContentType);
+                    break;
                 case "HTTP_ACCEPT":
-                    return new HeaderSegment(HeaderNames.Accept);
+                    patternSegment = new HeaderSegment(HeaderNames.Accept);
+                    break;
                 case "HTTP_COOKIE":
-                    return new HeaderSegment(HeaderNames.Cookie);
+                    patternSegment = new HeaderSegment(HeaderNames.Cookie);
+                    break;
                 case "HTTP_HOST":
-                    return new HeaderSegment(HeaderNames.Host);
+                    patternSegment = new HeaderSegment(HeaderNames.Host);
+                    break;
                 case "HTTP_REFERER":
-                    return new HeaderSegment(HeaderNames.Referer);
+                    patternSegment = new HeaderSegment(HeaderNames.Referer);
+                    break;
                 case "HTTP_USER_AGENT":
-                    return new HeaderSegment(HeaderNames.UserAgent);
+                    patternSegment = new HeaderSegment(HeaderNames.UserAgent);
+                    break;
                 case "HTTP_CONNECTION":
-                    return new HeaderSegment(HeaderNames.Connection);
+                    patternSegment = new HeaderSegment(HeaderNames.Connection);
+                    break;
                 case "HTTP_URL":
-                    return new UrlSegment();
+                    patternSegment = new UrlSegment();
+                    break;
                 case "HTTPS":
-                    return new IsHttpsUrlSegment();
+                    patternSegment = new IsHttpsUrlSegment();
+                    break;
                 case "LOCAL_ADDR":
-                    return new LocalAddressSegment();
+                    patternSegment = new LocalAddressSegment();
+                    break;
                 case "HTTP_PROXY_CONNECTION":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "QUERY_STRING":
-                    return new QueryStringSegment();
+                    patternSegment = new QueryStringSegment();
+                    break;
                 case "REMOTE_ADDR":
-                    return new RemoteAddressSegment();
+                    patternSegment = new RemoteAddressSegment();
+                    break;
                 case "REMOTE_HOST":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REMOTE_PORT":
-                    return new RemotePortSegment();
+                    patternSegment = new RemotePortSegment();
+                    break;
                 case "REQUEST_FILENAME":
-                    return new RequestFileNameSegment();
+                    patternSegment = new RequestFileNameSegment();
+                    break;
                 case "REQUEST_URI":
-                    return new UrlSegment();
+                    patternSegment = new UrlSegment();
+                    break;
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
+
+            return new ServerVariable(serverVariable, new Pattern(patternSegment), ServerVariableType.RequestHeader);
+        }
+
+        public static ServerVariable ParseCustomServerVariable(string name, string value)
+        {
+            if (name.StartsWith(RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), _inputParser.ParseInputString(value), ServerVariableType.RequestHeader);
+            }
+            if (name.StartsWith(ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), _inputParser.ParseInputString(value), ServerVariableType.ResponseHeader);
+            }
+            throw new NotSupportedException($"Custom server variables must start with '{RequestHeaderPrefix}' or '{ResponseHeaderPrefix}'");
         }
     }
 }
