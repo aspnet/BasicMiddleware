@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -391,22 +392,23 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
+                    app.Use((context, next) =>
+                    {
+                        // TestServer doesn't set RemoteIpAddress so do it inline
+                        context.Connection.RemoteIpAddress = IPAddress.Loopback;
+                        return next();
+                    });
                     app.UseRewriter(options);
                     app.Run(context =>
                     {
-                        /*
-                            client will not see added inbound request headers
-                            need to assert header existence by returning the header value as the response string
-                            specifically in this scenario, REMOTE_ADDR is not set by the test framework, so we assert the existence of the header rather than its value
-                        */
                         StringValues values;
-                        var headerExists = context.Response.HttpContext.Request.Headers.TryGetValue("Custom-ClientIpAddress", out values);
-                        return context.Response.WriteAsync(headerExists.ToString());
+                        context.Response.HttpContext.Request.Headers.TryGetValue("Custom-ClientIpAddress", out values);
+                        return context.Response.WriteAsync(values);
                     });
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetStringAsync("/article/10/hey");
-            Assert.True(Boolean.Parse(response));
+            Assert.Equal(IPAddress.Loopback, IPAddress.Parse(response));
         }
 
         [Fact]
@@ -539,15 +541,20 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
+                    app.Use((context, next) =>
+                    {
+                        // TestServer doesn't set RemoteIpAddress so do it inline
+                        context.Connection.RemoteIpAddress = IPAddress.Loopback;
+                        return next();
+                    });
                     app.UseRewriter(options);
                     app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
                 });
             var server = new TestServer(builder);
             var response = await server.CreateClient().GetAsync("/article/10/hey");
             IEnumerable<string> headerValues;
-            var headerExists = response.Headers.TryGetValues("Custom-ClientIpAddress", out headerValues);
-            // REMOTE_ADDR is not set by the test framework, so we assert the existence of the header rather than its value
-            Assert.True(headerExists);
+            response.Headers.TryGetValues("Custom-ClientIpAddress", out headerValues);
+            Assert.Equal(IPAddress.Loopback, IPAddress.Parse(headerValues.Single()));
         }
 
         [Fact]

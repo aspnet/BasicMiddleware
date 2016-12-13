@@ -83,14 +83,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                             throw new ArgumentOutOfRangeException($"Unexpected server variable: `{serverVariable.Type}`");
                     }
 
-                    if (headerDictionary.ContainsKey(name))
-                    {
-                        headerDictionary.Append(name, value);
-                    }
-                    else
-                    {
-                        headerDictionary.Add(name, value);
-                    }
+                    headerDictionary.Append(name, value);
                 }
             }
 
