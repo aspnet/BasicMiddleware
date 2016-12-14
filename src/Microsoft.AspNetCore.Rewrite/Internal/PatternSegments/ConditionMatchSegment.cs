@@ -14,7 +14,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 
         public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return condMatch?.BackReference[_index].Value;
+            if (condMatch.BackReferences != null)
+            {
+                //Url Rewrite
+                return condMatch.BackReferences.GetBackReferenceAtIndex(_index);
+            }
+            else
+            {
+                // For mod_rewrite
+                return condMatch.BackReference[_index].Value;
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         public Pattern Input { get; set; }
         public UrlMatch Match { get; set; }
         public bool OrNext { get; set; }
+        public bool TrackAllCaptures { get; set; }
 
         public MatchResults Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {

@@ -12,5 +12,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
         public GroupCollection BackReference { get; set; }
         public bool Success { get; set; }
+        public string ExactBackReference { get; set; }
+        public BackReferenceCollection BackReferences { get; set; }
     }
 }

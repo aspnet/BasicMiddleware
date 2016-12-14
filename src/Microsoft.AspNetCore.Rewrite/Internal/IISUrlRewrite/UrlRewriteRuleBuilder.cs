@@ -21,6 +21,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private IList<Condition> _conditions;
         private UrlAction _action;
         private bool _matchAny;
+        private bool _trackAllCaptures;
 
         public IISUrlRewriteRule Build()
         {
@@ -85,7 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
         }
 
-        public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate)
+        public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate, bool trackAllCaptures)
         {
             // If there are no conditions specified
             if (_conditions == null)
@@ -112,7 +113,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                             RegexOptions.CultureInvariant | RegexOptions.Compiled,
                                         RegexTimeout);
 
-                                    _conditions.Add(new Condition { Input = input, Match = new RegexMatch(regex, negate), OrNext = _matchAny });
+                                    _conditions.Add(new Condition { Input = input, Match = new RegexMatch(regex, negate), OrNext = _matchAny, TrackAllCaptures = _trackAllCaptures });
                                     break;
                                 }
                             case MatchType.IsDirectory:
@@ -148,6 +149,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             _conditions = new List<Condition>();
             _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
+            _trackAllCaptures = trackAllCaptures;
         }
     }
 }
