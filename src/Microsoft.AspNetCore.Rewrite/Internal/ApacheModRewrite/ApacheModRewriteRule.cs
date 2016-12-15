@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 
             foreach (var action in Actions)
             {
-                action.ApplyAction(context, initMatchRes, condMatchRes);
+                action.ApplyAction(context, initMatchRes, condMatchRes?.BackReferences);
             }
         }
     }

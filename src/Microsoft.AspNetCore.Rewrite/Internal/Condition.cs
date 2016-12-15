@@ -9,9 +9,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         public UrlMatch Match { get; set; }
         public bool OrNext { get; set; }
 
-        public MatchResults Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public MatchResults Evaluate(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
         {
-            var pattern = Input.Evaluate(context, ruleMatch, condMatch);
+            var pattern = Input.Evaluate(context, ruleMatch, backReferences);
             return Match.Evaluate(pattern, context);
         }
     }

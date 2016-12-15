@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
     {        
         // Note: Mod rewrite pattern matches on lower case "on" and "off" 
         // while IIS looks for capitalized "ON" and "OFF"
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
         {
             return context.HttpContext.Request.IsHttps ? "ON" : "OFF";
         }

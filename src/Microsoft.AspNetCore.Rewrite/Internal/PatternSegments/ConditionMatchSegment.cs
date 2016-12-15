@@ -12,9 +12,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
             _index = index;
         }
 
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
         {
-            return condMatch?.BackReferences?[_index];
+            return backReferences?[_index];
         }
     }
 }

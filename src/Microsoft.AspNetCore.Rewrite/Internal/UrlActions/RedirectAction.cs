@@ -41,9 +41,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
         {
         }
 
-        public override void ApplyAction(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public override void ApplyAction(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
         {
-            var pattern = Url.Evaluate(context, ruleMatch, condMatch);
+            var pattern = Url.Evaluate(context, ruleMatch, backReferences);
             var response = context.HttpContext.Response;
             var pathBase = context.HttpContext.Request.PathBase;
             if (EscapeBackReferences)

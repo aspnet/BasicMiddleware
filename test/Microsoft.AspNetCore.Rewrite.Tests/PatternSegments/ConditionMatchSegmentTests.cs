@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
             var segment = new ConditionMatchSegment(index);
 
             // Act
-            var results = segment.Evaluate(null, null, condMatch);
+            var results = segment.Evaluate(null, null, condMatch.BackReferences);
 
             // Assert
             Assert.Equal(expected, results);
