@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
 {
     public class AbortAction : UrlAction
     {
-        public override void ApplyAction(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
+        public override void ApplyAction(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             context.HttpContext.Abort();
             context.Result = RuleResult.EndResponse;

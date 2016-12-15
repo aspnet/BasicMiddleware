@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     continue;
                 }
 
-                var condResult = condition.Evaluate(context, ruleMatch, prevResult?.BackReferences);
+                var condResult = condition.Evaluate(context, ruleMatch?.BackReferences, prevResult?.BackReferences);
 
                 if (condition.OrNext)
                 {

@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
             _literal = literal;
         }
 
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
+        public override string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             return _literal;
         }

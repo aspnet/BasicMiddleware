@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluateBackReferenceRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch().BackReferences);
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch().BackReferences, CreateTestCondMatch().BackReferences);
             Assert.Equal(expected, result);
         }
 
@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluatToLowerRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch().BackReferences);
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch().BackReferences, CreateTestCondMatch().BackReferences);
             Assert.Equal(expected, result);
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluatUriEncodeRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch().BackReferences);
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch()?.BackReferences, CreateTestCondMatch().BackReferences);
             Assert.Equal(expected, result);
         }
 

@@ -5,7 +5,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 {
     public class RemoteAddressSegment : PatternSegment
     {
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, BackReferenceCollection backReferences)
+        public override string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             return context.HttpContext.Connection.RemoteIpAddress?.ToString();
         }
