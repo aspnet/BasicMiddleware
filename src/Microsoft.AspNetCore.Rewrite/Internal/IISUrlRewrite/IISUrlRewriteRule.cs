@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             context.Logger?.UrlRewriteMatchedRule(Name);
             // at this point we know the rule passed, evaluate the replacement.
-            Action.ApplyAction(context, initMatchResults, condMatchRes);
+            Action.ApplyAction(context, initMatchResults?.BackReferences, condMatchRes?.BackReferences);
         }
     }
 }

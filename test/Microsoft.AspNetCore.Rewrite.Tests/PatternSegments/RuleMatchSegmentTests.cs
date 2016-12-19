@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
             var segment = new RuleMatchSegment(index);
 
             // Act
-            var results = segment.Evaluate(null, ruleMatch, null);
+            var results = segment.Evaluate(null, ruleMatch.BackReferences, null);
 
             // Assert
             Assert.Equal(expected, results);
