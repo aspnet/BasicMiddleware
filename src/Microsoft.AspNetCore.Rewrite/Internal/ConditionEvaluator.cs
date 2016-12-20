@@ -11,6 +11,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
         }
+
         public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
         {
             BackReferenceCollection prevBackReferences = null;
