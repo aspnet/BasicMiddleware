@@ -49,11 +49,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return;
             }
 
-            MatchResults condMatchRes = null;
+            BackReferenceCollection condBackReferences = null;
             if (Conditions != null)
             {
-                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchResults, TrackAllCaptures);
-                if (!condMatchRes.Success)
+                condBackReferences = ConditionHelper.Evaluate(Conditions, context, initMatchResults.BackReferences, TrackAllCaptures);
+                if (condBackReferences == null)
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);
                     return;
@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             context.Logger?.UrlRewriteMatchedRule(Name);
             // at this point we know the rule passed, evaluate the replacement.
-            Action.ApplyAction(context, initMatchResults?.BackReferences, condMatchRes?.BackReferences);
+            Action.ApplyAction(context, initMatchResults?.BackReferences, condBackReferences);
         }
     }
 }

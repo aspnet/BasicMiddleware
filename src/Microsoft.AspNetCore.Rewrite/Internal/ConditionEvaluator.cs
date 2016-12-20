@@ -7,10 +7,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public static class ConditionHelper
     {
-
-        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, MatchResults ruleMatch, bool trackAllCaptures = false)
+        public static BackReferenceCollection Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences)
         {
-            MatchResults prevResult = null;
+            return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
+        }
+        public static BackReferenceCollection Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
+        {
+            BackReferenceCollection prevBackReferences = null;
             var orSucceeded = false;
             foreach (var condition in conditions)
             {
@@ -24,26 +27,26 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     continue;
                 }
 
-                var condResult = condition.Evaluate(context, ruleMatch?.BackReferences, prevResult?.BackReferences);
+                var condBackReferences = condition.Evaluate(context, backReferences, prevBackReferences);
 
                 if (condition.OrNext)
                 {
-                    orSucceeded = condResult.Success;
+                    orSucceeded = condBackReferences != null;
                 }
-                else if (!condResult.Success)
+                else if (condBackReferences == null)
                 {
-                    return condResult;
+                    return condBackReferences;
                 }
 
-                if (condResult.Success && trackAllCaptures && prevResult?.BackReferences != null)
+                if (condBackReferences != null && trackAllCaptures && prevBackReferences!= null)
                 {
-                    prevResult.BackReferences.Add(condResult.BackReferences);
-                    condResult.BackReferences = prevResult.BackReferences;
+                    prevBackReferences.Add(condBackReferences);
+                    condBackReferences = prevBackReferences;
                 }
 
-                prevResult = condResult;
+                prevBackReferences = condBackReferences;
             }
-            return prevResult;
+            return prevBackReferences;
         }
     }
 }

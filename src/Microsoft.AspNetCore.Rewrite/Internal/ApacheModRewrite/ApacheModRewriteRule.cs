@@ -30,11 +30,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 return;
             }
 
-            MatchResults condMatchRes = null;
+            BackReferenceCollection condBackReferences = null;
             if (Conditions != null)
             {
-                condMatchRes = ConditionHelper.Evaluate(Conditions, context, initMatchRes);
-                if (!condMatchRes.Success)
+                condBackReferences = ConditionHelper.Evaluate(Conditions, context, initMatchRes.BackReferences);
+                if (condBackReferences == null)
                 {
                     context.Logger?.ModRewriteDidNotMatchRule();
                     return;
@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 
             foreach (var action in Actions)
             {
-                action.ApplyAction(context, initMatchRes?.BackReferences, condMatchRes?.BackReferences);
+                action.ApplyAction(context, initMatchRes?.BackReferences, condBackReferences);
             }
         }
     }
