@@ -7,13 +7,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public static class ConditionHelper
     {
-        public static BackReferenceCollection Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences)
+        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences)
         {
             return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
         }
-        public static BackReferenceCollection Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
+        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
         {
             BackReferenceCollection prevBackReferences = null;
+            MatchResults condResult = null;
             var orSucceeded = false;
             foreach (var condition in conditions)
             {
@@ -27,26 +28,27 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     continue;
                 }
 
-                var condBackReferences = condition.Evaluate(context, backReferences, prevBackReferences);
-
+                condResult = condition.Evaluate(context, backReferences, prevBackReferences);
+                var currentBackReferences = condResult.BackReferences;
                 if (condition.OrNext)
                 {
-                    orSucceeded = condBackReferences != null;
+                    orSucceeded = condResult.Success;
                 }
-                else if (condBackReferences == null)
+                else if (!condResult.Success)
                 {
-                    return condBackReferences;
+                    return condResult;
                 }
 
-                if (condBackReferences != null && trackAllCaptures && prevBackReferences!= null)
+                if (condResult.Success && trackAllCaptures && prevBackReferences!= null)
                 {
-                    prevBackReferences.Add(condBackReferences);
-                    condBackReferences = prevBackReferences;
+                    prevBackReferences.Add(currentBackReferences);
+                    currentBackReferences = prevBackReferences;
                 }
 
-                prevBackReferences = condBackReferences;
+                prevBackReferences = currentBackReferences;
             }
-            return prevBackReferences;
+
+            return new MatchResults { BackReferences = prevBackReferences, Success = condResult.Success }; ;
         }
     }
 }
