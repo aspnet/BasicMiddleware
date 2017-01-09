@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 {
     public class UrlSegment : PatternSegment
     {
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public override string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             return context.GlobalRule ? context.HttpContext.Request.GetEncodedUrl() : (string)context.HttpContext.Request.Path;
         }
