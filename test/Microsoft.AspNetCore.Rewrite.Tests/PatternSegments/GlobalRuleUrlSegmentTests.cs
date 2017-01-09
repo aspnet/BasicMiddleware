@@ -7,10 +7,13 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
 {
-    public class UrlSegmentTests
+    public class GlobalRuleUrlSegmentTests
     {
         [Theory]
-        [InlineData("http", "localhost", 80, "/foo/bar", "/foo/bar")]
+        [InlineData("http", "localhost", 80, "", "http://localhost:80/")]
+        [InlineData("http", "localhost", 80, "/foo/bar", "http://localhost:80/foo/bar")]
+        [InlineData("http", "localhost", 81, "/foo/bar", "http://localhost:81/foo/bar")]
+        [InlineData("https", "localhost", 443, "/foo/bar", "https://localhost:443/foo/bar")]
         public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, string expectedResult)
         {
             // Arrange
@@ -23,7 +26,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
             context.HttpContext = httpContext;
 
             // Act
-            var segment = new UrlSegment();
+            var segment = new GlobalRuleUrlSegment();
             string results = segment.Evaluate(context, null, null);
 
             // Assert

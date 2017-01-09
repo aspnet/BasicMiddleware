@@ -76,11 +76,6 @@ namespace Microsoft.AspNetCore.Rewrite
 
             foreach (var rule in _options.Rules)
             {
-                var iisRule = rule as IISUrlRewriteRule;
-                if (iisRule != null)
-                {
-                    rewriteContext.GlobalRule = iisRule.Global;
-                }
                 rule.ApplyRule(rewriteContext);
                 switch (rewriteContext.Result)
                 {
