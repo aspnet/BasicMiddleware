@@ -74,6 +74,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 case "REQUEST_FILENAME":
                     patternSegment = new RequestFileNameSegment();
                     break;
+                case "REQUEST_METHOD":
+                    patternSegment = new RequestMethodSegment();
+                    break;
+                case "REQUEST_SCHEME":
+                    patternSegment = new SchemeSegment();
+                    break;
                 case "REQUEST_URI":
                     patternSegment = new UrlSegment();
                     break;
