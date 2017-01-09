@@ -127,7 +127,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var rewriteMapSegment = segment as RewriteMapSegment;
             Assert.NotNull(rewriteMapSegment);
 
-            var result = rewriteMapSegment.Evaluate(CreateTestRewriteContext(), CreateRewriteMapRuleMatch(expectedKey), CreateRewriteMapConditionMatch(inputString));
+            var result = rewriteMapSegment.Evaluate(CreateTestRewriteContext(), CreateRewriteMapRuleMatch(expectedKey).BackReferences, CreateRewriteMapConditionMatch(inputString).BackReferences);
             Assert.Equal(expectedValue, result);
         }
 
@@ -152,13 +152,13 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         private MatchResults CreateRewriteMapRuleMatch(string input)
         {
             var match = Regex.Match(input, "([^/]*)/?(.*)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new MatchResults { BackReferences = new BackReferenceCollection(match.Groups), Success = match.Success };
         }
 
         private MatchResults CreateRewriteMapConditionMatch(string input)
         {
             var match = Regex.Match(input, "(.+)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new MatchResults { BackReferences = new BackReferenceCollection(match.Groups), Success = match.Success };
         }
     }
 }

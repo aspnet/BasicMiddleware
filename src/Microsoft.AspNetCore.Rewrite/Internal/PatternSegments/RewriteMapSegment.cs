@@ -13,9 +13,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
             _pattern = pattern;
         }
 
-        public override string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public override string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
-            var key = _pattern.Evaluate(context, ruleMatch, condMatch).ToLowerInvariant();
+            var key = _pattern.Evaluate(context, ruleBackReferences, conditionBackReferences).ToLowerInvariant();
             return _rewriteMap[key];
         }
     }
