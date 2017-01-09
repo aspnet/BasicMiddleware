@@ -22,8 +22,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             if (xmlRoot != null)
             {
                 var result = new List<IISUrlRewriteRule>();
-                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result, true);
-                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result, false);
+                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result, global: true);
+                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result, global: false);
                 return result;
             }
             return null;
