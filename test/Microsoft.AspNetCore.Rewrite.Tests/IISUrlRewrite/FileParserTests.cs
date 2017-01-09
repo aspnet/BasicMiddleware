@@ -148,7 +148,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             )
         {
             return new IISUrlRewriteRule(name, new RegexMatch(new Regex("^OFF$"), false), conditions,
-                Enumerable.Empty<ServerVariable>(), new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url), queryStringAppend: false));
+                Enumerable.Empty<ServerVariable>(), new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url), queryStringAppend: false), trackAllCaptures: false);
         }
 
         // TODO make rules comparable?

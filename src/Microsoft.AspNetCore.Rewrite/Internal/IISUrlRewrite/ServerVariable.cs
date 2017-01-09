@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
         {
-            return Pattern.Evaluate(context, ruleMatch, condMatch);
+            return Pattern.Evaluate(context, ruleMatch.BackReferences, condMatch?.BackReferences);
         }
     }
 }
