@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluateBackReferenceRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch());
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleBackReferences(), CreateTestCondBackReferences());
             Assert.Equal(expected, result);
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluatToLowerRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch());
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleBackReferences(), CreateTestCondBackReferences());
             Assert.Equal(expected, result);
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void EvaluatUriEncodeRule(string testString, string expected)
         {
             var middle = new InputParser().ParseInputString(testString);
-            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleMatch(), CreateTestCondMatch());
+            var result = middle.Evaluate(CreateTestRewriteContext(), CreateTestRuleBackReferences(), CreateTestCondBackReferences());
             Assert.Equal(expected, result);
         }
 
@@ -137,16 +137,16 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             return new RewriteContext { HttpContext = context, StaticFileProvider = null, Logger = new NullLogger() };
         }
 
-        private MatchResults CreateTestRuleMatch()
+        private BackReferenceCollection CreateTestRuleBackReferences()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new BackReferenceCollection(match.Groups);
         }
 
-        private MatchResults CreateTestCondMatch()
+        private BackReferenceCollection CreateTestCondBackReferences()
         {
             var match = Regex.Match("foo/bar/baz", "(.*)/(.*)/(.*)");
-            return new MatchResults { BackReference = match.Groups, Success = match.Success };
+            return new BackReferenceCollection(match.Groups);
         }
 
         private MatchResults CreateRewriteMapRuleMatch(string input)
