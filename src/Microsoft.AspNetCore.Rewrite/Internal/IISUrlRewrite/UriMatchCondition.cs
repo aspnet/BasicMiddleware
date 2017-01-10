@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
     {
         private static readonly InputParser _inputParser = new InputParser();
 
-        public UriMatchCondition(string pattern, string input, UriMatchPart uriMatchPart, bool ignoreCase, bool negate)
+        public UriMatchCondition(string input, string pattern, UriMatchPart uriMatchPart, bool ignoreCase, bool negate)
         {
             var regex = new Regex(
                 pattern,
