@@ -22,11 +22,11 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [InlineData("HTTP_USER_AGENT", "useragent", false)]
         [InlineData("HTTP_CONNECTION", "connection", false)]
         [InlineData("HTTP_URL", "/foo", false)]
-        [InlineData("HTTP_URL", "http://example.com/foo", true)]
+        [InlineData("HTTP_URL", "http://example.com/foo?bar=1", true)]
         [InlineData("QUERY_STRING", "bar=1", false)]
         [InlineData("REQUEST_FILENAME", "/foo", false)]
         [InlineData("REQUEST_URI", "/foo", false)]
-        [InlineData("REQUEST_URI", "http://example.com/foo", true)]
+        [InlineData("REQUEST_URI", "http://example.com/foo?bar=1", true)]
         public void CheckServerVariableParsingAndApplication(string variable, string expected, bool global)
         {
             // Arrange and Act
@@ -40,6 +40,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         private RewriteContext CreateTestHttpContext()
         {
             var context = new DefaultHttpContext();
+            context.Request.Scheme = "http";
             context.Request.Host = new HostString("example.com");
             context.Request.Path = PathString.FromUriComponent("/foo");
             context.Request.QueryString = QueryString.FromUriComponent("?bar=1");
