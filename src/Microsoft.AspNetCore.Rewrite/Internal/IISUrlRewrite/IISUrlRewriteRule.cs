@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
@@ -11,14 +10,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
     {
         public string Name { get; }
         public UrlMatch InitialMatch { get; }
-        public IList<Condition> Conditions { get; }
+        public ConditionCollection Conditions { get; }
         public UrlAction Action { get; }
         public bool TrackAllCaptures { get; }
         public bool Global { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
-            IList<Condition> conditions,
+			ConditionCollection conditions,
             UrlAction action,
             bool trackAllCaptures,
             bool global = false)

@@ -5,8 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
+
+using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
@@ -124,10 +127,54 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             var parsedPatternString = condition.Attribute(RewriteTags.Pattern)?.Value;
+
             try
             {
-                var input = _inputParser.ParseInputString(parsedInputString, global);
-                builder.AddUrlCondition(input, parsedPatternString, patternSyntax, matchType, ignoreCase, negate, trackAllCaptures);
+                Condition conditionX;
+                switch (patternSyntax)
+                {
+                    case PatternSyntax.ECMAScript:
+                        {
+                            switch (matchType)
+                            {
+                                case MatchType.Pattern:
+                                    {
+                                        if (string.IsNullOrEmpty(parsedPatternString))
+                                        {
+                                            throw new FormatException("Match does not have an associated pattern attribute in condition");
+                                        }
+                                        conditionX = new UriMatchCondition(parsedPatternString, parsedInputString, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, ignoreCase, negate);
+                                        break;
+                                    }
+                                case MatchType.IsDirectory:
+                                    {
+                                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsDirectoryMatch(negate) };
+                                        break;
+                                    }
+                                case MatchType.IsFile:
+                                    {
+                                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsFileMatch(negate) };
+                                        break;
+                                    }
+                                default:
+                                    throw new FormatException("Unrecognized matchType");
+                            }
+                            break;
+                        }
+                    case PatternSyntax.Wildcard:
+                        throw new NotSupportedException("Wildcard syntax is not supported");
+                    case PatternSyntax.ExactMatch:
+                        if (string.IsNullOrEmpty(parsedPatternString))
+                        {
+                            throw new FormatException("Match does not have an associated pattern attribute in condition");
+                        }
+                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new ExactMatch(ignoreCase, parsedPatternString, negate) };
+                        break;
+                    default:
+                        throw new FormatException("Unrecognized pattern syntax");
+                }
+
+                builder.AddUrlCondition(conditionX, trackAllCaptures);
             }
             catch (FormatException formatException)
             {

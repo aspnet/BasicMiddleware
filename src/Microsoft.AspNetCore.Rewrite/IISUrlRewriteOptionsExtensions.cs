@@ -65,5 +65,17 @@ namespace Microsoft.AspNetCore.Rewrite
 
             return options;
         }
+
+        /// <summary>
+        /// Adds a rule to the current rules.
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/>.</param>
+        /// <param name="rule">A <see cref="IISUrlRewriteRule"/> to be added to the current rules.</param>
+        /// <returns>The Rewrite options.</returns>
+        public static RewriteOptions Add(this RewriteOptions options, IISUrlRewriteRule rule)
+        {
+            options.Rules.Add(rule);
+            return options;
+        }
     }
 }

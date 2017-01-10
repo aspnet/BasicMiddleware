@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
@@ -18,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public bool Enabled { get; set; }
 
         private UrlMatch _initialMatch;
-        private IList<Condition> _conditions;
+        private ConditionCollection _conditions;
         private UrlAction _action;
         private bool _matchAny;
         private bool _trackAllCaptures;
@@ -86,68 +85,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
         }
 
-        public void AddUrlCondition(Pattern input, string pattern, PatternSyntax patternSyntax, MatchType matchType, bool ignoreCase, bool negate, bool trackAllCaptures)
+        public void AddUrlCondition(Condition condition, bool trackAllCaptures)
         {
             // If there are no conditions specified
             if (_conditions == null)
             {
                 AddUrlConditions(LogicalGrouping.MatchAll, trackAllCaptures);
             }
-
-            switch (patternSyntax)
-            {
-                case PatternSyntax.ECMAScript:
-                    {
-                        switch (matchType)
-                        {
-                            case MatchType.Pattern:
-                                {
-                                    if (string.IsNullOrEmpty(pattern))
-                                    {
-                                        throw new FormatException("Match does not have an associated pattern attribute in condition");
-                                    }
-
-                                    var regex = new Regex(
-                                        pattern,
-                                        ignoreCase ? RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase :
-                                            RegexOptions.CultureInvariant | RegexOptions.Compiled,
-                                        RegexTimeout);
-
-                                    _conditions.Add(new Condition { Input = input, Match = new RegexMatch(regex, negate), OrNext = _matchAny });
-                                    break;
-                                }
-                            case MatchType.IsDirectory:
-                                {
-                                    _conditions.Add(new Condition { Input = input, Match = new IsDirectoryMatch(negate), OrNext = _matchAny });
-                                    break;
-                                }
-                            case MatchType.IsFile:
-                                {
-                                    _conditions.Add(new Condition { Input = input, Match = new IsFileMatch(negate), OrNext = _matchAny });
-                                    break;
-                                }
-                            default:
-                                throw new FormatException("Unrecognized matchType");
-                        }
-                        break;
-                    }
-                case PatternSyntax.Wildcard:
-                    throw new NotSupportedException("Wildcard syntax is not supported");
-                case PatternSyntax.ExactMatch:
-                    if (pattern == null)
-                    {
-                        throw new FormatException("Match does not have an associated pattern attribute in condition");
-                    }
-                    _conditions.Add(new Condition { Input = input, Match = new ExactMatch(ignoreCase, pattern, negate), OrNext = _matchAny });
-                    break;
-                default:
-                    throw new FormatException("Unrecognized pattern syntax");
-            }
+			_conditions.Add(condition);
         }
 
         public void AddUrlConditions(LogicalGrouping logicalGrouping, bool trackAllCaptures)
         {
-            _conditions = new List<Condition>();
+            _conditions = new ConditionCollection(logicalGrouping == LogicalGrouping.MatchAny ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, trackAllCaptures);
             _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
             _trackAllCaptures = trackAllCaptures;
         }

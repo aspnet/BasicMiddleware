@@ -7,12 +7,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public static class ConditionHelper
     {
-        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences)
+        public static MatchResults Evaluate(ConditionCollection conditions, RewriteContext context, BackReferenceCollection backReferences)
         {
             return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
         }
 
-        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
+        public static MatchResults Evaluate(ConditionCollection conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
         {
             BackReferenceCollection prevBackReferences = null;
             MatchResults condResult = null;

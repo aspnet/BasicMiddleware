@@ -9,10 +9,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
     public class ApacheModRewriteRule : IRule
     {
         public UrlMatch InitialMatch { get; }
-        public IList<Condition> Conditions { get; }
+        public ConditionCollection Conditions { get; }
         public IList<UrlAction> Actions { get; }
 
-        public ApacheModRewriteRule(UrlMatch initialMatch, IList<Condition> conditions, IList<UrlAction> urlActions)
+        public ApacheModRewriteRule(UrlMatch initialMatch, ConditionCollection conditions, IList<UrlAction> urlActions)
         {
             Conditions = conditions;
             InitialMatch = initialMatch;

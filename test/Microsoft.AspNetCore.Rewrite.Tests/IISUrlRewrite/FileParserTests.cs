@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Rewrite.Internal;
-using Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
@@ -29,7 +28,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                         </rewrite>";
 
             var expected = new List<IISUrlRewriteRule>();
-            expected.Add(CreateTestRule(new List<Condition>(),
+            expected.Add(CreateTestRule(new ConditionCollection(),
                 url: "^article/([0-9]+)/([_0-9a-z-]+)",
                 name: "Rewrite to article.aspx",
                 actionType: ActionType.Rewrite,
@@ -58,7 +57,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                             </rules>
                         </rewrite>";
 
-            var condList = new List<Condition>();
+            var condList = new ConditionCollection();
             condList.Add(new Condition
             {
                 Input = new InputParser().ParseInputString("{HTTPS}", global: false),
@@ -102,7 +101,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                             </rules>
                         </rewrite>";
 
-            var condList = new List<Condition>();
+            var condList = new ConditionCollection();
             condList.Add(new Condition
             {
                 Input = new InputParser().ParseInputString("{HTTPS}", global: false),
@@ -160,7 +159,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         // Creates a rule with appropriate default values of the url rewrite rule.
-        private IISUrlRewriteRule CreateTestRule(List<Condition> conditions,
+        private IISUrlRewriteRule CreateTestRule(ConditionCollection conditions,
             LogicalGrouping condGrouping = LogicalGrouping.MatchAll,
             bool condTracking = false,
             string name = "",

@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
     public class RuleBuilder
     {
-        private IList<Condition> _conditions;
+        private ConditionCollection _conditions;
         internal IList<UrlAction> _actions = new List<UrlAction>();
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         {
             if (_conditions == null)
             {
-                _conditions = new List<Condition>();
+                _conditions = new ConditionCollection(flags.HasFlag(FlagType.Or) ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, false);
             }
 
             var condition = new Condition();
