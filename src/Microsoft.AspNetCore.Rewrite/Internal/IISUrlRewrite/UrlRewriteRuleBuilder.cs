@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
@@ -96,7 +97,27 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 throw new InvalidOperationException($"You must first configure condition behavior by calling {nameof(ConfigureConditionBehavior)}");
             }
+            if (condition == null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
             _conditions.Add(condition);
+        }
+
+        public void AddUrlConditions(IEnumerable<Condition> conditions)
+        {
+            if (_conditions == null)
+            {
+                throw new InvalidOperationException($"You must first configure condition behavior by calling {nameof(ConfigureConditionBehavior)}");
+            }
+            foreach (var condition in conditions)
+            {
+                if (condition == null)
+                {
+                    throw new ArgumentNullException(nameof(condition));
+                }
+                _conditions.Add(condition);
+            }
         }
     }
 }
