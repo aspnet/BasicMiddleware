@@ -19,8 +19,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private UrlMatch _initialMatch;
         private ConditionCollection _conditions;
         private UrlAction _action;
-        private bool _matchAny;
-        private bool _trackAllCaptures;
 
         public IISUrlRewriteRule Build(bool global)
         {
@@ -29,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 throw new InvalidOperationException("Cannot create UrlRewriteRule without action and match");
             }
 
-            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action, _trackAllCaptures, global);
+            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action, global);
         }
 
         public void AddUrlAction(
@@ -98,8 +96,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public void AddUrlConditions(LogicalGrouping logicalGrouping, bool trackAllCaptures)
         {
             _conditions = new ConditionCollection(logicalGrouping == LogicalGrouping.MatchAny ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, trackAllCaptures);
-            _matchAny = logicalGrouping == LogicalGrouping.MatchAny;
-            _trackAllCaptures = trackAllCaptures;
         }
     }
 }

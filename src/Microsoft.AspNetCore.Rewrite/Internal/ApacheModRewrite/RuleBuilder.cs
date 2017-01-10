@@ -55,13 +55,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         {
             if (_conditions == null)
             {
-                _conditions = new ConditionCollection(flags.HasFlag(FlagType.Or) ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, false);
+                _conditions = new ConditionCollection(flags.HasFlag(FlagType.Or) ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, flags.HasFlag(FlagType.Or));
             }
 
-            var condition = new Condition();
-
-            condition.OrNext = flags.HasFlag(FlagType.Or);
-            condition.Input = pattern;
+            var condition = new Condition { Input = pattern };
 
             switch (input.ConditionType)
             {

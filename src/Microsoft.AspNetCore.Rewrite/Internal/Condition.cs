@@ -7,7 +7,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
     {
         public Pattern Input { get; set; }
         public UrlMatch Match { get; set; }
-        public bool OrNext { get; set; }
 
         public MatchResults Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {

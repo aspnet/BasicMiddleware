@@ -1,25 +1,18 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public static class ConditionHelper
     {
         public static MatchResults Evaluate(ConditionCollection conditions, RewriteContext context, BackReferenceCollection backReferences)
         {
-            return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
-        }
-
-        public static MatchResults Evaluate(ConditionCollection conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
-        {
             BackReferenceCollection prevBackReferences = null;
             MatchResults condResult = null;
             var orSucceeded = false;
             foreach (var condition in conditions)
             {
-                if (orSucceeded && condition.OrNext)
+                if (orSucceeded && conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
                 {
                     continue;
                 }
@@ -31,7 +24,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 condResult = condition.Evaluate(context, backReferences, prevBackReferences);
                 var currentBackReferences = condResult.BackReferences;
-                if (condition.OrNext)
+                if (conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
                 {
                     orSucceeded = condResult.Success;
                 }
@@ -40,7 +33,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     return condResult;
                 }
 
-                if (condResult.Success && trackAllCaptures && prevBackReferences!= null)
+                if (condResult.Success && conditions.TrackAllCaptures && prevBackReferences!= null)
                 {
                     prevBackReferences.Add(currentBackReferences);
                     currentBackReferences = prevBackReferences;
@@ -49,7 +42,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 prevBackReferences = currentBackReferences;
             }
 
-            return new MatchResults { BackReferences = prevBackReferences, Success = condResult.Success }; ;
+            return new MatchResults { BackReferences = prevBackReferences, Success = condResult.Success };
         }
     }
 }

@@ -59,10 +59,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 {
                     return _conditions[index];
                 }
-                else
-                {
-                    throw new IndexOutOfRangeException($"Cannot access condition at index {index}. Only {_conditions.Count} conditions were captured.");
-                }
+                throw new IndexOutOfRangeException($"Cannot access condition at index {index}. Only {_conditions.Count} conditions were captured.");
             }
         }
 
@@ -70,7 +67,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         {
             if (condition != null)
             {
-                condition.OrNext = Grouping == ConditionGrouping.Or;
                 _conditions.Add(condition);
             }
         }
