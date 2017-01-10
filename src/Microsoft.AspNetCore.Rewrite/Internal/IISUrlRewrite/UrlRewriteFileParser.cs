@@ -131,6 +131,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             try
             {
                 Condition condition;
+                UriMatchCondition.UriMatchPart uriMatchPart = global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path;
+
                 switch (patternSyntax)
                 {
                     case PatternSyntax.ECMAScript:
@@ -143,17 +145,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                         {
                                             throw new FormatException("Match does not have an associated pattern attribute in condition");
                                         }
-                                        condition = new UriMatchCondition(parsedPatternString, parsedInputString, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, ignoreCase, negate);
+                                        condition = new UriMatchCondition(parsedPatternString, parsedInputString, uriMatchPart, ignoreCase, negate);
                                         break;
                                     }
                                 case MatchType.IsDirectory:
                                     {
-                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsDirectoryMatch(negate) };
+                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, uriMatchPart), Match = new IsDirectoryMatch(negate) };
                                         break;
                                     }
                                 case MatchType.IsFile:
                                     {
-                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsFileMatch(negate) };
+                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, uriMatchPart), Match = new IsFileMatch(negate) };
                                         break;
                                     }
                                 default:
@@ -168,7 +170,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         {
                             throw new FormatException("Match does not have an associated pattern attribute in condition");
                         }
-                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new ExactMatch(ignoreCase, parsedPatternString, negate) };
+                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, uriMatchPart), Match = new ExactMatch(ignoreCase, parsedPatternString, negate) };
                         break;
                     default:
                         throw new FormatException("Unrecognized pattern syntax");
@@ -200,7 +202,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             try
             {
-                var input = _inputParser.ParseInputString(url, global);
+                var input = _inputParser.ParseInputString(url, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path);
                 builder.AddUrlAction(input, actionType, appendQuery, stopProcessing, (int)redirectType);
             }
             catch (FormatException formatException)

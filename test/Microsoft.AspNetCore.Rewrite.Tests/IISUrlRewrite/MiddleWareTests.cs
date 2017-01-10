@@ -490,21 +490,26 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Theory]
-        [InlineData(false, @"^http://localhost(/.*)", "http://localhost/foo/bar")]
-        [InlineData(true, @"^http://localhost(/.*)", "http://www.test.com/foo/bar")]
-        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(bool global, string conditionInputPattern, string expectedResult)
+        [InlineData(@"^http://localhost(/.*)", "http://localhost/foo/bar", UriMatchCondition.UriMatchPart.Path)]
+        [InlineData(@"^http://localhost(/.*)", "http://www.test.com/foo/bar", UriMatchCondition.UriMatchPart.Full)]
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(string conditionInputPattern, string expectedResult, UriMatchCondition.UriMatchPart uriMatchPart)
         {
             // arrange
             var inputParser = new InputParser();
             var ruleBuilder = new UrlRewriteRuleBuilder();
             ruleBuilder.Name = "test";
             ruleBuilder.AddUrlMatch(".*");
-            var condition = new UriMatchCondition(conditionInputPattern, "{REQUEST_URI}", global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, negate: false, ignoreCase: true);
+            var condition = new UriMatchCondition(
+                conditionInputPattern, 
+                "{REQUEST_URI}",
+                uriMatchPart, 
+                negate: false,
+                ignoreCase: true);
             ruleBuilder.ConfigureConditionBehavior(LogicalGrouping.MatchAll, trackAllCaptures: true);
             ruleBuilder.AddUrlCondition(condition);
-            ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", global), ActionType.Rewrite);
+            ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", uriMatchPart), ActionType.Rewrite);
 
-            var options = new RewriteOptions().Add(ruleBuilder.Build(global));
+            var options = new RewriteOptions().Add(ruleBuilder.Build(false));
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.Rewrite.Internal.PatternSegments;
 using Xunit;
 
@@ -10,8 +11,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
     public class UrlSegmentTests
     {
         [Theory]
-        [InlineData("http", "localhost", 80, "/foo/bar", "/foo/bar")]
-        public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, string expectedResult)
+        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchCondition.UriMatchPart.Path, "/foo/bar")]
+        [InlineData("http", "localhost", 80, "", UriMatchCondition.UriMatchPart.Full, "http://localhost:80/")]
+        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "http://localhost:80/foo/bar")]
+        [InlineData("http", "localhost", 81, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "http://localhost:81/foo/bar")]
+        [InlineData("https", "localhost", 443, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "https://localhost:443/foo/bar")]
+		public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, UriMatchCondition.UriMatchPart uriMatchPart, string expectedResult)
         {
             // Arrange
             var httpContext = new DefaultHttpContext();
@@ -23,7 +28,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
             context.HttpContext = httpContext;
 
             // Act
-            var segment = new UrlSegment();
+            var segment = new UrlSegment(uriMatchPart);
             string results = segment.Evaluate(context, null, null);
 
             // Assert

@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 pattern,
                 ignoreCase ? RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase : RegexOptions.CultureInvariant | RegexOptions.Compiled,
                 TimeSpan.FromMilliseconds(1));
-            Input = _inputParser.ParseInputString(input, uriMatchPart == UriMatchPart.Full);
+            Input = _inputParser.ParseInputString(input, uriMatchPart);
             Match = new RegexMatch(regex, negate);
         }
 

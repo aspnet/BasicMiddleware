@@ -13,14 +13,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
 
-	    /// <summary>
-	    /// Creates a pattern, which is a template to create a new test string to
-	    /// compare to the condition. Can contain server variables, back references, etc.
-	    /// </summary>
-	    /// <param name="testString"></param>
-	    /// <param name="global"></param>
-	    /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
-	    public Pattern ParseInputString(string testString, bool global)
+        /// <summary>
+        /// Creates a pattern, which is a template to create a new test string to
+        /// compare to the condition. Can contain server variables, back references, etc.
+        /// </summary>
+        /// <param name="testString"></param>
+        /// <param name="uriMatchPart"></param>
+        /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
+        public Pattern ParseInputString(string testString, UriMatchCondition.UriMatchPart uriMatchPart)
         {
             if (testString == null)
             {
@@ -28,10 +28,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             var context = new ParserContext(testString);
-            return ParseString(context, global);
+            return ParseString(context, uriMatchPart);
         }
 
-        private static Pattern ParseString(ParserContext context, bool global)
+        private static Pattern ParseString(ParserContext context, UriMatchCondition.UriMatchPart uriMatchPart)
         {
             var results = new List<PatternSegment>();
             while (context.Next())
@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         // missing {
                         throw new FormatException(Resources.FormatError_InputParserMissingCloseBrace(context.Index));
                     }
-                    ParseParameter(context, results, global);
+                    ParseParameter(context, results, uriMatchPart);
                 }
                 else if (context.Current == CloseBrace)
                 {
@@ -60,7 +60,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new Pattern(results);
         }
 
-        private static void ParseParameter(ParserContext context, IList<PatternSegment> results, bool global)
+        private static void ParseParameter(ParserContext context, IList<PatternSegment> results, UriMatchCondition.UriMatchPart uriMatchPart)
         {
             context.Mark();
             // Four main cases:
@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 {
                     // This is just a server variable, so we do a lookup and verify the server variable exists.
                     parameter = context.Capture();
-                    results.Add(ServerVariables.FindServerVariable(parameter, context, global));
+                    results.Add(ServerVariables.FindServerVariable(parameter, context, uriMatchPart));
                     return;
                 }
                 else if (context.Current == Colon)
@@ -88,7 +88,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     {
                         case "ToLower":
                             {
-                                var pattern = ParseString(context, global);
+                                var pattern = ParseString(context, uriMatchPart);
                                 results.Add(new ToLowerSegment(pattern));
 
                                 // at this point, we expect our context to be on the ending closing brace,
@@ -106,7 +106,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                             }
                         case "UrlEncode":
                             {
-                                var pattern = ParseString(context, global);
+                                var pattern = ParseString(context, uriMatchPart);
                                 results.Add(new UrlEncodeSegment(pattern));
 
                                 if (context.Current != CloseBrace)
