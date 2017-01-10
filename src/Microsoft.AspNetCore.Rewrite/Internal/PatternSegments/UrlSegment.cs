@@ -8,16 +8,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
 {
     public class UrlSegment : PatternSegment
     {
-        private readonly UriMatchCondition.UriMatchPart _uriMatchPart;
+        private readonly UriMatchPart _uriMatchPart;
 
-        public UrlSegment(UriMatchCondition.UriMatchPart uriMatchPart = UriMatchCondition.UriMatchPart.Path)
+        public UrlSegment(UriMatchPart uriMatchPart = UriMatchPart.Path)
         {
             _uriMatchPart = uriMatchPart;
         }
 
         public override string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
-            return _uriMatchPart == UriMatchCondition.UriMatchPart.Full ? context.HttpContext.Request.GetEncodedUrl() : (string)context.HttpContext.Request.Path;
+            return _uriMatchPart == UriMatchPart.Full ? context.HttpContext.Request.GetEncodedUrl() : (string)context.HttpContext.Request.Path;
         }
     }
 }

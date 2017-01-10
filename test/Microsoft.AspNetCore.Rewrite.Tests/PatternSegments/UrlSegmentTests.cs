@@ -11,12 +11,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
     public class UrlSegmentTests
     {
         [Theory]
-        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchCondition.UriMatchPart.Path, "/foo/bar")]
-        [InlineData("http", "localhost", 80, "", UriMatchCondition.UriMatchPart.Full, "http://localhost:80/")]
-        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "http://localhost:80/foo/bar")]
-        [InlineData("http", "localhost", 81, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "http://localhost:81/foo/bar")]
-        [InlineData("https", "localhost", 443, "/foo/bar", UriMatchCondition.UriMatchPart.Full, "https://localhost:443/foo/bar")]
-		public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, UriMatchCondition.UriMatchPart uriMatchPart, string expectedResult)
+        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchPart.Path, "/foo/bar")]
+        [InlineData("http", "localhost", 80, "", UriMatchPart.Full, "http://localhost:80/")]
+        [InlineData("http", "localhost", 80, "/foo/bar", UriMatchPart.Full, "http://localhost:80/foo/bar")]
+        [InlineData("http", "localhost", 81, "/foo/bar", UriMatchPart.Full, "http://localhost:81/foo/bar")]
+        [InlineData("https", "localhost", 443, "/foo/bar", UriMatchPart.Full, "https://localhost:443/foo/bar")]
+        public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, UriMatchPart uriMatchPart, string expectedResult)
         {
             // Arrange
             var httpContext = new DefaultHttpContext();

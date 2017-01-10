@@ -490,9 +490,9 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Theory]
-        [InlineData(@"^http://localhost(/.*)", "http://localhost/foo/bar", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData(@"^http://localhost(/.*)", "http://www.test.com/foo/bar", UriMatchCondition.UriMatchPart.Full)]
-        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(string conditionInputPattern, string expectedResult, UriMatchCondition.UriMatchPart uriMatchPart)
+        [InlineData(@"^http://localhost(/.*)", "http://localhost/foo/bar", UriMatchPart.Path)]
+        [InlineData(@"^http://localhost(/.*)", "http://www.test.com/foo/bar", UriMatchPart.Full)]
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(string conditionInputPattern, string expectedResult, UriMatchPart uriMatchPart)
         {
             // arrange
             var inputParser = new InputParser();

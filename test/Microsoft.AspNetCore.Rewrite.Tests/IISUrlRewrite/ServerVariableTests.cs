@@ -13,21 +13,21 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
     public class ServerVariableTests
     {
         [Theory]
-        [InlineData("CONTENT_LENGTH", "10", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("CONTENT_TYPE", "json", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_ACCEPT", "accept", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_COOKIE", "cookie", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_HOST", "example.com", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_REFERER", "referer", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_USER_AGENT", "useragent", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_CONNECTION", "connection", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_URL", "/foo", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("HTTP_URL", "http://example.com/foo?bar=1", UriMatchCondition.UriMatchPart.Full)]
-        [InlineData("QUERY_STRING", "bar=1", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("REQUEST_FILENAME", "/foo", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("REQUEST_URI", "/foo", UriMatchCondition.UriMatchPart.Path)]
-        [InlineData("REQUEST_URI", "http://example.com/foo?bar=1", UriMatchCondition.UriMatchPart.Full)]
-        public void CheckServerVariableParsingAndApplication(string variable, string expected, UriMatchCondition.UriMatchPart uriMatchPart)
+        [InlineData("CONTENT_LENGTH", "10", UriMatchPart.Path)]
+        [InlineData("CONTENT_TYPE", "json", UriMatchPart.Path)]
+        [InlineData("HTTP_ACCEPT", "accept", UriMatchPart.Path)]
+        [InlineData("HTTP_COOKIE", "cookie", UriMatchPart.Path)]
+        [InlineData("HTTP_HOST", "example.com", UriMatchPart.Path)]
+        [InlineData("HTTP_REFERER", "referer", UriMatchPart.Path)]
+        [InlineData("HTTP_USER_AGENT", "useragent", UriMatchPart.Path)]
+        [InlineData("HTTP_CONNECTION", "connection", UriMatchPart.Path)]
+        [InlineData("HTTP_URL", "/foo", UriMatchPart.Path)]
+        [InlineData("HTTP_URL", "http://example.com/foo?bar=1", UriMatchPart.Full)]
+        [InlineData("QUERY_STRING", "bar=1", UriMatchPart.Path)]
+        [InlineData("REQUEST_FILENAME", "/foo", UriMatchPart.Path)]
+        [InlineData("REQUEST_URI", "/foo", UriMatchPart.Path)]
+        [InlineData("REQUEST_URI", "http://example.com/foo?bar=1", UriMatchPart.Full)]
+        public void CheckServerVariableParsingAndApplication(string variable, string expected, UriMatchPart uriMatchPart)
         {
             // Arrange and Act
             var testParserContext = new ParserContext("test");
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var context = new DefaultHttpContext();
             var rewriteContext = new RewriteContext { HttpContext = context };
             var testParserContext = new ParserContext("test");
-            var serverVar = ServerVariables.FindServerVariable("QUERY_STRING", testParserContext, UriMatchCondition.UriMatchPart.Path);
+            var serverVar = ServerVariables.FindServerVariable("QUERY_STRING", testParserContext, UriMatchPart.Path);
             var lookup = serverVar.Evaluate(rewriteContext, CreateTestRuleMatch().BackReferences, CreateTestCondMatch().BackReferences);
 
             Assert.Equal(string.Empty, lookup);

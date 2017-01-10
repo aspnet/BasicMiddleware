@@ -60,7 +60,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var condList = new ConditionCollection();
             condList.Add(new Condition
             {
-                Input = new InputParser().ParseInputString("{HTTPS}", UriMatchCondition.UriMatchPart.Path),
+                Input = new InputParser().ParseInputString("{HTTPS}"),
                 Match = new RegexMatch(new Regex("^OFF$"), false)
             });
 
@@ -104,7 +104,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var condList = new ConditionCollection();
             condList.Add(new Condition
             {
-                Input = new InputParser().ParseInputString("{HTTPS}", UriMatchCondition.UriMatchPart.Path),
+                Input = new InputParser().ParseInputString("{HTTPS}"),
                 Match = new RegexMatch(new Regex("^OFF$"), false)
             });
 
@@ -172,7 +172,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             bool appendQueryString = false,
             bool rewrittenUrl = false,
             bool global = false,
-            UriMatchCondition.UriMatchPart uriMatchPart = UriMatchCondition.UriMatchPart.Path,
+            UriMatchPart uriMatchPart = UriMatchPart.Path,
             RedirectType redirectType = RedirectType.Permanent
             )
         {

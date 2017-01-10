@@ -18,9 +18,20 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         /// compare to the condition. Can contain server variables, back references, etc.
         /// </summary>
         /// <param name="testString"></param>
-        /// <param name="uriMatchPart"></param>
         /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
-        public Pattern ParseInputString(string testString, UriMatchCondition.UriMatchPart uriMatchPart)
+        public Pattern ParseInputString(string testString)
+        {
+            return ParseInputString(testString, UriMatchPart.Path);
+        }
+
+        /// <summary>
+        /// Creates a pattern, which is a template to create a new test string to
+        /// compare to the condition. Can contain server variables, back references, etc.
+        /// </summary>
+        /// <param name="testString"></param>
+        /// <param name="uriMatchPart">When testString evaluates to a URL segment, specify which part of the URI to evaluate.</param>
+        /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
+        public Pattern ParseInputString(string testString, UriMatchPart uriMatchPart)
         {
             if (testString == null)
             {
@@ -31,7 +42,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return ParseString(context, uriMatchPart);
         }
 
-        private static Pattern ParseString(ParserContext context, UriMatchCondition.UriMatchPart uriMatchPart)
+        private static Pattern ParseString(ParserContext context, UriMatchPart uriMatchPart)
         {
             var results = new List<PatternSegment>();
             while (context.Next())
@@ -60,7 +71,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new Pattern(results);
         }
 
-        private static void ParseParameter(ParserContext context, IList<PatternSegment> results, UriMatchCondition.UriMatchPart uriMatchPart)
+        private static void ParseParameter(ParserContext context, IList<PatternSegment> results, UriMatchPart uriMatchPart)
         {
             context.Mark();
             // Four main cases:

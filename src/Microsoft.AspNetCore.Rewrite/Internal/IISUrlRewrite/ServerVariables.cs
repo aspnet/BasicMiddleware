@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         /// <param name="uriMatchPart">Indicates whether the full URI or the path should be evaluated for URL segments</param>
         /// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
         /// <returns>The matching <see cref="PatternSegment"/></returns>
-        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context, UriMatchCondition.UriMatchPart uriMatchPart)
+        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context, UriMatchPart uriMatchPart)
         {
             switch (serverVariable)
             {

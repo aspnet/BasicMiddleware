@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             try
             {
                 Condition condition;
-                UriMatchCondition.UriMatchPart uriMatchPart = global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path;
+                UriMatchPart uriMatchPart = global ? UriMatchPart.Full : UriMatchPart.Path;
 
                 switch (patternSyntax)
                 {
@@ -202,7 +202,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             try
             {
-                var input = _inputParser.ParseInputString(url, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path);
+                var input = _inputParser.ParseInputString(url, global ? UriMatchPart.Full : UriMatchPart.Path);
                 builder.AddUrlAction(input, actionType, appendQuery, stopProcessing, (int)redirectType);
             }
             catch (FormatException formatException)

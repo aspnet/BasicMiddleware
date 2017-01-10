@@ -20,11 +20,5 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Input = _inputParser.ParseInputString(input, uriMatchPart);
             Match = new RegexMatch(regex, negate);
         }
-
-        public enum UriMatchPart
-        {
-            Full,
-            Path
-        }
     }
 }
