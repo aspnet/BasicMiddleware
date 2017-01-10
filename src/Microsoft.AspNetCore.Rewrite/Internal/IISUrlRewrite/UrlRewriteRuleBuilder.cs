@@ -83,19 +83,20 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
         }
 
-        public void AddUrlCondition(Condition condition, bool trackAllCaptures)
+        public void ConfigureConditionBehavior(LogicalGrouping logicalGrouping, bool trackAllCaptures)
         {
-            // If there are no conditions specified
-            if (_conditions == null)
-            {
-                AddUrlConditions(LogicalGrouping.MatchAll, trackAllCaptures);
-            }
-            _conditions.Add(condition);
+            _conditions = new ConditionCollection(
+                logicalGrouping == LogicalGrouping.MatchAny ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And,
+                trackAllCaptures);
         }
 
-        public void AddUrlConditions(LogicalGrouping logicalGrouping, bool trackAllCaptures)
+        public void AddUrlCondition(Condition condition)
         {
-            _conditions = new ConditionCollection(logicalGrouping == LogicalGrouping.MatchAny ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And, trackAllCaptures);
+            if (_conditions == null)
+            {
+                throw new InvalidOperationException($"You must first configure condition behavior by calling {nameof(ConfigureConditionBehavior)}");
+            }
+            _conditions.Add(condition);
         }
     }
 }

@@ -106,15 +106,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             var grouping = ParseEnum(conditions, RewriteTags.LogicalGrouping, LogicalGrouping.MatchAll);
             var trackAllCaptures = ParseBool(conditions, RewriteTags.TrackAllCaptures, defaultValue: false);
-            builder.AddUrlConditions(grouping, trackAllCaptures);
+            builder.ConfigureConditionBehavior(grouping, trackAllCaptures);
 
             foreach (var cond in conditions.Elements(RewriteTags.Add))
             {
-                ParseCondition(cond, builder, patternSyntax, trackAllCaptures, global);
+                ParseCondition(cond, builder, patternSyntax, global);
             }
         }
 
-        private void ParseCondition(XElement conditionElement, UrlRewriteRuleBuilder builder, PatternSyntax patternSyntax, bool trackAllCaptures, bool global)
+        private void ParseCondition(XElement conditionElement, UrlRewriteRuleBuilder builder, PatternSyntax patternSyntax, bool global)
         {
             var ignoreCase = ParseBool(conditionElement, RewriteTags.IgnoreCase, defaultValue: true);
             var negate = ParseBool(conditionElement, RewriteTags.Negate, defaultValue: false);
@@ -174,7 +174,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         throw new FormatException("Unrecognized pattern syntax");
                 }
 
-                builder.AddUrlCondition(condition, trackAllCaptures);
+                builder.AddUrlCondition(condition);
             }
             catch (FormatException formatException)
             {

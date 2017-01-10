@@ -500,7 +500,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             ruleBuilder.Name = "test";
             ruleBuilder.AddUrlMatch(".*");
             var condition = new UriMatchCondition(conditionInputPattern, "{REQUEST_URI}", global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, negate: false, ignoreCase: true);
-            ruleBuilder.AddUrlCondition(condition, trackAllCaptures: true);
+            ruleBuilder.ConfigureConditionBehavior(LogicalGrouping.MatchAll, trackAllCaptures: true);
+            ruleBuilder.AddUrlCondition(condition);
             ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", global), ActionType.Rewrite);
 
             var options = new RewriteOptions().Add(ruleBuilder.Build(global));
