@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 
 namespace RewriteSample
 {
@@ -19,11 +20,59 @@ namespace RewriteSample
                 .AddRewrite(@"app/(\d+)", "app?id=$1", skipRemainingRules: false)
                 .AddRedirectToHttps(302, 5001)
                 .AddIISUrlRewrite(env.ContentRootFileProvider, "UrlRewrite.xml")
-                .AddApacheModRewrite(env.ContentRootFileProvider, "Rewrite.txt");
+                .AddApacheModRewrite(env.ContentRootFileProvider, "Rewrite.txt")
+                .AddIISUrlRewrite(CreateCustomIISRule());
 
             app.UseRewriter(options);
-
             app.Run(context => context.Response.WriteAsync($"Rewritten Url: {context.Request.Path + context.Request.QueryString}"));
+        }
+
+        /// <summary>
+        /// Creates an IIS rewrite rule programmatically that is equivalent to the following xml configuration:
+        /// 
+        /// <rule name="Test">
+        ///     <match url="(.*)" ignoreCase="false" />
+        ///     <conditions trackAllCaptures = "true" >
+        ///         <add input="{REQUEST_URI}" pattern="^/([a-zA-Z]+)/([0-9]+)$" />
+        ///         <add input="{QUERY_STRING}" pattern="p2=([a-z]+)" />
+        ///     </conditions>
+        ///     <action type="Redirect" url ="blogposts/{C:1}/{C:4}" />
+        /// </rule>
+        /// </summary>
+        /// <returns>An <see cref="IISUrlRewriteRule"/></returns>
+        private static IISUrlRewriteRule CreateCustomIISRule()
+        {
+            // create rule builder
+            var ruleBuilder = new UrlRewriteRuleBuilder
+            {
+                Name = "Test",
+                Enabled = true
+            };
+
+            // add url match
+            ruleBuilder.AddUrlMatch("(.*)", ignoreCase: false);
+
+            // add conditions
+            ruleBuilder.ConfigureConditionBehavior(LogicalGrouping.MatchAll, trackAllCaptures: true);
+            var requestUriCondition = new UriMatchCondition(
+                "{REQUEST_URI}",
+                "^/([a-zA-Z]+)/([0-9]+)$",
+                UriMatchPart.Path,
+                ignoreCase: true,
+                negate: false);
+            var queryStringCondition = new UriMatchCondition(
+                "{QUERY_STRING}",
+                "p2=([a-z]+)",
+                UriMatchPart.Path,
+                ignoreCase: true,
+                negate: false);
+            ruleBuilder.AddUrlConditions(new[] { requestUriCondition, queryStringCondition });
+
+            // add action
+            ruleBuilder.AddUrlAction(new InputParser().ParseInputString("blogposts/{C:1}/{C:4}", UriMatchPart.Path), ActionType.Redirect);
+
+            // create rule
+            return ruleBuilder.Build(false);
         }
 
         public static void Main(string[] args)
