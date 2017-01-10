@@ -160,8 +160,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
         // Creates a rule with appropriate default values of the url rewrite rule.
         private IISUrlRewriteRule CreateTestRule(ConditionCollection conditions,
-            LogicalGrouping condGrouping = LogicalGrouping.MatchAll,
-            bool condTracking = false,
             string name = "",
             bool enabled = true,
             PatternSyntax patternSyntax = PatternSyntax.ECMAScript,
@@ -173,11 +171,16 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             string pattern = "",
             bool appendQueryString = false,
             bool rewrittenUrl = false,
+            bool global = false,
             RedirectType redirectType = RedirectType.Permanent
             )
         {
-            return new IISUrlRewriteRule(name, new RegexMatch(new Regex("^OFF$"), false), conditions,
-                new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url, global: false), queryStringAppend: false));
+            return new IISUrlRewriteRule(
+                name,
+                new RegexMatch(new Regex("^OFF$"), negate),
+                conditions,
+                new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url, global), queryStringAppend: false),
+                global);
         }
 
         // TODO make rules comparable?
