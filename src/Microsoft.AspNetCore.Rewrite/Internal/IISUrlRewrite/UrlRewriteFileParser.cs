@@ -114,23 +114,23 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
         }
 
-        private void ParseCondition(XElement condition, UrlRewriteRuleBuilder builder, PatternSyntax patternSyntax, bool trackAllCaptures, bool global)
+        private void ParseCondition(XElement conditionElement, UrlRewriteRuleBuilder builder, PatternSyntax patternSyntax, bool trackAllCaptures, bool global)
         {
-            var ignoreCase = ParseBool(condition, RewriteTags.IgnoreCase, defaultValue: true);
-            var negate = ParseBool(condition, RewriteTags.Negate, defaultValue: false);
-            var matchType = ParseEnum(condition, RewriteTags.MatchType, MatchType.Pattern);
-            var parsedInputString = condition.Attribute(RewriteTags.Input)?.Value;
+            var ignoreCase = ParseBool(conditionElement, RewriteTags.IgnoreCase, defaultValue: true);
+            var negate = ParseBool(conditionElement, RewriteTags.Negate, defaultValue: false);
+            var matchType = ParseEnum(conditionElement, RewriteTags.MatchType, MatchType.Pattern);
+            var parsedInputString = conditionElement.Attribute(RewriteTags.Input)?.Value;
 
             if (parsedInputString == null)
             {
-                ThrowUrlFormatException(condition, "Conditions must have an input attribute");
+                ThrowUrlFormatException(conditionElement, "Conditions must have an input attribute");
             }
 
-            var parsedPatternString = condition.Attribute(RewriteTags.Pattern)?.Value;
+            var parsedPatternString = conditionElement.Attribute(RewriteTags.Pattern)?.Value;
 
             try
             {
-                Condition conditionX;
+                Condition condition;
                 switch (patternSyntax)
                 {
                     case PatternSyntax.ECMAScript:
@@ -143,17 +143,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                         {
                                             throw new FormatException("Match does not have an associated pattern attribute in condition");
                                         }
-                                        conditionX = new UriMatchCondition(parsedPatternString, parsedInputString, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, ignoreCase, negate);
+                                        condition = new UriMatchCondition(parsedPatternString, parsedInputString, global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, ignoreCase, negate);
                                         break;
                                     }
                                 case MatchType.IsDirectory:
                                     {
-                                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsDirectoryMatch(negate) };
+                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsDirectoryMatch(negate) };
                                         break;
                                     }
                                 case MatchType.IsFile:
                                     {
-                                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsFileMatch(negate) };
+                                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new IsFileMatch(negate) };
                                         break;
                                     }
                                 default:
@@ -168,17 +168,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         {
                             throw new FormatException("Match does not have an associated pattern attribute in condition");
                         }
-                        conditionX = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new ExactMatch(ignoreCase, parsedPatternString, negate) };
+                        condition = new Condition { Input = _inputParser.ParseInputString(parsedInputString, global), Match = new ExactMatch(ignoreCase, parsedPatternString, negate) };
                         break;
                     default:
                         throw new FormatException("Unrecognized pattern syntax");
                 }
 
-                builder.AddUrlCondition(conditionX, trackAllCaptures);
+                builder.AddUrlCondition(condition, trackAllCaptures);
             }
             catch (FormatException formatException)
             {
-                ThrowUrlFormatException(condition, formatException.Message, formatException);
+                ThrowUrlFormatException(conditionElement, formatException.Message, formatException);
             }
         }
 

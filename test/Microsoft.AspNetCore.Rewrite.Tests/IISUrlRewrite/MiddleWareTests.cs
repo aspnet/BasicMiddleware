@@ -461,7 +461,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_ParsedRule()
         {
-			// arrange
+            // arrange
             var xml = @"<rewrite>
                             <globalRules>
                                 <rule name=""Test"" patternSyntax=""ECMAScript"" stopProcessing=""true"">
@@ -482,41 +482,41 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 });
             var server = new TestServer(builder);
 
-			// act
+            // act
             var response = await server.CreateClient().GetStringAsync($"http://localhost/{Guid.NewGuid()}/foo/bar");
 
-			// assert
+            // assert
             Assert.Equal("http://www.test.com/foo/bar", response);
         }
 
-		[Theory]
-		[InlineData(false, @"^http://localhost(/.*)", "http://localhost/foo/bar")]
-		[InlineData(true, @"^http://localhost(/.*)", "http://www.test.com/foo/bar")]
-		public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(bool global, string conditionInputPattern, string expectedResult)
-		{
-			// arrange
-			var inputParser = new InputParser();
-			var ruleBuilder = new UrlRewriteRuleBuilder();
-			ruleBuilder.Name = "test";
-			ruleBuilder.AddUrlMatch(".*");
-			var condition = new UriMatchCondition(conditionInputPattern, "{REQUEST_URI}", global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, negate: false, ignoreCase: true);
-			ruleBuilder.AddUrlCondition(condition, trackAllCaptures: true);
-			ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", global), ActionType.Rewrite);
+        [Theory]
+        [InlineData(false, @"^http://localhost(/.*)", "http://localhost/foo/bar")]
+        [InlineData(true, @"^http://localhost(/.*)", "http://www.test.com/foo/bar")]
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(bool global, string conditionInputPattern, string expectedResult)
+        {
+            // arrange
+            var inputParser = new InputParser();
+            var ruleBuilder = new UrlRewriteRuleBuilder();
+            ruleBuilder.Name = "test";
+            ruleBuilder.AddUrlMatch(".*");
+            var condition = new UriMatchCondition(conditionInputPattern, "{REQUEST_URI}", global ? UriMatchCondition.UriMatchPart.Full : UriMatchCondition.UriMatchPart.Path, negate: false, ignoreCase: true);
+            ruleBuilder.AddUrlCondition(condition, trackAllCaptures: true);
+            ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", global), ActionType.Rewrite);
 
-			var options = new RewriteOptions().Add(ruleBuilder.Build(global));
-			var builder = new WebHostBuilder()
-				.Configure(app =>
-				{
-					app.UseRewriter(options);
-					app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
-				});
-			var server = new TestServer(builder);
+            var options = new RewriteOptions().Add(ruleBuilder.Build(global));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
 
-			// act
-			var response = await server.CreateClient().GetStringAsync($"http://localhost/foo/bar");
+            // act
+            var response = await server.CreateClient().GetStringAsync($"http://localhost/foo/bar");
 
-			// assert
-			Assert.Equal(expectedResult, response);
-		}
-	}
+            // assert
+            Assert.Equal(expectedResult, response);
+        }
+    }
 }

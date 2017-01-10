@@ -90,7 +90,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 AddUrlConditions(LogicalGrouping.MatchAll, trackAllCaptures);
             }
-			_conditions.Add(condition);
+            _conditions.Add(condition);
         }
 
         public void AddUrlConditions(LogicalGrouping logicalGrouping, bool trackAllCaptures)
