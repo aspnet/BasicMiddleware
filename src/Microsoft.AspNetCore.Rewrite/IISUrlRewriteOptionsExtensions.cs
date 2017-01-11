@@ -65,5 +65,15 @@ namespace Microsoft.AspNetCore.Rewrite
 
             return options;
         }
+
+        /// <summary>
+        /// Add an IIS rewrite map
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/></param>
+        /// <param name="map">The rewrite map</param>
+        public static RewriteOptions AddIISRewriteMap(this RewriteOptions options, IISRewriteMap map)
+        {
+            return options;
+        }
     }
 }
