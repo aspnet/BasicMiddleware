@@ -30,6 +30,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
             }
             if (!string.IsNullOrEmpty(StatusDescription))
             {
+                context.HttpContext.Response.ContentLength = StatusDescription.Length;
                 context.HttpContext.Response.WriteAsync(StatusDescription).Wait();
             }
             context.Result = RuleResult.EndResponse;
