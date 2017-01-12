@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
             }
             if (!string.IsNullOrEmpty(StatusDescription))
             {
-                byte[] content = Encoding.UTF8.GetBytes(StatusDescription);
+                var content = Encoding.UTF8.GetBytes(StatusDescription);
                 context.HttpContext.Response.ContentLength = content.Length;
                 context.HttpContext.Response.Body.Write(content, 0, content.Length);
             }
