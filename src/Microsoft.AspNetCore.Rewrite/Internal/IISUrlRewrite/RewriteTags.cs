@@ -26,6 +26,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public const string RedirectType = "redirectType";
         public const string Rule = "rule";
         public const string Rules = "rules";
+        public const string StatusCode = "statusCode";
         public const string StopProcessing = "stopProcessing";
         public const string TrackAllCaptures = "trackAllCaptures";
         public const string Type = "type";

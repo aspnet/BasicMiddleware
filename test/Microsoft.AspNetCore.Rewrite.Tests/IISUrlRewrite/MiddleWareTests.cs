@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -450,6 +451,29 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var ex = await Assert.ThrowsAsync<IndexOutOfRangeException>(() => server.CreateClient().GetAsync("article/23?p1=123&p2=abc"));
 
             Assert.Equal("Cannot access back reference at index 9. Only 5 back references were captured.", ex.Message);
+        }
+
+        [Fact]
+        public async Task Invoke_CustomResponse()
+        {
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Forbidden"">
+                <match url = "".*"" />
+                <action type=""CustomResponse"" statusCode=""403"" />
+                </rule>
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("article/10/hey");
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
     }
 }

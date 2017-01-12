@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
@@ -74,13 +74,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             var match = rule.Element(RewriteTags.Match);
             if (match == null)
             {
-                ThrowUrlFormatException(rule, "Cannot have rule without match");
+                throw new UrlRewriteParseException(rule, "Cannot have rule without match");
             }
 
             var action = rule.Element(RewriteTags.Action);
             if (action == null)
             {
-                ThrowUrlFormatException(rule, "Rule does not have an associated action attribute");
+                throw new UrlRewriteParseException(rule, "Rule does not have an associated action attribute");
             }
 
             ParseMatch(match, builder, patternSyntax);
@@ -93,7 +93,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             var parsedInputString = match.Attribute(RewriteTags.Url)?.Value;
             if (parsedInputString == null)
             {
-                ThrowUrlFormatException(match, "Match must have Url Attribute");
+                throw new UrlRewriteParseException(match, "Match must have Url Attribute");
             }
 
             var ignoreCase = ParseBool(match, RewriteTags.IgnoreCase, defaultValue: true);
@@ -127,7 +127,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             if (parsedInputString == null)
             {
-                ThrowUrlFormatException(condition, "Conditions must have an input attribute");
+                throw new UrlRewriteParseException(condition, "Conditions must have an input attribute");
             }
 
             var parsedPatternString = condition.Attribute(RewriteTags.Pattern)?.Value;
@@ -138,59 +138,67 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             catch (FormatException formatException)
             {
-                ThrowUrlFormatException(condition, formatException.Message, formatException);
+                throw new UrlRewriteParseException(condition, formatException.Message, formatException);
             }
         }
 
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
             var actionType = ParseEnum(urlAction, RewriteTags.Type, ActionType.None);
-            var redirectType = ParseEnum(urlAction, RewriteTags.RedirectType, RedirectType.Permanent);
-            var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
-
-            string url = string.Empty;
-            if (urlAction.Attribute(RewriteTags.Url) != null)
-            {
-                url = urlAction.Attribute(RewriteTags.Url).Value;
-                if (string.IsNullOrEmpty(url))
-                {
-                    ThrowUrlFormatException(urlAction, "Url attribute cannot contain an empty string");
-                }
-            }
 
             try
             {
-                var input = _inputParser.ParseInputString(url);
-                builder.AddUrlAction(input, actionType, appendQuery, stopProcessing, (int)redirectType);
+                UrlAction action;
+                switch (actionType)
+                {
+                    case ActionType.None:
+                        action = new VoidAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules);
+                        break;
+                    case ActionType.Rewrite:
+                    case ActionType.Redirect:
+                        var url = string.Empty;
+                        if (urlAction.Attribute(RewriteTags.Url) != null)
+                        {
+                            url = urlAction.Attribute(RewriteTags.Url).Value;
+                            if (string.IsNullOrEmpty(url))
+                            {
+                                throw new UrlRewriteParseException(urlAction, "Url attribute cannot contain an empty string");
+                            }
+                        }
+
+                        var urlPattern = _inputParser.ParseInputString(url);
+                        var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
+
+                        if (actionType == ActionType.Rewrite)
+                        {
+                            action = new RewriteAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules, urlPattern, appendQuery);
+                        }
+                        else
+                        {
+                            var redirectType = ParseEnum(urlAction, RewriteTags.RedirectType, RedirectType.Permanent);
+                            action = new RedirectAction((int)redirectType, urlPattern, appendQuery);
+                        }
+                        break;
+                    case ActionType.AbortRequest:
+                        action = new AbortAction();
+                        break;
+                    case ActionType.CustomResponse:
+                        int statusCode;
+                        if (!int.TryParse(urlAction.Attribute(RewriteTags.StatusCode)?.Value, out statusCode))
+                        {
+                            statusCode = 200;
+                        }
+                        action = new CustomResponseAction(statusCode);
+                        break;
+                    default:
+                        throw new NotSupportedException("Unknown action type");
+                }
+                builder.AddUrlAction(action);
             }
-            catch (FormatException formatException)
+            catch (Exception exception) when (!(exception is UrlRewriteParseException))
             {
-                ThrowUrlFormatException(urlAction, formatException.Message, formatException);
+                throw new UrlRewriteParseException(urlAction, exception.Message, exception);
             }
-        }
-
-        private static void ThrowUrlFormatException(XElement element, string message)
-        {
-            var lineInfo = (IXmlLineInfo)element;
-            var line = lineInfo.LineNumber;
-            var col = lineInfo.LinePosition;
-            throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col));
-        }
-
-        private static void ThrowUrlFormatException(XElement element, string message, Exception ex)
-        {
-            var lineInfo = (IXmlLineInfo)element;
-            var line = lineInfo.LineNumber;
-            var col = lineInfo.LinePosition;
-            throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col), ex);
-        }
-
-        private static void ThrowParameterFormatException(XElement element, string message)
-        {
-            var lineInfo = (IXmlLineInfo)element;
-            var line = lineInfo.LineNumber;
-            var col = lineInfo.LinePosition;
-            throw new FormatException(Resources.FormatError_UrlRewriteParseError(message, line, col));
         }
 
         private bool ParseBool(XElement element, string rewriteTag, bool defaultValue)
@@ -203,7 +211,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             else if (!bool.TryParse(attribute.Value, out result))
             {
-                ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
+                throw new UrlRewriteParseException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
             }
             return result;
         }
@@ -219,7 +227,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
             else if(!Enum.TryParse(attribute.Value, ignoreCase: true, result: out enumResult))
             {
-                ThrowParameterFormatException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
+                throw new UrlRewriteParseException(element, $"The {rewriteTag} parameter '{attribute.Value}' was not recognized");
             }
             return enumResult;
         }

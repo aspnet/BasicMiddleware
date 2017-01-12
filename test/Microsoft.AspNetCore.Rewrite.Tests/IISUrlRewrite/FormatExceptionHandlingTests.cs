@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void ThrowFormatExceptionWithCorrectMessage(string input, string expected)
         {
             // Arrange, Act, Assert
-            var ex = Assert.Throws<FormatException>(() => new UrlRewriteFileParser().Parse(new StringReader(input)));
+            var ex = Assert.Throws<UrlRewriteParseException>(() => new UrlRewriteFileParser().Parse(new StringReader(input)));
             Assert.Equal(expected, ex.Message);
         }
     }
