@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Http;
+using System.Text;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Rewrite.Logging;
@@ -30,8 +30,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
             }
             if (!string.IsNullOrEmpty(StatusDescription))
             {
-                context.HttpContext.Response.ContentLength = StatusDescription.Length;
-                context.HttpContext.Response.WriteAsync(StatusDescription).Wait();
+                byte[] content = Encoding.UTF8.GetBytes(StatusDescription);
+                context.HttpContext.Response.ContentLength = content.Length;
+                context.HttpContext.Response.Body.Write(content, 0, content.Length);
             }
             context.Result = RuleResult.EndResponse;
             context.Logger?.CustomResponse(context.HttpContext.Request.GetEncodedUrl());
