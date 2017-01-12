@@ -188,7 +188,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         {
                             statusCode = 200;
                         }
-                        action = new CustomResponseAction(statusCode);
+                        action = new CustomResponseAction(statusCode, urlAction.Attribute(RewriteTags.StatusReason)?.Value, urlAction.Attribute(RewriteTags.StatusDescription)?.Value);
                         break;
                     default:
                         throw new NotSupportedException("Unknown action type");
