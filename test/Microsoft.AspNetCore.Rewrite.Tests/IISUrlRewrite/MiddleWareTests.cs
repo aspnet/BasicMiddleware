@@ -498,8 +498,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             {
                 ["dev"] = "1.1.1.1"
             };
-
-            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"
+            const string xml = @"
                 <rewrite>
                     <rules>
                         <rule name=""Proxy"">
@@ -510,8 +509,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                             <action type=""Rewrite"" url=""http://{C:1}{R:2}"" appendQueryString=""true"" />
                         </rule>
                     </rules>
-                </rewrite>"));
-            options.AddIISRewriteMap(map);
+                </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml), new []{map});
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {

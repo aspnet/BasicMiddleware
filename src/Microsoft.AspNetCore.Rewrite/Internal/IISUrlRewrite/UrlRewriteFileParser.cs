@@ -14,14 +14,20 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
     {
         private InputParser _inputParser;
 
-        public IList<IISUrlRewriteRule> Parse(TextReader reader)
+        /// <summary>
+        /// Parse an IIS rewrite section into a list of <see cref="IISUrlRewriteRule"/>s.
+        /// </summary>
+        /// <param name="reader">The reader containing the rewrite XML</param>
+        /// <param name="rewriteMaps">An optional set of rewrite maps to uztilize when parsing rules.
+        /// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
+        public IList<IISUrlRewriteRule> Parse(TextReader reader, IEnumerable<IISRewriteMap> rewriteMaps = null)
         {
             var xmlDoc = XDocument.Load(reader, LoadOptions.SetLineInfo);
             var xmlRoot = xmlDoc.Descendants(RewriteTags.Rewrite).FirstOrDefault();
 
             if (xmlRoot != null)
             {
-                _inputParser = new InputParser(RewriteMapParser.Parse(xmlRoot));
+                _inputParser = new InputParser(SetUpRewriteMaps(xmlRoot, rewriteMaps));
 
                 var result = new List<IISUrlRewriteRule>();
                 // TODO Global rules are currently not treated differently than normal rules, fix.
@@ -31,6 +37,30 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return result;
             }
             return null;
+        }
+
+        private static IDictionary<string, IISRewriteMap> SetUpRewriteMaps(XElement xmlRoot, IEnumerable<IISRewriteMap> rewriteMaps)
+        {
+            if (xmlRoot == null && rewriteMaps == null)
+            {
+                return null;
+            }
+
+            var iisRewriteMaps = RewriteMapParser.Parse(xmlRoot);
+
+            if (rewriteMaps != null)
+            {
+                if (iisRewriteMaps == null)
+                {
+                    iisRewriteMaps = new Dictionary<string, IISRewriteMap>();
+                }
+                foreach (var rewriteMap in rewriteMaps)
+                {
+                    iisRewriteMaps[rewriteMap.Name] =  rewriteMap;
+                }
+            }
+
+            return iisRewriteMaps;
         }
 
         private void ParseRules(XElement rules, IList<IISUrlRewriteRule> result)
