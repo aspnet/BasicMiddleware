@@ -7,14 +7,14 @@ using System.Xml.Linq;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
-    public class UrlRewriteParseException : FormatException
+    public class InvalidUrlRewriteFormatException : FormatException
     {
-        public UrlRewriteParseException(XElement element, string message)
+        public InvalidUrlRewriteFormatException(XElement element, string message)
             : base(FormatMessage(element, message))
         {
         }
 
-        public UrlRewriteParseException(XElement element, string message, Exception innerException)
+        public InvalidUrlRewriteFormatException(XElement element, string message, Exception innerException)
             : base(FormatMessage(element, message), innerException)
         {
         }

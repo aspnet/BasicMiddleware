@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         </rule>
     </rules>
 </rewrite>",
-            "Could not parse the UrlRewrite file. Message: 'Cannot have rule without match'. Line number '3': '10'.")]
+			"Could not parse the UrlRewrite file. Message: 'Condition must have an associated match'. Line number '3': '10'.")]
         [InlineData(
 @"<rewrite>
     <rules>
@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         public void ThrowFormatExceptionWithCorrectMessage(string input, string expected)
         {
             // Arrange, Act, Assert
-            var ex = Assert.Throws<UrlRewriteParseException>(() => new UrlRewriteFileParser().Parse(new StringReader(input)));
+            var ex = Assert.Throws<InvalidUrlRewriteFormatException>(() => new UrlRewriteFileParser().Parse(new StringReader(input)));
             Assert.Equal(expected, ex.Message);
         }
     }

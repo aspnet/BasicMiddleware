@@ -24,16 +24,19 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
         public override void ApplyAction(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             context.HttpContext.Response.StatusCode = StatusCode;
+
             if (!string.IsNullOrEmpty(StatusReason))
             {
                 context.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = StatusReason;
             }
+
             if (!string.IsNullOrEmpty(StatusDescription))
             {
                 var content = Encoding.UTF8.GetBytes(StatusDescription);
                 context.HttpContext.Response.ContentLength = content.Length;
                 context.HttpContext.Response.Body.Write(content, 0, content.Length);
             }
+
             context.Result = RuleResult.EndResponse;
             context.Logger?.CustomResponse(context.HttpContext.Request.GetEncodedUrl());
         }
