@@ -472,9 +472,9 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var server = new TestServer(builder);
 
             var response = await server.CreateClient().GetAsync("article/10/hey");
-			var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync();
 
-			Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
             Assert.Equal("reason", response.ReasonPhrase);
             Assert.Equal("description", content);
         }
