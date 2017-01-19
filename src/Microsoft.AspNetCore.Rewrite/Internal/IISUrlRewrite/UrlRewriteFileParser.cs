@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return null;
         }
 
-        private static IDictionary<string, IISRewriteMap> SetUpRewriteMaps(XElement xmlRoot, IEnumerable<IISRewriteMap> rewriteMaps)
+        private static IISRewriteMapCollection SetUpRewriteMaps(XElement xmlRoot, IEnumerable<IISRewriteMap> rewriteMaps)
         {
             if (xmlRoot == null && rewriteMaps == null)
             {
@@ -52,11 +52,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 if (iisRewriteMaps == null)
                 {
-                    iisRewriteMaps = new Dictionary<string, IISRewriteMap>();
+                    iisRewriteMaps = new IISRewriteMapCollection();
                 }
                 foreach (var rewriteMap in rewriteMaps)
                 {
-                    iisRewriteMaps[rewriteMap.Name] =  rewriteMap;
+                    iisRewriteMaps.Add(rewriteMap);
                 }
             }
 

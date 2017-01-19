@@ -105,7 +105,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             const string definedMapName = "testMap";
             const string undefinedMapName = "apiMap";
             var map = new IISRewriteMap(definedMapName);
-            var maps = new Dictionary<string, IISRewriteMap> { { map.Name, map } };
+            var maps = new IISRewriteMapCollection { map };
             Assert.Throws<FormatException>(() => new InputParser(maps).ParseInputString($"{{{undefinedMapName}:{{R:1}}}}"));
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             const string expectedValue = "test.com/api";
             var map = new IISRewriteMap(expectedMapName);
             map[expectedKey] = expectedValue;
-            var maps = new Dictionary<string, IISRewriteMap> { { map.Name, map } };
+            var maps = new IISRewriteMapCollection { map };
 
             string inputString = $"{{{expectedMapName}:{{R:1}}}}";
             Pattern pattern = new InputParser(maps).ParseInputString(inputString);

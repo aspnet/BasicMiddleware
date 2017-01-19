@@ -12,13 +12,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char Colon = ':';
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
-        private readonly IDictionary<string, IISRewriteMap> _rewriteMaps;
+        private readonly IISRewriteMapCollection _rewriteMaps;
 
         public InputParser()
         {
         }
 
-        public InputParser(IDictionary<string, IISRewriteMap> rewriteMaps)
+        public InputParser(IISRewriteMapCollection rewriteMaps)
         {
             _rewriteMaps = rewriteMaps;
         }
@@ -137,8 +137,8 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                 return;
                             }
                         default:
-                            IISRewriteMap rewriteMap;
-                            if (_rewriteMaps != null && _rewriteMaps.TryGetValue(parameter, out rewriteMap))
+                            IISRewriteMap rewriteMap = _rewriteMaps?[parameter];
+                            if (rewriteMap != null)
                             {
                                 var pattern = ParseString(context);
                                 results.Add(new RewriteMapSegment(rewriteMap, pattern));

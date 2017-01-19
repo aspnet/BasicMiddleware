@@ -34,8 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
             // assert
             Assert.Equal(1, actualMaps.Count);
 
-            IISRewriteMap actualMap;
-            Assert.True(actualMaps.TryGetValue(expectedMapName, out actualMap));
+            IISRewriteMap actualMap = actualMaps[expectedMapName];
             Assert.NotNull(actualMap);
             Assert.Equal(expectedMapName, actualMap.Name);
             Assert.Equal(expectedValue, actualMap[expectedKey]);

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -7,7 +6,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class RewriteMapParser
     {
-        public static IDictionary<string, IISRewriteMap> Parse(XElement xmlRoot)
+        public static IISRewriteMapCollection Parse(XElement xmlRoot)
         {
             if (xmlRoot == null)
             {
@@ -20,15 +19,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 return null;
             }
 
-            var rewriteMaps = new Dictionary<string, IISRewriteMap>();
+            var rewriteMaps = new IISRewriteMapCollection();
             foreach (var mapElement in mapsElement.Elements(RewriteTags.RewriteMap))
             {
                 var map = new IISRewriteMap(mapElement.Attribute(RewriteTags.Name)?.Value);
                 foreach (var addElement in mapElement.Elements(RewriteTags.Add))
                 {
-	                map[addElement.Attribute(RewriteTags.Key).Value.ToLowerInvariant()] = addElement.Attribute(RewriteTags.Value).Value;
+                    map[addElement.Attribute(RewriteTags.Key).Value.ToLowerInvariant()] = addElement.Attribute(RewriteTags.Value).Value;
                 }
-                rewriteMaps.Add(map.Name, map);
+                rewriteMaps.Add(map);
             }
 
             return rewriteMaps;
