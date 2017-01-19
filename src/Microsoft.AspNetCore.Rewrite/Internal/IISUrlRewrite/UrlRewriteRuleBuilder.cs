@@ -110,14 +110,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 throw new InvalidOperationException($"You must first configure condition behavior by calling {nameof(ConfigureConditionBehavior)}");
             }
-            foreach (var condition in conditions)
-            {
-                if (condition == null)
-                {
-                    throw new ArgumentNullException(nameof(condition));
-                }
-                _conditions.Add(condition);
-            }
+            _conditions.AddConditions(conditions);
         }
     }
 }

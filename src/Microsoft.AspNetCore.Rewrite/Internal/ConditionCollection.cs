@@ -71,6 +71,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             }
         }
 
+        public void AddConditions(IEnumerable<Condition> conditions)
+        {
+            if (conditions != null)
+            {
+                _conditions.AddRange(conditions);
+            }
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _conditions.GetEnumerator();

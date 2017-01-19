@@ -5,10 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
-
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
