@@ -143,7 +143,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                         {
                                             throw new FormatException("Match does not have an associated pattern attribute in condition");
                                         }
-                                        condition = new UriMatchCondition(parsedInputString, parsedPatternString, uriMatchPart, ignoreCase, negate);
+                                        condition = new UriMatchCondition(_inputParser, parsedInputString, parsedPatternString, uriMatchPart, ignoreCase, negate);
                                         break;
                                     }
                                 case MatchType.IsDirectory:

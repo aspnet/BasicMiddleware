@@ -500,6 +500,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             ruleBuilder.Name = "test";
             ruleBuilder.AddUrlMatch(".*");
             var condition = new UriMatchCondition(
+                inputParser,
                 "{REQUEST_URI}",
                 conditionInputPattern, 
                 uriMatchPart,

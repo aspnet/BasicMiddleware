@@ -9,15 +9,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class UriMatchCondition : Condition
     {
-        private static readonly InputParser _inputParser = new InputParser();
-
-        public UriMatchCondition(string input, string pattern, UriMatchPart uriMatchPart, bool ignoreCase, bool negate)
+        public UriMatchCondition(InputParser inputParser, string input, string pattern, UriMatchPart uriMatchPart, bool ignoreCase, bool negate)
         {
             var regex = new Regex(
                 pattern,
                 ignoreCase ? RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase : RegexOptions.CultureInvariant | RegexOptions.Compiled,
                 TimeSpan.FromMilliseconds(1));
-            Input = _inputParser.ParseInputString(input, uriMatchPart);
+            Input = inputParser.ParseInputString(input, uriMatchPart);
             Match = new RegexMatch(regex, negate);
         }
     }
