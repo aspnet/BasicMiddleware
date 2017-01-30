@@ -20,8 +20,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             UrlMatch initialMatch,
             IList<Condition> conditions,
             UrlAction action,
+            bool trackAllCaptures)
+            : this(name, initialMatch, conditions, action, trackAllCaptures, false)
+        {
+        }
+
+        public IISUrlRewriteRule(string name,
+            UrlMatch initialMatch,
+            IList<Condition> conditions,
+            UrlAction action,
             bool trackAllCaptures,
-            bool global = false)
+            bool global)
         {
             Name = name;
             InitialMatch = initialMatch;

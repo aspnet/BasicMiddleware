@@ -13,14 +13,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
 
-	    /// <summary>
-	    /// Creates a pattern, which is a template to create a new test string to
-	    /// compare to the condition. Can contain server variables, back references, etc.
-	    /// </summary>
-	    /// <param name="testString"></param>
-	    /// <param name="global"></param>
-	    /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
-	    public Pattern ParseInputString(string testString, bool global)
+        /// <summary>
+        /// Creates a pattern, which is a template to create a new test string to
+        /// compare to the condition. Can contain server variables, back references, etc.
+        /// </summary>
+        /// <param name="testString"></param>
+        /// <param name="global"></param>
+        /// <returns>A new <see cref="Pattern"/>, containing a list of <see cref="PatternSegment"/></returns>
+        public Pattern ParseInputString(string testString, bool global)
         {
             if (testString == null)
             {

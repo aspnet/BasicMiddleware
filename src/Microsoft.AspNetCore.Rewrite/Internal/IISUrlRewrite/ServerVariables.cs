@@ -9,15 +9,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class ServerVariables
     {
-		/// <summary>
-		/// Returns the matching <see cref="PatternSegment"/> for the given <paramref name="serverVariable"/>
-		/// </summary>
-		/// <param name="serverVariable">The server variable</param>
-		/// <param name="context">The parser context which is utilized when an exception is thrown</param>
-		/// <param name="global">Indicates if the rule being parsed is a global rule</param>
-		/// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
-		/// <returns>The matching <see cref="PatternSegment"/></returns>
-		public static PatternSegment FindServerVariable(string serverVariable, ParserContext context, bool global)
+        /// <summary>
+        /// Returns the matching <see cref="PatternSegment"/> for the given <paramref name="serverVariable"/>
+        /// </summary>
+        /// <param name="serverVariable">The server variable</param>
+        /// <param name="context">The parser context which is utilized when an exception is thrown</param>
+        /// <param name="global">Indicates if the rule being parsed is a global rule</param>
+        /// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
+        /// <returns>The matching <see cref="PatternSegment"/></returns>
+        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context, bool global)
         {
             switch (serverVariable)
             {

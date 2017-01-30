@@ -11,6 +11,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
     {
         [Theory]
         [InlineData("http", "localhost", 80, "/foo/bar", "/foo/bar")]
+        [InlineData("http", "localhost", 80, "/foo:bar", "/foo:bar")]
+        [InlineData("http", "localhost", 80, "/foo bar", "/foo%20bar")]
         public void AssertSegmentIsCorrect(string scheme, string host, int port, string path, string expectedResult)
         {
             // Arrange
@@ -24,7 +26,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
 
             // Act
             var segment = new UrlSegment();
-            string results = segment.Evaluate(context, null, null);
+            var results = segment.Evaluate(context, null, null);
 
             // Assert
             Assert.Equal(expectedResult, results);
