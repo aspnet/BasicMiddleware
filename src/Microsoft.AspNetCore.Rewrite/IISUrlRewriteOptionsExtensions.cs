@@ -14,15 +14,26 @@ namespace Microsoft.AspNetCore.Rewrite
     /// </summary>
     public static class IISUrlRewriteOptionsExtensions
     {
-		/// <summary>
-		/// Add rules from a IIS config file containing Url Rewrite rules
-		/// </summary>
-		/// <param name="options">The <see cref="RewriteOptions"/></param>
-		/// <param name="fileProvider">The <see cref="IFileProvider"/> </param>
-		/// <param name="filePath">The path to the file containing UrlRewrite rules.</param>
-		/// <param name="rewriteMaps">An optional set of rewrite maps to uztilize when parsing rules.
-		/// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
-		public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, IFileProvider fileProvider, string filePath, IEnumerable<IISRewriteMap> rewriteMaps = null)
+        /// <summary>
+        /// Add rules from a IIS config file containing Url Rewrite rules
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/></param>
+        /// <param name="fileProvider">The <see cref="IFileProvider"/> </param>
+        /// <param name="filePath">The path to the file containing UrlRewrite rules.</param>
+        public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, IFileProvider fileProvider, string filePath)
+        {
+            return AddIISUrlRewrite(options, fileProvider, filePath, null);
+        }
+
+        /// <summary>
+        /// Add rules from a IIS config file containing Url Rewrite rules
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/></param>
+        /// <param name="fileProvider">The <see cref="IFileProvider"/> </param>
+        /// <param name="filePath">The path to the file containing UrlRewrite rules.</param>
+        /// <param name="rewriteMaps">A set of rewrite maps to uztilize when parsing rules.
+        /// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
+        public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, IFileProvider fileProvider, string filePath, IEnumerable<IISRewriteMap> rewriteMaps)
         {
             if (options == null)
             {
@@ -42,14 +53,24 @@ namespace Microsoft.AspNetCore.Rewrite
             }
         }
 
-		/// <summary>
-		/// Add rules from a IIS config file containing Url Rewrite rules
-		/// </summary>
-		/// <param name="options">The <see cref="RewriteOptions"/></param>
-		/// <param name="reader">The text reader stream.</param>
-		/// <param name="rewriteMaps">An optional set of rewrite maps to uztilize when parsing rules.
-		/// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
-		public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, TextReader reader, IEnumerable<IISRewriteMap> rewriteMaps = null)
+        /// <summary>
+        /// Add rules from a IIS config file containing Url Rewrite rules
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/></param>
+        /// <param name="reader">The text reader stream.</param>
+        public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, TextReader reader)
+        {
+            return AddIISUrlRewrite(options, reader, null);
+        }
+
+        /// <summary>
+        /// Add rules from a IIS config file containing Url Rewrite rules
+        /// </summary>
+        /// <param name="options">The <see cref="RewriteOptions"/></param>
+        /// <param name="reader">The text reader stream.</param>
+        /// <param name="rewriteMaps">A set of rewrite maps to uztilize when parsing rules.
+        /// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
+        public static RewriteOptions AddIISUrlRewrite(this RewriteOptions options, TextReader reader, IEnumerable<IISRewriteMap> rewriteMaps)
         {
             if (options == null)
             {

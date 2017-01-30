@@ -18,25 +18,35 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         /// Parse an IIS rewrite section into a list of <see cref="IISUrlRewriteRule"/>s.
         /// </summary>
         /// <param name="reader">The reader containing the rewrite XML</param>
-        /// <param name="rewriteMaps">An optional set of rewrite maps to uztilize when parsing rules.
+        public IList<IISUrlRewriteRule> Parse(TextReader reader)
+        {
+            return Parse(reader, null);
+        }
+
+        /// <summary>
+        /// Parse an IIS rewrite section into a list of <see cref="IISUrlRewriteRule"/>s.
+        /// </summary>
+        /// <param name="reader">The reader containing the rewrite XML</param>
+        /// <param name="rewriteMaps">A set of rewrite maps to uztilize when parsing rules.
         /// Rewrite maps in this collection will overwrite (supercede) duplicate named entries in the XML.</param>
-        public IList<IISUrlRewriteRule> Parse(TextReader reader, IEnumerable<IISRewriteMap> rewriteMaps = null)
+        public IList<IISUrlRewriteRule> Parse(TextReader reader, IEnumerable<IISRewriteMap> rewriteMaps)
         {
             var xmlDoc = XDocument.Load(reader, LoadOptions.SetLineInfo);
             var xmlRoot = xmlDoc.Descendants(RewriteTags.Rewrite).FirstOrDefault();
 
-            if (xmlRoot != null)
+            if (xmlRoot == null)
             {
-                _inputParser = new InputParser(SetUpRewriteMaps(xmlRoot, rewriteMaps));
-
-                var result = new List<IISUrlRewriteRule>();
-                // TODO Global rules are currently not treated differently than normal rules, fix.
-                // See: https://github.com/aspnet/BasicMiddleware/issues/59
-                ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result);
-                ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result);
-                return result;
+                return null;
             }
-            return null;
+
+            _inputParser = new InputParser(SetUpRewriteMaps(xmlRoot, rewriteMaps));
+
+            var result = new List<IISUrlRewriteRule>();
+            // TODO Global rules are currently not treated differently than normal rules, fix.
+            // See: https://github.com/aspnet/BasicMiddleware/issues/59
+            ParseRules(xmlRoot.Descendants(RewriteTags.GlobalRules).FirstOrDefault(), result);
+            ParseRules(xmlRoot.Descendants(RewriteTags.Rules).FirstOrDefault(), result);
+            return result;
         }
 
         private static IISRewriteMapCollection SetUpRewriteMaps(XElement xmlRoot, IEnumerable<IISRewriteMap> rewriteMaps)
