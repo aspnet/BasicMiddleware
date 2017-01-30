@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.Rewrite.Internal.PatternSegments;
 using Microsoft.Extensions.Logging.Testing;
-
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
@@ -119,11 +117,11 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             map[expectedKey] = expectedValue;
             var maps = new IISRewriteMapCollection { map };
 
-            string inputString = $"{{{expectedMapName}:{{R:1}}}}";
-            Pattern pattern = new InputParser(maps).ParseInputString(inputString);
+            var inputString = $"{{{expectedMapName}:{{R:1}}}}";
+            var pattern = new InputParser(maps).ParseInputString(inputString);
             Assert.Equal(1, pattern.PatternSegments.Count);
 
-            PatternSegment segment = pattern.PatternSegments.Single();
+            var segment = pattern.PatternSegments.Single();
             var rewriteMapSegment = segment as RewriteMapSegment;
             Assert.NotNull(rewriteMapSegment);
 

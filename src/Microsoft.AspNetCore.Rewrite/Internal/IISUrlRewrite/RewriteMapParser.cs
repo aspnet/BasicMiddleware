@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using System.Linq;
 using System.Xml.Linq;
@@ -10,7 +13,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             if (xmlRoot == null)
             {
-                throw new ArgumentException(nameof(xmlRoot));
+                throw new ArgumentNullException(nameof(xmlRoot));
             }
 
             var mapsElement = xmlRoot.Descendants(RewriteTags.RewriteMaps).SingleOrDefault();

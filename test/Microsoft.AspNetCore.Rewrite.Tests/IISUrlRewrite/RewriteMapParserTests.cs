@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
-
 using Xunit;
 
 namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
             // assert
             Assert.Equal(1, actualMaps.Count);
 
-            IISRewriteMap actualMap = actualMaps[expectedMapName];
+            var actualMap = actualMaps[expectedMapName];
             Assert.NotNull(actualMap);
             Assert.Equal(expectedMapName, actualMap.Name);
             Assert.Equal(expectedValue, actualMap[expectedKey]);

@@ -137,7 +137,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                 return;
                             }
                         default:
-                            IISRewriteMap rewriteMap = _rewriteMaps?[parameter];
+                            var rewriteMap = _rewriteMaps?[parameter];
                             if (rewriteMap != null)
                             {
                                 var pattern = ParseString(context);
