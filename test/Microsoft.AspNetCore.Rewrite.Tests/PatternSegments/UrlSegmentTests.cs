@@ -11,8 +11,15 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
     public class UrlSegmentTests
     {
         [Theory]
+        [InlineData("http", "localhost", 80, null, UriMatchPart.Path, "")]
+        [InlineData("http", "localhost", 80, "", UriMatchPart.Path, "")]
         [InlineData("http", "localhost", 80, "/foo/bar", UriMatchPart.Path, "/foo/bar")]
+        [InlineData("http", "localhost", 80, "/foo:bar", UriMatchPart.Path, "/foo:bar")]
+        [InlineData("http", "localhost", 80, "/foo bar", UriMatchPart.Path, "/foo%20bar")]
+        [InlineData("http", "localhost", 80, null, UriMatchPart.Full, "http://localhost:80/")]
         [InlineData("http", "localhost", 80, "", UriMatchPart.Full, "http://localhost:80/")]
+        [InlineData("http", "localhost", 80, "/foo:bar", UriMatchPart.Full, "http://localhost:80/foo:bar")]
+        [InlineData("http", "localhost", 80, "/foo bar", UriMatchPart.Full, "http://localhost:80/foo%20bar")]
         [InlineData("http", "localhost", 80, "/foo/bar", UriMatchPart.Full, "http://localhost:80/foo/bar")]
         [InlineData("http", "localhost", 81, "/foo/bar", UriMatchPart.Full, "http://localhost:81/foo/bar")]
         [InlineData("https", "localhost", 443, "/foo/bar", UriMatchPart.Full, "https://localhost:443/foo/bar")]
@@ -29,7 +36,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.PatternSegments
 
             // Act
             var segment = new UrlSegment(uriMatchPart);
-            string results = segment.Evaluate(context, null, null);
+            var results = segment.Evaluate(context, null, null);
 
             // Assert
             Assert.Equal(expectedResult, results);

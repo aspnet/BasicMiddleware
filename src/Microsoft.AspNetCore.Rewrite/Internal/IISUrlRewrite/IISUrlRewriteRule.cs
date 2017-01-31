@@ -17,8 +17,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
             ConditionCollection conditions,
+            UrlAction action)
+            : this(name, initialMatch, conditions, action, false)
+        {
+        }
+
+        public IISUrlRewriteRule(string name,
+            UrlMatch initialMatch,
+            ConditionCollection conditions,
             UrlAction action,
-            bool global = false)
+            bool global)
         {
             Name = name;
             InitialMatch = initialMatch;
