@@ -25,24 +25,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             TrackAllCaptures = trackAllCaptures;
         }
 
-        public ConditionCollection(LogicalGrouping grouping, bool trackAllCaptures, Condition condition)
-            : this(grouping, trackAllCaptures)
-        {
-            Add(condition);
-        }
-
-        public ConditionCollection(LogicalGrouping grouping, bool trackAllCaptures, IEnumerable<Condition> conditions)
-            : this(grouping, trackAllCaptures)
-        {
-            if (conditions != null)
-            {
-                foreach (var condition in conditions)
-                {
-                    Add(condition);
-                }
-            }
-        }
-
         public int Count => _conditions.Count;
 
         public Condition this[int index]
