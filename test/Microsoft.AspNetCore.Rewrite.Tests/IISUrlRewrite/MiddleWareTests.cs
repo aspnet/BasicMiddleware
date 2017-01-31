@@ -496,8 +496,11 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         {
             // arrange
             var inputParser = new InputParser();
-            var ruleBuilder = new UrlRewriteRuleBuilder();
-            ruleBuilder.Name = "test";
+            var ruleBuilder = new UrlRewriteRuleBuilder
+            {
+                Name = "test",
+                Global = false
+            };
             ruleBuilder.AddUrlMatch(".*");
             var condition = new UriMatchCondition(
                 inputParser,
@@ -510,7 +513,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             ruleBuilder.AddUrlCondition(condition);
             ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", uriMatchPart), ActionType.Rewrite);
 
-            var options = new RewriteOptions().Add(ruleBuilder.Build(false));
+            var options = new RewriteOptions().Add(ruleBuilder.Build());
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {

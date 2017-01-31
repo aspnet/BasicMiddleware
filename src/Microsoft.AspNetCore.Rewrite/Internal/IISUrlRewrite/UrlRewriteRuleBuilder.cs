@@ -16,19 +16,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public string Name { get; set; }
         public bool Enabled { get; set; }
+        public bool Global { get; set; }
+        public UriMatchPart UriMatchPart => Global ? UriMatchPart.Full : UriMatchPart.Path;
 
         private UrlMatch _initialMatch;
         private ConditionCollection _conditions;
         private UrlAction _action;
 
-        public IISUrlRewriteRule Build(bool global)
+        public IISUrlRewriteRule Build()
         {
             if (_initialMatch == null || _action == null)
             {
                 throw new InvalidOperationException("Cannot create UrlRewriteRule without action and match");
             }
 
-            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action, global);
+            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action, Global);
         }
 
         public void AddUrlAction(
