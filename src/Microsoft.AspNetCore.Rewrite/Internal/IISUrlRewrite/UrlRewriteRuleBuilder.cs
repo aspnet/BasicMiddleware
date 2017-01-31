@@ -86,9 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         public void ConfigureConditionBehavior(LogicalGrouping logicalGrouping, bool trackAllCaptures)
         {
-            _conditions = new ConditionCollection(
-                logicalGrouping == LogicalGrouping.MatchAny ? ConditionCollection.ConditionGrouping.Or : ConditionCollection.ConditionGrouping.And,
-                trackAllCaptures);
+            _conditions = new ConditionCollection(logicalGrouping, trackAllCaptures);
         }
 
         public void AddUrlCondition(Condition condition)

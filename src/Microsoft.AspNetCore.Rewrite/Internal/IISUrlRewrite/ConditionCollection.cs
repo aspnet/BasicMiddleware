@@ -11,33 +11,27 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
     {
         private readonly List<Condition> _conditions = new List<Condition>();
 
-        public enum ConditionGrouping
-        {
-            And,
-            Or
-        }
-
-        public ConditionGrouping Grouping { get; }
+        public LogicalGrouping Grouping { get; }
         public bool TrackAllCaptures { get; }
 
         public ConditionCollection()
-            :this(ConditionGrouping.And, trackAllCaptures: false)
+            :this(LogicalGrouping.MatchAll, trackAllCaptures: false)
         {
         }
 
-        public ConditionCollection(ConditionGrouping grouping, bool trackAllCaptures)
+        public ConditionCollection(LogicalGrouping grouping, bool trackAllCaptures)
         {
             Grouping = grouping;
             TrackAllCaptures = trackAllCaptures;
         }
 
-        public ConditionCollection(ConditionGrouping grouping, bool trackAllCaptures, Condition condition)
+        public ConditionCollection(LogicalGrouping grouping, bool trackAllCaptures, Condition condition)
             : this(grouping, trackAllCaptures)
         {
             Add(condition);
         }
 
-        public ConditionCollection(ConditionGrouping grouping, bool trackAllCaptures, IEnumerable<Condition> conditions)
+        public ConditionCollection(LogicalGrouping grouping, bool trackAllCaptures, IEnumerable<Condition> conditions)
             : this(grouping, trackAllCaptures)
         {
             if (conditions != null)

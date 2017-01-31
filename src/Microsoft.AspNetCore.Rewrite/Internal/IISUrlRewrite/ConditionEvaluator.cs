@@ -12,11 +12,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             var orSucceeded = false;
             foreach (var condition in conditions)
             {
-                if (orSucceeded && conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
+                if (orSucceeded && conditions.Grouping == LogicalGrouping.MatchAny)
                 {
                     continue;
                 }
-                else if (orSucceeded)
+
+				if (orSucceeded)
                 {
                     orSucceeded = false;
                     continue;
@@ -24,7 +25,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
                 condResult = condition.Evaluate(context, backReferences, prevBackReferences);
                 var currentBackReferences = condResult.BackReferences;
-                if (conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
+                if (conditions.Grouping == LogicalGrouping.MatchAny)
                 {
                     orSucceeded = condResult.Success;
                 }
