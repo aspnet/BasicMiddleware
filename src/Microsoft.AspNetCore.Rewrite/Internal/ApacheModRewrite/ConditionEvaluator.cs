@@ -1,18 +1,25 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.AspNetCore.Rewrite.Internal
+using System.Collections.Generic;
+
+namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
-    public static class ConditionHelper
+    public static class ConditionEvaluator
     {
-        public static MatchResults Evaluate(ConditionCollection conditions, RewriteContext context, BackReferenceCollection backReferences)
+        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences)
+        {
+            return Evaluate(conditions, context, backReferences, trackAllCaptures: false);
+        }
+
+        public static MatchResults Evaluate(IEnumerable<Condition> conditions, RewriteContext context, BackReferenceCollection backReferences, bool trackAllCaptures)
         {
             BackReferenceCollection prevBackReferences = null;
             MatchResults condResult = null;
             var orSucceeded = false;
             foreach (var condition in conditions)
             {
-                if (orSucceeded && conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
+                if (orSucceeded && condition.OrNext)
                 {
                     continue;
                 }
@@ -24,7 +31,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 condResult = condition.Evaluate(context, backReferences, prevBackReferences);
                 var currentBackReferences = condResult.BackReferences;
-                if (conditions.Grouping == ConditionCollection.ConditionGrouping.Or)
+                if (condition.OrNext)
                 {
                     orSucceeded = condResult.Success;
                 }
@@ -33,7 +40,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     return condResult;
                 }
 
-                if (condResult.Success && conditions.TrackAllCaptures && prevBackReferences!= null)
+                if (condResult.Success && trackAllCaptures && prevBackReferences != null)
                 {
                     prevBackReferences.Add(currentBackReferences);
                     currentBackReferences = prevBackReferences;

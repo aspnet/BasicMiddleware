@@ -9,10 +9,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
     public class ApacheModRewriteRule : IRule
     {
         public UrlMatch InitialMatch { get; }
-        public ConditionCollection Conditions { get; }
+        public IList<Condition> Conditions { get; }
         public IList<UrlAction> Actions { get; }
 
-        public ApacheModRewriteRule(UrlMatch initialMatch, ConditionCollection conditions, IList<UrlAction> urlActions)
+        public ApacheModRewriteRule(UrlMatch initialMatch, IList<Condition> conditions, IList<UrlAction> urlActions)
         {
             Conditions = conditions;
             InitialMatch = initialMatch;
@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             BackReferenceCollection condBackReferences = null;
             if (Conditions != null)
             {
-                var condResult = ConditionHelper.Evaluate(Conditions, context, initMatchRes.BackReferences);
+                var condResult = ConditionEvaluator.Evaluate(Conditions, context, initMatchRes.BackReferences);
                 if (!condResult.Success)
                 {
                     context.Logger?.ModRewriteDidNotMatchRule();
