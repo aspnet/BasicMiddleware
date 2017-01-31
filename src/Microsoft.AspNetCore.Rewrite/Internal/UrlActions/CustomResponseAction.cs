@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Text;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
@@ -14,8 +15,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
         public string StatusReason { get; }
         public string StatusDescription { get; }
 
-        public CustomResponseAction(int statusCode, string statusReason = null, string statusDescription = null)
+        public CustomResponseAction(int statusCode, string statusReason, string statusDescription)
         {
+            if (string.IsNullOrEmpty(statusReason))
+            {
+                throw new ArgumentException(nameof(statusReason));
+            }
+
+            if (string.IsNullOrEmpty(statusDescription))
+            {
+                throw new ArgumentException(nameof(statusDescription));
+            }
+
             StatusCode = statusCode;
             StatusReason = statusReason;
             StatusDescription = statusDescription;
@@ -25,19 +36,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
         {
             context.HttpContext.Response.StatusCode = StatusCode;
 
-            if (!string.IsNullOrEmpty(StatusReason))
-            {
-                context.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = StatusReason;
-            }
+            context.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = StatusReason;
 
-            if (!string.IsNullOrEmpty(StatusDescription))
-            {
-                var content = Encoding.UTF8.GetBytes(StatusDescription);
-                context.HttpContext.Response.ContentLength = content.Length;
-                context.HttpContext.Response.Body.Write(content, 0, content.Length);
-            }
+            var content = Encoding.UTF8.GetBytes(StatusDescription);
+            context.HttpContext.Response.ContentLength = content.Length;
+            context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+            context.HttpContext.Response.Body.Write(content, 0, content.Length);
 
             context.Result = RuleResult.EndResponse;
+
             context.Logger?.CustomResponse(context.HttpContext.Request.GetEncodedUrl());
         }
     }

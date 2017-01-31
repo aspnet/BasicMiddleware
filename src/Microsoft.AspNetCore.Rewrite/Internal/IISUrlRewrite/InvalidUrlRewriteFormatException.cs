@@ -9,6 +9,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class InvalidUrlRewriteFormatException : FormatException
     {
+        public int LineNumber { get; }
+        public int LinePosition { get; }
+
         public InvalidUrlRewriteFormatException(XElement element, string message)
             : base(FormatMessage(element, message))
         {
@@ -17,14 +20,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public InvalidUrlRewriteFormatException(XElement element, string message, Exception innerException)
             : base(FormatMessage(element, message), innerException)
         {
+            var xmlLineInfo = (IXmlLineInfo)element;
+            LineNumber = xmlLineInfo.LineNumber;
+            LinePosition = xmlLineInfo.LinePosition;
         }
 
         private static string FormatMessage(XElement element, string message)
         {
-            var lineInfo = (IXmlLineInfo)element;
-            var line = lineInfo.LineNumber;
-            var col = lineInfo.LinePosition;
-            return Resources.FormatError_UrlRewriteParseError(message, line, col);
+            var xmlLineInfo = (IXmlLineInfo)element;
+            return Resources.FormatError_UrlRewriteParseError(message, xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
         }
     }
 }

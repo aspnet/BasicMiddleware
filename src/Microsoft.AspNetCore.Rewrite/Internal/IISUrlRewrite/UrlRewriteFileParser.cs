@@ -131,79 +131,69 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             var parsedPatternString = condition.Attribute(RewriteTags.Pattern)?.Value;
-            try
-            {
-                var input = _inputParser.ParseInputString(parsedInputString);
-                builder.AddUrlCondition(input, parsedPatternString, patternSyntax, matchType, ignoreCase, negate, trackAllCaptures);
-            }
-            catch (FormatException formatException)
-            {
-                throw new InvalidUrlRewriteFormatException(condition, formatException.Message, formatException);
-            }
+            var input = _inputParser.ParseInputString(parsedInputString);
+            builder.AddUrlCondition(input, parsedPatternString, patternSyntax, matchType, ignoreCase, negate, trackAllCaptures);
         }
 
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)
         {
             var actionType = ParseEnum(urlAction, RewriteTags.Type, ActionType.None);
-
-            try
+            UrlAction action;
+            switch (actionType)
             {
-                UrlAction action;
-                switch (actionType)
-                {
-                    case ActionType.None:
-                        action = new VoidAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules);
-                        break;
-                    case ActionType.Rewrite:
-                    case ActionType.Redirect:
-                        var url = string.Empty;
-                        if (urlAction.Attribute(RewriteTags.Url) != null)
+                case ActionType.None:
+                    action = new NoneAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules);
+                    break;
+                case ActionType.Rewrite:
+                case ActionType.Redirect:
+                    var url = string.Empty;
+                    if (urlAction.Attribute(RewriteTags.Url) != null)
+                    {
+                        url = urlAction.Attribute(RewriteTags.Url).Value;
+                        if (string.IsNullOrEmpty(url))
                         {
-                            url = urlAction.Attribute(RewriteTags.Url).Value;
-                            if (string.IsNullOrEmpty(url))
-                            {
-                                throw new InvalidUrlRewriteFormatException(urlAction, "Url attribute cannot contain an empty string");
-                            }
+                            throw new InvalidUrlRewriteFormatException(urlAction, "Url attribute cannot contain an empty string");
                         }
+                    }
 
-                        var urlPattern = _inputParser.ParseInputString(url);
-                        var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
+                    var urlPattern = _inputParser.ParseInputString(url);
+                    var appendQuery = ParseBool(urlAction, RewriteTags.AppendQueryString, defaultValue: true);
 
-                        if (actionType == ActionType.Rewrite)
-                        {
-                            action = new RewriteAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules, urlPattern, appendQuery);
-                        }
-                        else
-                        {
-                            var redirectType = ParseEnum(urlAction, RewriteTags.RedirectType, RedirectType.Permanent);
+                    if (actionType == ActionType.Rewrite)
+                    {
+                        action = new RewriteAction(stopProcessing ? RuleResult.SkipRemainingRules : RuleResult.ContinueRules, urlPattern, appendQuery);
+                    }
+                    else
+                    {
+                        var redirectType = ParseEnum(urlAction, RewriteTags.RedirectType, RedirectType.Permanent);
 
-                            action = new RedirectAction((int)redirectType, urlPattern, appendQuery);
-                        }
-                        break;
-                    case ActionType.AbortRequest:
-                        action = new AbortAction();
-                        break;
-                    case ActionType.CustomResponse:
-                        int statusCode;
-                        if (!int.TryParse(urlAction.Attribute(RewriteTags.StatusCode)?.Value, out statusCode))
-                        {
-                            throw new InvalidUrlRewriteFormatException(urlAction, "A valid status code is required");
-                        }
+                        action = new RedirectAction((int)redirectType, urlPattern, appendQuery);
+                    }
+                    break;
+                case ActionType.AbortRequest:
+                    action = new AbortAction();
+                    break;
+                case ActionType.CustomResponse:
+                    int statusCode;
+                    if (!int.TryParse(urlAction.Attribute(RewriteTags.StatusCode)?.Value, out statusCode))
+                    {
+                        throw new InvalidUrlRewriteFormatException(urlAction, "A valid status code is required");
+                    }
 
-                        string statusReason = urlAction.Attribute(RewriteTags.StatusReason)?.Value;
-                        string statusDescription = urlAction.Attribute(RewriteTags.StatusDescription)?.Value;
+                    if (!string.IsNullOrEmpty(urlAction.Attribute(RewriteTags.SubStatusCode)?.Value))
+                    {
+                        throw new NotSupportedException("Substatus codes are not supported");
+                    }
 
-                        action = new CustomResponseAction(statusCode, statusReason, statusDescription);
-                        break;
-                    default:
-                        throw new NotSupportedException($"The action type {actionType} wasn't recognized");
-                }
-                builder.AddUrlAction(action);
+                    var statusReason = urlAction.Attribute(RewriteTags.StatusReason)?.Value;
+                    var statusDescription = urlAction.Attribute(RewriteTags.StatusDescription)?.Value;
+
+                    action = new CustomResponseAction(statusCode, statusReason, statusDescription);
+                    break;
+                default:
+                    throw new NotSupportedException($"The action type {actionType} wasn't recognized");
             }
-            catch (Exception exception) when (!(exception is InvalidUrlRewriteFormatException))
-            {
-                throw new InvalidUrlRewriteFormatException(urlAction, exception.Message, exception);
-            }
+            builder.AddUrlAction(action);
         }
 
         private bool ParseBool(XElement element, string rewriteTag, bool defaultValue)
