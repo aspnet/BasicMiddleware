@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         {
             if (action == null)
             {
-                throw new NotSupportedException("Rules must contain an action");
+                throw new ArgumentNullException(nameof(action), "Rules must contain an action");
             }
             _action = action;
         }

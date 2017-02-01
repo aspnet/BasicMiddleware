@@ -180,6 +180,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                         throw new InvalidUrlRewriteFormatException(urlAction, "A valid status code is required");
                     }
 
+                    if (statusCode < 200 || statusCode > 999)
+                    {
+                        throw new NotSupportedException("Status codes must be between 200 and 999 (inclusive)");
+                    }
+
                     if (!string.IsNullOrEmpty(urlAction.Attribute(RewriteTags.SubStatusCode)?.Value))
                     {
                         throw new NotSupportedException("Substatus codes are not supported");
@@ -188,7 +193,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     var statusReason = urlAction.Attribute(RewriteTags.StatusReason)?.Value;
                     var statusDescription = urlAction.Attribute(RewriteTags.StatusDescription)?.Value;
 
-                    action = new CustomResponseAction(statusCode, statusReason, statusDescription);
+                    action = new CustomResponseAction(statusCode) { StatusReason = statusReason, StatusDescription = statusDescription };
                     break;
                 default:
                     throw new NotSupportedException($"The action type {actionType} wasn't recognized");
