@@ -162,6 +162,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 builder.SetServerVariable(
                     ServerVariables.ParseCustomServerVariable(
+                        _inputParser,
                         serverVariable.Attribute(RewriteTags.Name).Value,
                         serverVariable.Attribute(RewriteTags.Value).Value));
             }

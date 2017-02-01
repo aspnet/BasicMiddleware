@@ -9,8 +9,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class ServerVariables
     {
-        private static readonly InputParser _inputParser = new InputParser();
-
         public const string RequestHeaderPrefix = "HTTP_";
         public const string ResponseHeaderPrefix = "RESPONSE_";
 
@@ -90,15 +88,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new ServerVariable(serverVariable, new Pattern(patternSegment), ServerVariableType.RequestHeader);
         }
 
-        public static ServerVariable ParseCustomServerVariable(string name, string value)
+        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, string name, string value)
         {
             if (name.StartsWith(RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), _inputParser.ParseInputString(value), ServerVariableType.RequestHeader);
+                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value), ServerVariableType.RequestHeader);
             }
             if (name.StartsWith(ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), _inputParser.ParseInputString(value), ServerVariableType.ResponseHeader);
+                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value), ServerVariableType.ResponseHeader);
             }
             throw new NotSupportedException($"Custom server variables must start with '{RequestHeaderPrefix}' or '{ResponseHeaderPrefix}'");
         }
