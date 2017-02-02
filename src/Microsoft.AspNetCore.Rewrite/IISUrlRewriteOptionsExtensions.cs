@@ -39,7 +39,6 @@ namespace Microsoft.AspNetCore.Rewrite
             }
         }
 
-
         /// <summary>
         /// Add rules from a IIS config file containing Url Rewrite rules
         /// </summary>
