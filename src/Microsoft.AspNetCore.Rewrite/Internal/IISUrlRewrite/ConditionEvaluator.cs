@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     continue;
                 }
 
-				if (orSucceeded)
+                if (orSucceeded)
                 {
                     orSucceeded = false;
                     continue;

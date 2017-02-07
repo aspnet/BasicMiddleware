@@ -10,7 +10,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.PatternSegments
     {
         private readonly UriMatchPart _uriMatchPart;
 
-        public UrlSegment(UriMatchPart uriMatchPart = UriMatchPart.Path)
+        public UrlSegment()
+            : this(UriMatchPart.Path)
+        {
+        }
+
+        public UrlSegment(UriMatchPart uriMatchPart)
         {
             _uriMatchPart = uriMatchPart;
         }
