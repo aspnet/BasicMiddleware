@@ -12,6 +12,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private const char Colon = ':';
         private const char OpenBrace = '{';
         private const char CloseBrace = '}';
+        private readonly IISRewriteMapCollection _rewriteMaps;
+
+        public InputParser()
+        {
+        }
+
+        public InputParser(IISRewriteMapCollection rewriteMaps)
+        {
+            _rewriteMaps = rewriteMaps;
+        }
 
         /// <summary>
         /// Creates a pattern, which is a template to create a new test string to
@@ -42,7 +52,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return ParseString(context, uriMatchPart);
         }
 
-        private static Pattern ParseString(ParserContext context, UriMatchPart uriMatchPart)
+        private Pattern ParseString(ParserContext context, UriMatchPart uriMatchPart)
         {
             var results = new List<PatternSegment>();
             while (context.Next())
@@ -71,7 +81,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new Pattern(results);
         }
 
-        private static void ParseParameter(ParserContext context, IList<PatternSegment> results, UriMatchPart uriMatchPart)
+        private void ParseParameter(ParserContext context, IList<PatternSegment> results, UriMatchPart uriMatchPart)
         {
             context.Mark();
             // Four main cases:
@@ -139,6 +149,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                 return;
                             }
                         default:
+                            var rewriteMap = _rewriteMaps?[parameter];
+                            if (rewriteMap != null)
+                            {
+                                var pattern = ParseString(context, uriMatchPart);
+                                results.Add(new RewriteMapSegment(rewriteMap, pattern));
+                                return;
+                            }
                             throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(parameter, context.Index));
                     }
                 }
