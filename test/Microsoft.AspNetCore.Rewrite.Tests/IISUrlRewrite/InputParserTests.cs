@@ -94,7 +94,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [Fact]
         public void Should_throw_FormatException_if_no_rewrite_maps_are_defined()
         {
-            Assert.Throws<FormatException>(() => new InputParser(null).ParseInputString("{apiMap:{R:1}}"));
+            Assert.Throws<FormatException>(() => new InputParser(null).ParseInputString("{apiMap:{R:1}}", global: false));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             const string undefinedMapName = "apiMap";
             var map = new IISRewriteMap(definedMapName);
             var maps = new IISRewriteMapCollection { map };
-            Assert.Throws<FormatException>(() => new InputParser(maps).ParseInputString($"{{{undefinedMapName}:{{R:1}}}}"));
+            Assert.Throws<FormatException>(() => new InputParser(maps).ParseInputString($"{{{undefinedMapName}:{{R:1}}}}", global: false));
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var maps = new IISRewriteMapCollection { map };
 
             var inputString = $"{{{expectedMapName}:{{R:1}}}}";
-            var pattern = new InputParser(maps).ParseInputString(inputString);
+            var pattern = new InputParser(maps).ParseInputString(inputString, global: false);
             Assert.Equal(1, pattern.PatternSegments.Count);
 
             var segment = pattern.PatternSegments.Single();

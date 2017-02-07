@@ -141,7 +141,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                             var rewriteMap = _rewriteMaps?[parameter];
                             if (rewriteMap != null)
                             {
-                                var pattern = ParseString(context);
+                                var pattern = ParseString(context, global);
                                 results.Add(new RewriteMapSegment(rewriteMap, pattern));
                                 return;
                             }
