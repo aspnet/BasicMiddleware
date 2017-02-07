@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public IEnumerable<ServerVariable> ServerVariables { get; }
         public UrlAction Action { get; }
         public bool TrackAllCaptures { get; }
+        public bool Global { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
@@ -23,6 +24,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             IEnumerable<ServerVariable> serverVariables,
             UrlAction action,
             bool trackAllCaptures)
+            : this(name, initialMatch, conditions, serverVariables, action, trackAllCaptures, false)
+        {
+        }
+
+        public IISUrlRewriteRule(string name,
+            UrlMatch initialMatch,
+            IList<Condition> conditions,
+            IEnumerable<ServerVariable> serverVariables,
+            UrlAction action,
+            bool trackAllCaptures,
+            bool global)
         {
             Name = name;
             InitialMatch = initialMatch;
@@ -30,6 +42,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             ServerVariables = serverVariables;
             Action = action;
             TrackAllCaptures = trackAllCaptures;
+            Global = global;
         }
 
         public virtual void ApplyRule(RewriteContext context)
@@ -69,7 +82,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 foreach (ServerVariable serverVariable in ServerVariables)
                 {
                     var name = serverVariable.Name;
-                    var value = serverVariable.Evaluate(context, initMatchResults, condResult);
+                    var value = serverVariable.Evaluate(context, initMatchResults.BackReferences, condResult?.BackReferences);
 
                     IHeaderDictionary headerDictionary;
                     switch (serverVariable.Type)

@@ -12,7 +12,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public const string RequestHeaderPrefix = "HTTP_";
         public const string ResponseHeaderPrefix = "RESPONSE_";
 
-        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context)
+        /// <summary>
+        /// Returns a <see cref="ServerVariable"/>
+        /// </summary>
+        /// <param name="serverVariable">The server variable</param>
+        /// <param name="context">The parser context which is utilized when an exception is thrown</param>
+        /// <param name="global">Indicates if the rule being parsed is a global rule</param>
+        /// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
+        /// <returns>A <see cref="ServerVariable"/></returns>
+        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context, bool global)
         {
             PatternSegment patternSegment;
 
@@ -48,7 +56,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     patternSegment = new HeaderSegment(HeaderNames.Connection);
                     break;
                 case "HTTP_URL":
-                    patternSegment = new UrlSegment();
+                    patternSegment = global ? (PatternSegment)new GlobalRuleUrlSegment() : (PatternSegment)new UrlSegment();
                     break;
                 case "HTTPS":
                     patternSegment = new IsHttpsUrlSegment();
@@ -79,7 +87,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     patternSegment = new SchemeSegment();
                     break;
                 case "REQUEST_URI":
-                    patternSegment = new UrlSegment();
+                    patternSegment = global ? (PatternSegment)new GlobalRuleUrlSegment() : (PatternSegment)new UrlSegment();
                     break;
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
@@ -88,15 +96,15 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             return new ServerVariable(serverVariable, new Pattern(patternSegment), ServerVariableType.RequestHeader);
         }
 
-        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, string name, string value)
+        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, bool global, string name, string value)
         {
             if (name.StartsWith(RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value), ServerVariableType.RequestHeader);
+                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, global), ServerVariableType.RequestHeader);
             }
             if (name.StartsWith(ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value), ServerVariableType.ResponseHeader);
+                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, global), ServerVariableType.ResponseHeader);
             }
             throw new NotSupportedException($"Custom server variables must start with '{RequestHeaderPrefix}' or '{ResponseHeaderPrefix}'");
         }

@@ -459,6 +459,34 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Fact]
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri()
+        {
+            var xml = @"<rewrite>
+                            <globalRules>
+                                <rule name=""Test"" patternSyntax=""ECMAScript"" stopProcessing=""true"">
+                                    <match url="".*"" />
+                                    <conditions logicalGrouping=""MatchAll"" trackAllCaptures=""false"">
+                                        <add input=""{REQUEST_URI}"" pattern=""^http://localhost/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})(/.*)"" />
+                                    </conditions>
+                                    <action type=""Rewrite"" url=""http://www.test.com{C:2}"" />
+                                </rule>
+                            </globalRules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetStringAsync($"http://localhost/{Guid.NewGuid()}/foo/bar");
+
+            Assert.Equal("http://www.test.com/foo/bar", response);
+        }
+
+        [Fact]
         public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingStandardServerVariables()
         {
             var actionType = ActionType.None;

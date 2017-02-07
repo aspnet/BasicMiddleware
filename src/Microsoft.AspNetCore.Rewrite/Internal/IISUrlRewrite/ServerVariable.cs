@@ -17,6 +17,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 throw new ArgumentException(nameof(name));
             }
+
             if (pattern == null)
             {
                 throw new ArgumentNullException(nameof(pattern));
@@ -27,9 +28,9 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Type = type;
         }
 
-        public string Evaluate(RewriteContext context, MatchResults ruleMatch, MatchResults condMatch)
+        public string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
-            return Pattern.Evaluate(context, ruleMatch.BackReferences, condMatch?.BackReferences);
+            return Pattern.Evaluate(context, ruleBackReferences, conditionBackReferences);
         }
     }
 }

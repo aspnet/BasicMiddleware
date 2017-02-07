@@ -13,25 +13,28 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
     public class ServerVariableTests
     {
         [Theory]
-        [InlineData("CONTENT_LENGTH", "10")]
-        [InlineData("CONTENT_TYPE", "json")]
-        [InlineData("HTTP_ACCEPT", "accept")]
-        [InlineData("HTTP_COOKIE", "cookie")]
-        [InlineData("HTTP_HOST", "example.com")]
-        [InlineData("HTTP_REFERER", "referer")]
-        [InlineData("HTTP_USER_AGENT", "useragent")]
-        [InlineData("HTTP_CONNECTION", "connection")]
-        [InlineData("HTTP_URL", "/foo")]
-        [InlineData("QUERY_STRING", "bar=1")]
-        [InlineData("REQUEST_FILENAME", "/foo")]
-        [InlineData("REQUEST_METHOD", "GET")]
-        [InlineData("REQUEST_SCHEME", "https")]
-        public void CheckServerVariableParsingAndApplication(string variable, string expected)
+        [InlineData("CONTENT_LENGTH", "10", false)]
+        [InlineData("CONTENT_TYPE", "json", false)]
+        [InlineData("HTTP_ACCEPT", "accept", false)]
+        [InlineData("HTTP_COOKIE", "cookie", false)]
+        [InlineData("HTTP_HOST", "example.com", false)]
+        [InlineData("HTTP_REFERER", "referer", false)]
+        [InlineData("HTTP_USER_AGENT", "useragent", false)]
+        [InlineData("HTTP_CONNECTION", "connection", false)]
+        [InlineData("HTTP_URL", "/foo", false)]
+        [InlineData("HTTP_URL", "https://example.com/foo?bar=1", true)]
+        [InlineData("QUERY_STRING", "bar=1", false)]
+        [InlineData("REQUEST_FILENAME", "/foo", false)]
+        [InlineData("REQUEST_URI", "/foo", false)]
+        [InlineData("REQUEST_URI", "https://example.com/foo?bar=1", true)]
+        [InlineData("REQUEST_METHOD", "GET", false)]
+        [InlineData("REQUEST_SCHEME", "https", false)]
+        public void CheckServerVariableParsingAndApplication(string variable, string expected, bool global)
         {
             // Arrange and Act
             var testParserContext = new ParserContext("test");
-            var serverVar = ServerVariables.FindServerVariable(variable, testParserContext);
-            var lookup = serverVar.Evaluate(CreateTestHttpContext(), CreateTestRuleMatch(), CreateTestCondMatch());
+            var serverVar = ServerVariables.FindServerVariable(variable, testParserContext, global);
+            var lookup = serverVar.Evaluate(CreateTestHttpContext(), CreateTestRuleMatch().BackReferences, CreateTestCondMatch().BackReferences);
             // Assert
             Assert.Equal(expected, lookup);
         }
@@ -72,8 +75,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             var context = new DefaultHttpContext();
             var rewriteContext = new RewriteContext { HttpContext = context };
             var testParserContext = new ParserContext("test");
-            var serverVar = ServerVariables.FindServerVariable("QUERY_STRING", testParserContext);
-            var lookup = serverVar.Evaluate(rewriteContext, CreateTestRuleMatch(), CreateTestCondMatch());
+            var serverVar = ServerVariables.FindServerVariable("QUERY_STRING", testParserContext, global: false);
+            var lookup = serverVar.Evaluate(rewriteContext, CreateTestRuleMatch().BackReferences, CreateTestCondMatch().BackReferences);
 
             Assert.Equal(string.Empty, lookup);
         }
