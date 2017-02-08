@@ -522,6 +522,32 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Fact]
+        public async Task Invoke_CustomResponse()
+        {
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Forbidden"">
+                <match url = "".*"" />
+                <action type=""CustomResponse"" statusCode=""403"" statusReason=""reason"" statusDescription=""description"" />
+                </rule>
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("article/10/hey");
+            var content = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+            Assert.Equal("reason", response.ReasonPhrase);
+            Assert.Equal("description", content);
+        }
+
+        [Fact]
         public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingStandardServerVariables()
         {
             var actionType = ActionType.None;

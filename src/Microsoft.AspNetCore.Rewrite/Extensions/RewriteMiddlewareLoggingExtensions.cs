@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         private static readonly Action<ILogger, string, Exception> _redirectSummary;
         private static readonly Action<ILogger, string, Exception> _rewriteSummary;
         private static readonly Action<ILogger, string, Exception> _abortedRequest;
+        private static readonly Action<ILogger, string, Exception> _customResponse;
         private static readonly Action<ILogger, string, Exception> _requestHeaderAdded;
         private static readonly Action<ILogger, string, Exception> _responseHeaderAdded;
 
@@ -79,14 +80,19 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
                             11,
                             "Request to {requestedUrl} was aborted");
 
-            _requestHeaderAdded = LoggerMessage.Define<string>(
+            _customResponse = LoggerMessage.Define<string>(
                             LogLevel.Debug,
                             12,
+                            "Request to {requestedUrl} was ended");
+
+            _requestHeaderAdded = LoggerMessage.Define<string>(
+                            LogLevel.Debug,
+                            13,
                             "Request header added - '{header}'");
 
             _responseHeaderAdded = LoggerMessage.Define<string>(
                             LogLevel.Debug,
-                            13,
+                            14,
                             "Response header added - '{header}'");
         }
 
@@ -143,6 +149,11 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         public static void AbortedRequest(this ILogger logger, string requestedUrl)
         {
             _abortedRequest(logger, requestedUrl, null);
+        }
+
+        public static void CustomResponse(this ILogger logger, string requestedUrl)
+        {
+            _customResponse(logger, requestedUrl, null);
         }
 
         public static void RequestHeaderAdded(this ILogger logger, string name, string value)
