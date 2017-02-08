@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Net.Http.Headers;
@@ -524,6 +526,32 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Equal(expectedRewrittenUri, response);
         }
 
+        [Fact]
+        public async Task Invoke_CustomResponse()
+        {
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(@"<rewrite>
+                <rules>
+                <rule name=""Forbidden"">
+                <match url = "".*"" />
+                <action type=""CustomResponse"" statusCode=""403"" statusReason=""reason"" statusDescription=""description"" />
+                </rule>
+                </rules>
+                </rewrite>"));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync("article/10/hey");
+            var content = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+            Assert.Equal("reason", response.ReasonPhrase);
+            Assert.Equal("description", content);
+        }
+
         [Theory]
         [InlineData(@"^http://localhost(/.*)", "http://localhost/foo/bar", UriMatchPart.Path)]
         [InlineData(@"^http://localhost(/.*)", "http://www.test.com/foo/bar", UriMatchPart.Full)]
@@ -531,12 +559,14 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         {
             // arrange
             var inputParser = new InputParser();
+
             var ruleBuilder = new UrlRewriteRuleBuilder
             {
                 Name = "test",
                 Global = false
             };
             ruleBuilder.AddUrlMatch(".*");
+
             var condition = new UriMatchCondition(
                 inputParser,
                 "{REQUEST_URI}",
@@ -546,7 +576,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 negate: false);
             ruleBuilder.ConfigureConditionBehavior(LogicalGrouping.MatchAll, trackAllCaptures: true);
             ruleBuilder.AddUrlCondition(condition);
-            ruleBuilder.AddUrlAction(inputParser.ParseInputString(@"http://www.test.com{C:1}", uriMatchPart), ActionType.Rewrite);
+
+            var action = new RewriteAction(
+                RuleResult.SkipRemainingRules, 
+                inputParser.ParseInputString(@"http://www.test.com{C:1}", uriMatchPart), 
+                queryStringAppend: false);
+            ruleBuilder.AddUrlAction(action);
 
             var options = new RewriteOptions().Add(ruleBuilder.Build());
             var builder = new WebHostBuilder()
