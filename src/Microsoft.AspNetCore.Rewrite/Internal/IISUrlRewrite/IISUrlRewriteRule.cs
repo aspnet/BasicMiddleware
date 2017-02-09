@@ -99,7 +99,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                             continue;
                     }
 
-                    headerDictionary.Append(name, value);
+                    headerDictionary[name] = value;
                 }
             }
 
