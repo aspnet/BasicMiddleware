@@ -96,7 +96,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                             context.Logger?.ResponseHeaderAdded(name, value);
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException($"Unexpected server variable: `{serverVariable.Type}`");
+                            continue;
                     }
 
                     headerDictionary.Append(name, value);
