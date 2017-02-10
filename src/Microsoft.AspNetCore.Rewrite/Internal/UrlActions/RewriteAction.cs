@@ -2,8 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
 {
@@ -43,7 +45,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
 
         }
 
-        public override void ApplyAction(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
+        public override Task ApplyActionAsync(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             var pattern = Url.Evaluate(context, ruleBackReferences, conditionBackReferences);
             var request = context.HttpContext.Request;
@@ -135,6 +137,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
                 }
             }
             context.Result = Result;
+            return TaskCache.CompletedTask;
         }
     }
 }

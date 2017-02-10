@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal;
 
@@ -28,11 +29,11 @@ namespace Microsoft.AspNetCore.Rewrite
         /// Adds a rule to the current rules.
         /// </summary>
         /// <param name="options">The <see cref="RewriteOptions"/>.</param>
-        /// <param name="applyRule">A Func that checks and applies the rule.</param>
+        /// <param name="applyRuleAsync">A Func that checks and applies the rule.</param>
         /// <returns></returns>
-        public static RewriteOptions Add(this RewriteOptions options, Action<RewriteContext> applyRule)
+        public static RewriteOptions Add(this RewriteOptions options, Func<RewriteContext, Task> applyRuleAsync)
         {
-            options.Rules.Add(new DelegateRule(applyRule));
+            options.Rules.Add(new DelegateRule(applyRuleAsync));
             return options;
         }
 

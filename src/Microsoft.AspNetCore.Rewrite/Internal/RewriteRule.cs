@@ -3,9 +3,11 @@
 
 using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Rewrite.Logging;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
@@ -32,7 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             StopProcessing = stopProcessing;
         }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual Task ApplyRuleAsync(RewriteContext context)
         {
             var path = context.HttpContext.Request.Path;
             Match initMatchResults;
@@ -107,6 +109,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 context.Logger?.RewriteSummary(result);
             }
+            return TaskCache.CompletedTask;
         }
     }
 }

@@ -2,17 +2,18 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
     public class DelegateRule : IRule
     {
-        private readonly Action<RewriteContext> _onApplyRule;
+        private readonly Func<RewriteContext, Task> _onApplyRuleAsync;
 
-        public DelegateRule(Action<RewriteContext> onApplyRule)
+        public DelegateRule(Func<RewriteContext, Task> onApplyRuleAsync)
         {
-            _onApplyRule = onApplyRule;
+            _onApplyRuleAsync = onApplyRuleAsync;
         }
-        public void ApplyRule(RewriteContext context) => _onApplyRule(context);
+        public Task ApplyRuleAsync(RewriteContext context) => _onApplyRuleAsync(context);
     }
 }

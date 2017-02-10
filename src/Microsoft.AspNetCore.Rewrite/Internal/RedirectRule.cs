@@ -3,9 +3,11 @@
 
 using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Rewrite.Logging;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
@@ -32,7 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
             StatusCode = statusCode;
         }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual Task ApplyRuleAsync(RewriteContext context)
         {
             var path = context.HttpContext.Request.Path;
             var pathBase = context.HttpContext.Request.PathBase;
@@ -59,7 +61,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 if (string.IsNullOrEmpty(newPath))
                 {
                     response.Headers[HeaderNames.Location] = pathBase.HasValue ? pathBase.Value : "/";
-                    return;
+                    return TaskCache.CompletedTask;
                 }
 
                 if (newPath.IndexOf("://", StringComparison.Ordinal) == -1 && newPath[0] != '/')
@@ -83,6 +85,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
                 context.Logger?.RedirectedSummary(newPath);
             }
+            return TaskCache.CompletedTask;
         }
     }
 }

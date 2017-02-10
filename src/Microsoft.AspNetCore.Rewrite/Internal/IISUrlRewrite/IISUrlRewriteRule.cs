@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
@@ -40,7 +41,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Global = global;
         }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual async Task ApplyRuleAsync(RewriteContext context)
         {
             // Due to the path string always having a leading slash,
             // remove it from the path before regex comparison
@@ -74,7 +75,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             context.Logger?.UrlRewriteMatchedRule(Name);
             // at this point we know the rule passed, evaluate the replacement.
-            Action.ApplyAction(context, initMatchResults?.BackReferences, condResult?.BackReferences);
+            await Action.ApplyActionAsync(context, initMatchResults?.BackReferences, condResult?.BackReferences);
         }
     }
 }

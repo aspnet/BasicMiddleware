@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Xunit;
@@ -13,7 +14,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
     public class UrlRewriteApplicationTests
     {
         [Fact]
-        public void ApplyRule_AssertStopProcessingFlagWillTerminateOnNoAction()
+        public async Task ApplyRule_AssertStopProcessingFlagWillTerminateOnNoAction()
         {
             var xml = new StringReader(@"<rewrite>
                 <rules>
@@ -27,12 +28,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             Assert.Equal(rules.Count, 1);
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
-            rules.FirstOrDefault().ApplyRule(context);
+            await rules.FirstOrDefault().ApplyRuleAsync(context);
             Assert.Equal(RuleResult.SkipRemainingRules, context.Result);
         }
 
         [Fact]
-        public void ApplyRule_AssertNoTerminateFlagWillNotTerminateOnNoAction()
+        public async Task ApplyRule_AssertNoTerminateFlagWillNotTerminateOnNoAction()
         {
             var xml = new StringReader(@"<rewrite>
                 <rules>
@@ -46,12 +47,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             Assert.Equal(rules.Count, 1);
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
-            rules.FirstOrDefault().ApplyRule(context);
+            await rules.FirstOrDefault().ApplyRuleAsync(context);
             Assert.Equal(RuleResult.ContinueRules, context.Result);
         }
 
         [Fact]
-        public void ApplyRule_TrackAllCaptures()
+        public async Task ApplyRule_TrackAllCaptures()
         {
             var xml = new StringReader(@"<rewrite>
                 <rules>
@@ -69,7 +70,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Equal(rules.Count, 1);
             Assert.True(rules[0].TrackAllCaptures);
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
-            rules.FirstOrDefault().ApplyRule(context);
+            await rules.FirstOrDefault().ApplyRuleAsync(context);
             Assert.Equal(RuleResult.ContinueRules, context.Result);
         }
     }
