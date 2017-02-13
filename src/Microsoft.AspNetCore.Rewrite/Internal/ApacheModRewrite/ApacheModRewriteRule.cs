@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Rewrite.Logging;
-using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 {
@@ -22,7 +20,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             Actions = urlActions;
         }
 
-        public virtual Task ApplyRuleAsync(RewriteContext context)
+        public virtual async Task ApplyRuleAsync(RewriteContext context)
         {
             // 1. Figure out which section of the string to match for the initial rule.
             var initMatchRes = InitialMatch.Evaluate(context.HttpContext.Request.Path, context);
@@ -30,7 +28,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             if (!initMatchRes.Success)
             {
                 context.Logger?.ModRewriteDidNotMatchRule();
-                return TaskCache.CompletedTask;
+                return;
             }
 
             MatchResults condResult = null;
@@ -40,7 +38,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 if (!condResult.Success)
                 {
                     context.Logger?.ModRewriteDidNotMatchRule();
-                    return TaskCache.CompletedTask;
+                    return;
                 }
             }
 
@@ -48,7 +46,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             // which can modify things like the cookie or env, and then apply the action
             context.Logger?.ModRewriteMatchedRule();
 
-            return Task.WhenAll(Actions.Select(action => action.ApplyActionAsync(context, initMatchRes?.BackReferences, condResult?.BackReferences)));
+            foreach (var action in Actions)
+            {
+                await action.ApplyActionAsync(context, initMatchRes?.BackReferences, condResult?.BackReferences);
+            }
         }
     }
 }
