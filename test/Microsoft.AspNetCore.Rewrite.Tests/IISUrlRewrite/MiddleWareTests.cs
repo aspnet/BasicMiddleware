@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
+using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -459,8 +463,9 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Fact]
-        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri()
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_ParsedRule()
         {
+            // arrange
             var xml = @"<rewrite>
                             <globalRules>
                                 <rule name=""Test"" patternSyntax=""ECMAScript"" stopProcessing=""true"">
@@ -481,8 +486,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 });
             var server = new TestServer(builder);
 
+            // act
             var response = await server.CreateClient().GetStringAsync($"http://localhost/{Guid.NewGuid()}/foo/bar");
 
+            // assert
             Assert.Equal("http://www.test.com/foo/bar", response);
         }
 
@@ -545,6 +552,53 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
             Assert.Equal("reason", response.ReasonPhrase);
             Assert.Equal("description", content);
+        }
+
+        [Theory]
+        [InlineData(@"^http://localhost(/.*)", "http://localhost/foo/bar", UriMatchPart.Path)]
+        [InlineData(@"^http://localhost(/.*)", "http://www.test.com/foo/bar", UriMatchPart.Full)]
+        public async Task Invoke_GlobalRuleConditionMatchesAgainstFullUri_CodedRule(string conditionInputPattern, string expectedResult, UriMatchPart uriMatchPart)
+        {
+            // arrange
+            var inputParser = new InputParser();
+
+            var ruleBuilder = new UrlRewriteRuleBuilder
+            {
+                Name = "test",
+                Global = false
+            };
+            ruleBuilder.AddUrlMatch(".*");
+
+            var condition = new UriMatchCondition(
+                inputParser,
+                "{REQUEST_URI}",
+                conditionInputPattern, 
+                uriMatchPart,
+                ignoreCase: true,
+                negate: false);
+            ruleBuilder.ConfigureConditionBehavior(LogicalGrouping.MatchAll, trackAllCaptures: true);
+            ruleBuilder.AddUrlCondition(condition);
+
+            var action = new RewriteAction(
+                RuleResult.SkipRemainingRules, 
+                inputParser.ParseInputString(@"http://www.test.com{C:1}", uriMatchPart), 
+                queryStringAppend: false);
+            ruleBuilder.AddUrlAction(action);
+
+            var options = new RewriteOptions().Add(ruleBuilder.Build());
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+
+            // act
+            var response = await server.CreateClient().GetStringAsync("http://localhost/foo/bar");
+
+            // assert
+            Assert.Equal(expectedResult, response);
         }
 
         [Fact]

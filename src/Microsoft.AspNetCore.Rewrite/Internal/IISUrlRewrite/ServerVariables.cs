@@ -17,13 +17,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         /// </summary>
         /// <param name="serverVariable">The server variable</param>
         /// <param name="context">The parser context which is utilized when an exception is thrown</param>
-        /// <param name="global">Indicates if the rule being parsed is a global rule</param>
+        /// <param name="uriMatchPart">Indicates how a URI should be matched</param>
         /// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
         /// <returns>A <see cref="ServerVariable"/></returns>
-        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context, bool global)
+        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context, UriMatchPart uriMatchPart)
         {
-            PatternSegment patternSegment;
-
             switch (serverVariable)
             {
                 // TODO Add all server variables here.
@@ -48,8 +46,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 case "HTTP_CONNECTION":
                     return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Connection)), ServerVariableType.RequestHeader);
                 case "HTTP_URL":
-                    patternSegment = global ? (PatternSegment)new GlobalRuleUrlSegment() : (PatternSegment)new UrlSegment();
-                    return new ServerVariable(serverVariable, new Pattern(patternSegment), ServerVariableType.RequestHeader);
+                    return new ServerVariable(serverVariable, new Pattern(new UrlSegment(uriMatchPart)), ServerVariableType.RequestHeader);
                 case "HTTPS":
                     return new ServerVariable(serverVariable, new Pattern(new IsHttpsUrlSegment()), ServerVariableType.Request);
                 case "LOCAL_ADDR":
@@ -71,22 +68,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 case "REQUEST_SCHEME":
                     return new ServerVariable(serverVariable, new Pattern(new SchemeSegment()), ServerVariableType.Request);
                 case "REQUEST_URI":
-                    patternSegment = global ? (PatternSegment)new GlobalRuleUrlSegment() : (PatternSegment)new UrlSegment();
-                    return new ServerVariable(serverVariable, new Pattern(patternSegment), ServerVariableType.Request);
+                    return new ServerVariable(serverVariable, new Pattern(new UrlSegment(uriMatchPart)), ServerVariableType.Request);
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
         }
 
-        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, bool global, string name, string value)
+        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, UriMatchPart uriMatchPart, string name, string value)
         {
             if (name.StartsWith(RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, global), ServerVariableType.RequestHeader);
+                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, uriMatchPart), ServerVariableType.RequestHeader);
             }
             if (name.StartsWith(ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, global), ServerVariableType.ResponseHeader);
+                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, uriMatchPart), ServerVariableType.ResponseHeader);
             }
             throw new NotSupportedException($"Custom server variables must start with '{RequestHeaderPrefix}' or '{ResponseHeaderPrefix}'");
         }
