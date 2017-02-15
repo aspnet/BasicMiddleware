@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             MatchResults condResult = null;
             if (Conditions != null)
             {
-                condResult = ConditionHelper.Evaluate(Conditions, context, initMatchRes.BackReferences);
+                condResult = ConditionEvaluator.Evaluate(Conditions, context, initMatchRes.BackReferences);
                 if (!condResult.Success)
                 {
                     context.Logger?.ModRewriteDidNotMatchRule();
