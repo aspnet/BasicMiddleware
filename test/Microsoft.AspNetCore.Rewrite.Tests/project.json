@@ -5,9 +5,9 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "2.2.0-*",
-    "Microsoft.AspNetCore.Rewrite": "1.0.1",
-    "Microsoft.AspNetCore.TestHost": "1.1.1",
-    "Microsoft.Extensions.Logging.Testing": "1.1.1",
+    "Microsoft.AspNetCore.Rewrite": "1.0.2",
+    "Microsoft.AspNetCore.TestHost": "1.1.2",
+    "Microsoft.Extensions.Logging.Testing": "1.1.2",
     "xunit": "2.2.0-*"
   },
   "frameworks": {
