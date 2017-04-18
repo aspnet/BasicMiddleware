@@ -75,6 +75,18 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         }
 
         [Theory]
+        [InlineData("hey/{RequestHeader:Tenant-Id}", "hey/805ffafa-293d-427b-a136-96f196087667")]
+        public void EvaluateRequestHeaderRule(string testString, string expected)
+        {
+            const string tenantId = "805ffafa-293d-427b-a136-96f196087667";
+            var pattern = new InputParser().ParseInputString(testString, UriMatchPart.Path);
+            RewriteContext rewriteContext = CreateTestRewriteContext();
+            rewriteContext.HttpContext.Request.Headers.Add("Tenant-Id", tenantId);
+            var result = pattern.Evaluate(rewriteContext, CreateTestRuleBackReferences(), CreateTestCondBackReferences());
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData("{")]
         [InlineData("{:}")]
         [InlineData("{R:")]
