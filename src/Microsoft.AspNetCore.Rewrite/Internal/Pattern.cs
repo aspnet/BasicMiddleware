@@ -15,13 +15,20 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
 
         public string Evaluate(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
-            foreach (var pattern in PatternSegments)
+            var pooledBuilder = PooledStringBuilder.Allocate();
+            try
             {
-                context.Builder.Append(pattern.Evaluate(context, ruleBackReferences, conditionBackReferences));
+                var builder = pooledBuilder.Builder;
+                foreach (var pattern in PatternSegments)
+                {
+                    builder.Append(pattern.Evaluate(context, ruleBackReferences, conditionBackReferences));
+                }
+                return builder.ToString();
             }
-            var retVal = context.Builder.ToString();
-            context.Builder.Clear();
-            return retVal;
+            finally
+            {
+                pooledBuilder.Free();
+            }
         }
     }
 }
