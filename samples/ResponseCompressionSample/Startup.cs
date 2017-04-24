@@ -20,10 +20,10 @@ namespace ResponseCompressionSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Fastest);
+            services.AddSingleton<ICompressionProvider, GzipCompressionProvider>();
+            services.AddSingleton<ICompressionProvider, CustomCompressionProvider>();
             services.AddResponseCompression(options =>
             {
-                options.Providers.Add<GzipCompressionProvider>();
-                options.Providers.Add<CustomCompressionProvider>();
                 // .Append(TItem) is only available on Core.
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
             });

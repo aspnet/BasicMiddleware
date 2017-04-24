@@ -120,6 +120,38 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             CheckResponseCompressed(response, expectedBodyLength: 123);
         }
 
+
+        [Fact]
+        public async Task ICompressionProvider_CanBeAddedToDI()
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<ICompressionProvider, CustomGzipCompressionProvider>();
+                    services.AddResponseCompression();
+                })
+                .Configure(app =>
+                {
+                    app.UseResponseCompression();
+                    app.Run(context =>
+                    {
+                        context.Response.Headers[HeaderNames.ContentMD5] = "MD5";
+                        context.Response.ContentType = TextPlain;
+                        return context.Response.WriteAsync(new string('a', 100));
+                    });
+                });
+
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            request.Headers.AcceptEncoding.ParseAdd("customgzip");
+
+            var response = await client.SendAsync(request);
+
+            CheckResponseCompressed(response, expectedBodyLength: 24, expectedContentEncoding: "customgzip");
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData("text/plain2")]
@@ -789,7 +821,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             return client.SendAsync(request);
         }
 
-        private void CheckResponseCompressed(HttpResponseMessage response, int expectedBodyLength)
+        private void CheckResponseCompressed(HttpResponseMessage response, int expectedBodyLength, string expectedContentEncoding = "gzip")
         {
             IEnumerable<string> contentMD5 = null;
 
@@ -804,7 +836,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             }
             Assert.True(containsVaryAcceptEncoding);
             Assert.False(response.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
-            Assert.Single(response.Content.Headers.ContentEncoding, "gzip");
+            Assert.Single(response.Content.Headers.ContentEncoding, expectedContentEncoding);
             Assert.Equal(expectedBodyLength, response.Content.Headers.ContentLength);
         }
 
@@ -857,6 +889,25 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                     await file.CopyToAsync(_innerBody, 81920, cancellation);
                 }
             }
+        }
+    }
+
+    public class CustomGzipCompressionProvider: ICompressionProvider
+    {
+        private readonly GzipCompressionProvider _provider;
+
+        public CustomGzipCompressionProvider()
+        {
+            _provider = new GzipCompressionProvider(new GzipCompressionProviderOptions());
+        }
+
+        public string EncodingName => "customgzip";
+
+        public bool SupportsFlush => _provider.SupportsFlush;
+
+        public Stream CreateStream(Stream outputStream)
+        {
+            return _provider.CreateStream(outputStream);
         }
     }
 }

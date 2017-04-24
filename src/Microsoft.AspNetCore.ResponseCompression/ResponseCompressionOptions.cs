@@ -20,10 +20,5 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// Enable compression on HTTPS connections may expose security problems.
         /// </summary>
         public bool EnableForHttps { get; set; } = false;
-
-        /// <summary>
-        /// The ICompressionProviders to use for responses.
-        /// </summary>
-        public CompressionProviderCollection Providers { get; } = new CompressionProviderCollection();
     }
 }

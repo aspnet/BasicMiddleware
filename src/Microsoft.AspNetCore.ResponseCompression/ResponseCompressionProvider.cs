@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -23,7 +24,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// </summary>
         /// <param name="services">Services to use when instantiating compression providers.</param>
         /// <param name="options"></param>
-        public ResponseCompressionProvider(IServiceProvider services, IOptions<ResponseCompressionOptions> options)
+        /// <param name="providers"></param>
+        public ResponseCompressionProvider(IServiceProvider services, IOptions<ResponseCompressionOptions> options, IEnumerable<ICompressionProvider> providers)
         {
             if (services == null)
             {
@@ -34,19 +36,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 throw new ArgumentNullException(nameof(options));
             }
 
-            _providers = options.Value.Providers.ToArray();
+            _providers = providers.ToArray();
             if (_providers.Length == 0)
             {
                 // Use the factory so it can resolve IOptions<GzipCompressionProviderOptions> from DI.
-                _providers = new ICompressionProvider[] { new CompressionProviderFactory(typeof(GzipCompressionProvider)) };
-            }
-            for (var i = 0; i < _providers.Length; i++)
-            {
-                var factory = _providers[i] as CompressionProviderFactory;
-                if (factory != null)
-                {
-                    _providers[i] = factory.CreateInstance(services);
-                }
+                _providers = GetDefaultProviders(services);
             }
 
             var mimeTypes = options.Value.MimeTypes;
@@ -57,6 +51,14 @@ namespace Microsoft.AspNetCore.ResponseCompression
             _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
 
             _enableForHttps = options.Value.EnableForHttps;
+        }
+
+        private static ICompressionProvider[] GetDefaultProviders(IServiceProvider services)
+        {
+            return new ICompressionProvider[]
+            {
+                ActivatorUtilities.CreateInstance<GzipCompressionProvider>(services)
+            };
         }
 
         /// <inheritdoc />
