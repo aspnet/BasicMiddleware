@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
@@ -22,7 +22,7 @@
     ]
   },
   "dependencies": {
-    "Microsoft.AspNetCore.Http.Extensions": "1.0.2",
+    "Microsoft.AspNetCore.Http.Extensions": "1.0.3",
     "Microsoft.Extensions.Logging.Abstractions": "1.0.2",
     "Microsoft.Extensions.Options": "1.0.2"
   },
