@@ -137,58 +137,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
         }
 
-#if NET46
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
-        {
-            var tcs = new TaskCompletionSource<object>(state);
-            InternalWriteAsync(buffer, offset, count, callback, tcs);
-            return tcs.Task;
-        }
-
-        private async void InternalWriteAsync(byte[] buffer, int offset, int count, AsyncCallback callback, TaskCompletionSource<object> tcs)
-        {
-            try
-            {
-                await WriteAsync(buffer, offset, count);
-                tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-
-            if (callback != null)
-            {
-                // Offload callbacks to avoid stack dives on sync completions.
-                var ignored = Task.Run(() =>
-                {
-                    try
-                    {
-                        callback(tcs.Task);
-                    }
-                    catch (Exception)
-                    {
-                        // Suppress exceptions on background threads.
-                    }
-                });
-            }
-        }
-
-        public override void EndWrite(IAsyncResult asyncResult)
-        {
-            if (asyncResult == null)
-            {
-                throw new ArgumentNullException(nameof(asyncResult));
-            }
-
-            var task = (Task)asyncResult;
-            task.GetAwaiter().GetResult();
-        }
-#elif NETSTANDARD1_3
-#else
-#error target frameworks need to be updated
-#endif
-
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             OnWrite();

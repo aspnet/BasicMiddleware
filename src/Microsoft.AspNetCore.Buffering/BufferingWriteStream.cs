@@ -160,34 +160,7 @@ namespace Microsoft.AspNetCore.Buffering
                 return _innerStream.WriteAsync(buffer, offset, count, cancellationToken);
             }
         }
-#if NET46
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
-        {
-            if (_isBuffering)
-            {
-                return _buffer.BeginWrite(buffer, offset, count, callback, state);
-            }
-            else
-            {
-                return _innerStream.BeginWrite(buffer, offset, count, callback, state);
-            }
-        }
 
-        public override void EndWrite(IAsyncResult asyncResult)
-        {
-            if (_isBuffering)
-            {
-                _buffer.EndWrite(asyncResult);
-            }
-            else
-            {
-                _innerStream.EndWrite(asyncResult);
-            }
-        }
-#elif NETSTANDARD1_3
-#else
-#error target frameworks need to be updated
-#endif
         public override void Flush()
         {
             _isBuffering = false;
