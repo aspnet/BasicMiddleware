@@ -108,6 +108,31 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.Equal(File.ReadAllBytes(path), written);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BeginWrite_IsPassedToUnderlyingStream_WhenDisableResponseBuffering(bool flushable)
+        {
+            var buffer = new byte[] { 1 };
+            byte[] written = null;
+
+            var mock = new Mock<Stream>();
+            mock.SetupGet(s => s.CanWrite).Returns(true);
+            mock.Setup(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .Callback<byte[], int, int, CancellationToken>((b, o, c, t) =>
+                {
+                    written = new ArraySegment<byte>(b, 0, c).ToArray();
+                })
+            .Returns(Task.FromResult(0));
+
+            var stream = new BodyWrapperStream(new DefaultHttpContext(), mock.Object, new MockResponseCompressionProvider(flushable), null, null);
+
+            stream.DisableResponseBuffering();
+            stream.BeginWrite(buffer, 0, buffer.Length, (o) => {}, null);
+
+            Assert.Equal(buffer, written);
+        }
+
         private class MockResponseCompressionProvider: IResponseCompressionProvider
         {
             private readonly bool _flushable;
