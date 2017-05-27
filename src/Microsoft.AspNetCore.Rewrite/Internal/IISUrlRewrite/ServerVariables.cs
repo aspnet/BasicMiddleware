@@ -9,15 +9,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public static class ServerVariables
     {
+        public const string RequestHeaderPrefix = "HTTP_";
+        public const string ResponseHeaderPrefix = "RESPONSE_";
+
         /// <summary>
-        /// Returns the matching <see cref="PatternSegment"/> for the given <paramref name="serverVariable"/>
+        /// Returns a <see cref="ServerVariable"/>
         /// </summary>
         /// <param name="serverVariable">The server variable</param>
         /// <param name="context">The parser context which is utilized when an exception is thrown</param>
-        /// <param name="uriMatchPart">Indicates whether the full URI or the path should be evaluated for URL segments</param>
+        /// <param name="uriMatchPart">Indicates how a URI should be matched</param>
         /// <exception cref="FormatException">Thrown when the server variable is unknown</exception>
-        /// <returns>The matching <see cref="PatternSegment"/></returns>
-        public static PatternSegment FindServerVariable(string serverVariable, ParserContext context, UriMatchPart uriMatchPart)
+        /// <returns>A <see cref="ServerVariable"/></returns>
+        public static ServerVariable FindServerVariable(string serverVariable, ParserContext context, UriMatchPart uriMatchPart)
         {
             switch (serverVariable)
             {
@@ -27,44 +30,61 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 case "APP_POOL_ID":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "CONTENT_LENGTH":
-                    return new HeaderSegment(HeaderNames.ContentLength);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.ContentLength)), ServerVariableType.RequestHeader);
                 case "CONTENT_TYPE":
-                    return new HeaderSegment(HeaderNames.ContentType);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.ContentType)), ServerVariableType.RequestHeader);
                 case "HTTP_ACCEPT":
-                    return new HeaderSegment(HeaderNames.Accept);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Accept)), ServerVariableType.RequestHeader);
                 case "HTTP_COOKIE":
-                    return new HeaderSegment(HeaderNames.Cookie);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Cookie)), ServerVariableType.RequestHeader);
                 case "HTTP_HOST":
-                    return new HeaderSegment(HeaderNames.Host);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Host)), ServerVariableType.RequestHeader);
                 case "HTTP_REFERER":
-                    return new HeaderSegment(HeaderNames.Referer);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Referer)), ServerVariableType.RequestHeader);
                 case "HTTP_USER_AGENT":
-                    return new HeaderSegment(HeaderNames.UserAgent);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.UserAgent)), ServerVariableType.RequestHeader);
                 case "HTTP_CONNECTION":
-                    return new HeaderSegment(HeaderNames.Connection);
+                    return new ServerVariable(serverVariable, new Pattern(new HeaderSegment(HeaderNames.Connection)), ServerVariableType.RequestHeader);
                 case "HTTP_URL":
-                    return new UrlSegment(uriMatchPart);
+                    return new ServerVariable(serverVariable, new Pattern(new UrlSegment(uriMatchPart)), ServerVariableType.RequestHeader);
                 case "HTTPS":
-                    return new IsHttpsUrlSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new IsHttpsUrlSegment()), ServerVariableType.Request);
                 case "LOCAL_ADDR":
-                    return new LocalAddressSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new LocalAddressSegment()), ServerVariableType.Request);
                 case "HTTP_PROXY_CONNECTION":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "QUERY_STRING":
-                    return new QueryStringSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new QueryStringSegment()), ServerVariableType.Request);
                 case "REMOTE_ADDR":
-                    return new RemoteAddressSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new RemoteAddressSegment()), ServerVariableType.Request);
                 case "REMOTE_HOST":
                     throw new NotSupportedException(Resources.FormatError_UnsupportedServerVariable(serverVariable));
                 case "REMOTE_PORT":
-                    return new RemotePortSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new RemotePortSegment()), ServerVariableType.Request);
                 case "REQUEST_FILENAME":
-                    return new RequestFileNameSegment();
+                    return new ServerVariable(serverVariable, new Pattern(new RequestFileNameSegment()), ServerVariableType.Request);
+                case "REQUEST_METHOD":
+                    return new ServerVariable(serverVariable, new Pattern(new RequestMethodSegment()), ServerVariableType.Request);
+                case "REQUEST_SCHEME":
+                    return new ServerVariable(serverVariable, new Pattern(new SchemeSegment()), ServerVariableType.Request);
                 case "REQUEST_URI":
-                    return new UrlSegment(uriMatchPart);
+                    return new ServerVariable(serverVariable, new Pattern(new UrlSegment(uriMatchPart)), ServerVariableType.Request);
                 default:
                     throw new FormatException(Resources.FormatError_InputParserUnrecognizedParameter(serverVariable, context.Index));
             }
+        }
+
+        public static ServerVariable ParseCustomServerVariable(InputParser inputParser, UriMatchPart uriMatchPart, string name, string value)
+        {
+            if (name.StartsWith(RequestHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ServerVariable(name.Substring(RequestHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, uriMatchPart), ServerVariableType.RequestHeader);
+            }
+            if (name.StartsWith(ResponseHeaderPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ServerVariable(name.Substring(ResponseHeaderPrefix.Length).Replace('_', '-'), inputParser.ParseInputString(value, uriMatchPart), ServerVariableType.ResponseHeader);
+            }
+            throw new NotSupportedException($"Custom server variables must start with '{RequestHeaderPrefix}' or '{ResponseHeaderPrefix}'");
         }
     }
 }

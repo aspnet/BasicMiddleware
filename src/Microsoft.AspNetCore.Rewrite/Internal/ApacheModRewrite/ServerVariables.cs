@@ -12,7 +12,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
     /// </summary>
     public static class ServerVariables
     {
-
         /// <summary>
         /// Translates mod_rewrite server variables strings to an enum of different server variables.
         /// </summary>

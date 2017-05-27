@@ -22,11 +22,13 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         [InlineData("HTTP_USER_AGENT", "useragent", UriMatchPart.Path)]
         [InlineData("HTTP_CONNECTION", "connection", UriMatchPart.Path)]
         [InlineData("HTTP_URL", "/foo", UriMatchPart.Path)]
-        [InlineData("HTTP_URL", "http://example.com/foo?bar=1", UriMatchPart.Full)]
+        [InlineData("HTTP_URL", "https://example.com/foo?bar=1", UriMatchPart.Full)]
         [InlineData("QUERY_STRING", "bar=1", UriMatchPart.Path)]
         [InlineData("REQUEST_FILENAME", "/foo", UriMatchPart.Path)]
         [InlineData("REQUEST_URI", "/foo", UriMatchPart.Path)]
-        [InlineData("REQUEST_URI", "http://example.com/foo?bar=1", UriMatchPart.Full)]
+        [InlineData("REQUEST_URI", "https://example.com/foo?bar=1", UriMatchPart.Full)]
+        [InlineData("REQUEST_METHOD", "GET", UriMatchPart.Path)]
+        [InlineData("REQUEST_SCHEME", "https", UriMatchPart.Path)]
         public void CheckServerVariableParsingAndApplication(string variable, string expected, UriMatchPart uriMatchPart)
         {
             // Arrange and Act
@@ -40,7 +42,8 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
         private RewriteContext CreateTestHttpContext()
         {
             var context = new DefaultHttpContext();
-            context.Request.Scheme = "http";
+            context.Request.Method = "GET";
+            context.Request.Scheme = "https";
             context.Request.Host = new HostString("example.com");
             context.Request.Path = PathString.FromUriComponent("/foo");
             context.Request.QueryString = QueryString.FromUriComponent("?bar=1");

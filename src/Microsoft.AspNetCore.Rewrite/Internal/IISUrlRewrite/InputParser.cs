@@ -97,7 +97,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 {
                     // This is just a server variable, so we do a lookup and verify the server variable exists.
                     parameter = context.Capture();
-                    results.Add(ServerVariables.FindServerVariable(parameter, context, uriMatchPart));
+                    foreach (var patternPatternSegment in ServerVariables.FindServerVariable(parameter, context, uriMatchPart).Pattern.PatternSegments)
+                    {
+                        results.Add(patternPatternSegment);
+                    }
                     return;
                 }
                 else if (context.Current == Colon)

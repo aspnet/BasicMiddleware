@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
@@ -180,6 +181,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
                 name,
                 new RegexMatch(new Regex("^OFF$"), negate),
                 conditions,
+                Enumerable.Empty<ServerVariable>(),
                 new RewriteAction(RuleResult.ContinueRules, new InputParser().ParseInputString(url, uriMatchPart), queryStringAppend: false),
                 global);
         }

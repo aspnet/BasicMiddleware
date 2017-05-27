@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
@@ -11,26 +12,21 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         public string Name { get; }
         public UrlMatch InitialMatch { get; }
         public ConditionCollection Conditions { get; }
+        public IEnumerable<ServerVariable> ServerVariables { get; }
         public UrlAction Action { get; }
         public bool Global { get; }
 
         public IISUrlRewriteRule(string name,
             UrlMatch initialMatch,
             ConditionCollection conditions,
-            UrlAction action)
-            : this(name, initialMatch, conditions, action, false)
-        {
-        }
-
-        public IISUrlRewriteRule(string name,
-            UrlMatch initialMatch,
-            ConditionCollection conditions,
+            IEnumerable<ServerVariable> serverVariables,
             UrlAction action,
             bool global)
         {
             Name = name;
             InitialMatch = initialMatch;
             Conditions = conditions;
+            ServerVariables = serverVariables;
             Action = action;
             Global = global;
         }
@@ -64,6 +60,32 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);
                     return;
+                }
+            }
+
+            if (ServerVariables != null)
+            {
+                foreach (ServerVariable serverVariable in ServerVariables)
+                {
+                    var name = serverVariable.Name;
+                    var value = serverVariable.Evaluate(context, initMatchResults.BackReferences, condResult?.BackReferences);
+
+                    IHeaderDictionary headerDictionary;
+                    switch (serverVariable.Type)
+                    {
+                        case ServerVariableType.RequestHeader:
+                            headerDictionary = context.HttpContext.Request.Headers;
+                            context.Logger?.RequestHeaderAdded(name, value);
+                            break;
+                        case ServerVariableType.ResponseHeader:
+                            headerDictionary = context.HttpContext.Response.Headers;
+                            context.Logger?.ResponseHeaderAdded(name, value);
+                            break;
+                        default:
+                            continue;
+                    }
+
+                    headerDictionary[name] = value;
                 }
             }
 

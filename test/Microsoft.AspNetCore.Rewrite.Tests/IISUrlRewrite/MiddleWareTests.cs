@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlMatches;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Xunit;
 
@@ -597,6 +599,286 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlRewrite
 
             // assert
             Assert.Equal(expectedResult, response);
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingStandardServerVariables()
+        {
+            var actionType = ActionType.None;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""clientIpAddress"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                    <serverVariables>
+                                        <set name=""HTTP_Custom_ClientIpAddress"" value=""{{REMOTE_ADDR}}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.Use((context, next) =>
+                    {
+                        // TestServer doesn't set RemoteIpAddress so do it inline
+                        context.Connection.RemoteIpAddress = IPAddress.Loopback;
+                        return next();
+                    });
+                    app.UseRewriter(options);
+                    app.Run(context =>
+                    {
+                        StringValues values;
+                        context.Response.HttpContext.Request.Headers.TryGetValue("Custom-ClientIpAddress", out values);
+                        return context.Response.WriteAsync(values);
+                    });
+                });
+            var server = new TestServer(builder);
+            var response = await server.CreateClient().GetStringAsync("/article/10/hey");
+            Assert.Equal(IPAddress.Loopback, IPAddress.Parse(response));
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingRuleBackReference()
+        {
+            var actionType = ActionType.Rewrite;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""tenantId"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url=""(.*)"" />
+                                    <serverVariables>
+                                        <set name=""HTTP_OriginalUri"" value=""{{R:0}}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}{{REQUEST_URI}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context =>
+                    {
+                        /*
+                            client will not see added inbound request headers
+                            need to assert header existence by returning the header value as the response string
+                        */
+                        var headerValue = context.Response.HttpContext.Request.Headers["OriginalUri"];
+                        return context.Response.WriteAsync(headerValue);
+                    });
+                });
+            var server = new TestServer(builder);
+            const string requestPath = "article/10/hey";
+            var response = await server.CreateClient().GetStringAsync(requestPath);
+            Assert.Equal(requestPath, response);
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingConditionBackReference()
+        {
+            var actionType = ActionType.Rewrite;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""tenantId"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                        <conditions logicalGrouping=""MatchAll"" trackAllCaptures=""false"">
+                                            <add input=""{{REQUEST_URI}}"" pattern=""^/([0-9a-fA-F]{{8}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{12}})(/.*)$"" />
+                                        </conditions>
+                                        <serverVariables>
+                                            <set name=""HTTP_TenantId"" value=""{{C:1}}"" />
+                                        </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}/{{C:2}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context =>
+                    {
+                        /*
+                            client will not see added inbound request headers
+                            need to assert header existence by returning the header value as the response string
+                        */
+                        var headerValue = context.Response.HttpContext.Request.Headers["TenantId"];
+                        return context.Response.WriteAsync(headerValue);
+                    });
+                });
+            var server = new TestServer(builder);
+            var tenantId = Guid.NewGuid();
+            var response = await server.CreateClient().GetStringAsync($"{tenantId}/article/10/hey");
+            Assert.Equal(tenantId.ToString(), response);
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomRequestHeadersUsingLiteral()
+        {
+            var actionType = ActionType.Rewrite;
+            var customValue = "customValue";
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""customValue"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                    <serverVariables>
+                                        <set name=""HTTP_CustomValue"" value=""{customValue}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}{{REQUEST_URI}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context =>
+                    {
+                        /*
+                            client will not see added inbound request headers
+                            need to assert header existence by returning the header value as the response string
+                        */
+                        var headerValue = context.Response.HttpContext.Request.Headers["CustomValue"];
+                        return context.Response.WriteAsync(headerValue);
+                    });
+                });
+            var server = new TestServer(builder);
+            var response = await server.CreateClient().GetStringAsync("article/10/hey");
+            Assert.Equal(customValue, response);
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomResponseHeadersUsingStandardServerVariables()
+        {
+            var actionType = ActionType.None;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""clientIpAddress"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                    <serverVariables>
+                                        <set name=""RESPONSE_Custom_ClientIpAddress"" value=""{{REMOTE_ADDR}}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.Use((context, next) =>
+                    {
+                        // TestServer doesn't set RemoteIpAddress so do it inline
+                        context.Connection.RemoteIpAddress = IPAddress.Loopback;
+                        return next();
+                    });
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+            var response = await server.CreateClient().GetAsync("/article/10/hey");
+            IEnumerable<string> headerValues;
+            response.Headers.TryGetValues("Custom-ClientIpAddress", out headerValues);
+            Assert.Equal(IPAddress.Loopback, IPAddress.Parse(headerValues.Single()));
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomResponseHeadersUsingRuleBackReference()
+        {
+            var actionType = ActionType.Rewrite;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""tenantId"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url=""(.*)"" />
+                                    <serverVariables>
+                                        <set name=""RESPONSE_OriginalUri"" value=""{{R:0}}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}{{REQUEST_URI}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+            const string requestPath = "article/10/hey";
+            var response = await server.CreateClient().GetAsync(requestPath);
+            IEnumerable<string> headerValues;
+            var headerExists = response.Headers.TryGetValues("OriginalUri", out headerValues);
+            Assert.True(headerExists);
+            Assert.Equal(requestPath, headerValues.Single());
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomResponseHeadersUsingConditionBackReference()
+        {
+            var actionType = ActionType.Rewrite;
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""tenantId"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                        <conditions logicalGrouping=""MatchAll"" trackAllCaptures=""false"">
+                                            <add input=""{{REQUEST_URI}}"" pattern=""^/([0-9a-fA-F]{{8}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{4}}\-[0-9a-fA-F]{{12}})(/.*)$"" />
+                                        </conditions>
+                                        <serverVariables>
+                                            <set name=""RESPONSE_TenantId"" value=""{{C:1}}"" />
+                                        </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}/{{C:2}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+            var tenantId = Guid.NewGuid();
+            var response = await server.CreateClient().GetAsync($"{tenantId}/article/10/hey");
+            IEnumerable<string> headerValues;
+            var headerExists = response.Headers.TryGetValues("TenantId", out headerValues);
+            Assert.True(headerExists);
+            Assert.Equal(tenantId.ToString(), headerValues.Single());
+        }
+
+        [Fact]
+        public async Task Invoke_RewriteShouldSupportCustomResponseHeadersUsingLiteral()
+        {
+            var actionType = ActionType.Rewrite;
+            var customValue = "customValue";
+            var xml = $@"<rewrite>
+                            <rules>
+                                <rule name=""customValue"" patternSyntax=""ECMAScript"" stopProcessing=""false"">
+                                    <match url="".*"" />
+                                    <serverVariables>
+                                        <set name=""RESPONSE_CustomValue"" value=""{customValue}"" />
+                                    </serverVariables>
+                                    <action type=""{actionType}"" url=""http://{{HTTP_HOST}}{{REQUEST_URI}}"" />
+                                </rule>
+                            </rules>
+                        </rewrite>";
+            var options = new RewriteOptions().AddIISUrlRewrite(new StringReader(xml));
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                    app.Run(context => context.Response.WriteAsync(context.Request.GetEncodedUrl()));
+                });
+            var server = new TestServer(builder);
+            var response = await server.CreateClient().GetAsync("article/10/hey");
+            IEnumerable<string> headerValues;
+            var headerExists = response.Headers.TryGetValues("CustomValue", out headerValues);
+            Assert.True(headerExists);
+            Assert.Equal(customValue, headerValues.Single());
         }
     }
 }

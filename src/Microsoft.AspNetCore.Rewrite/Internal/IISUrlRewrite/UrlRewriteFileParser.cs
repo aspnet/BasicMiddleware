@@ -86,6 +86,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
             ParseMatch(match, builder, patternSyntax);
             ParseConditions(rule.Element(RewriteTags.Conditions), builder, patternSyntax);
+            ParseServerVariables(rule.Element(RewriteTags.ServerVariables), builder);
             ParseUrlAction(action, builder, stopProcessing);
         }
 
@@ -178,6 +179,24 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             }
 
             builder.AddUrlCondition(condition);
+        }
+
+        private void ParseServerVariables(XElement serverVariables, UrlRewriteRuleBuilder builder)
+        {
+            if (serverVariables == null)
+            {
+                return;
+            }
+
+            foreach (var serverVariable in serverVariables.Elements(RewriteTags.Set))
+            {
+                builder.SetServerVariable(
+                    ServerVariables.ParseCustomServerVariable(
+                        _inputParser,
+                        builder.UriMatchPart,
+                        serverVariable.Attribute(RewriteTags.Name).Value,
+                        serverVariable.Attribute(RewriteTags.Value).Value));
+            }
         }
 
         private void ParseUrlAction(XElement urlAction, UrlRewriteRuleBuilder builder, bool stopProcessing)

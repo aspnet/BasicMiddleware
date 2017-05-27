@@ -20,6 +20,8 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         private static readonly Action<ILogger, string, Exception> _rewriteSummary;
         private static readonly Action<ILogger, string, Exception> _abortedRequest;
         private static readonly Action<ILogger, string, Exception> _customResponse;
+        private static readonly Action<ILogger, string, Exception> _requestHeaderAdded;
+        private static readonly Action<ILogger, string, Exception> _responseHeaderAdded;
 
         static RewriteMiddlewareLoggingExtensions()
         {
@@ -82,6 +84,16 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
                             LogLevel.Debug,
                             12,
                             "Request to {requestedUrl} was ended");
+
+            _requestHeaderAdded = LoggerMessage.Define<string>(
+                            LogLevel.Debug,
+                            13,
+                            "Request header added - '{header}'");
+
+            _responseHeaderAdded = LoggerMessage.Define<string>(
+                            LogLevel.Debug,
+                            14,
+                            "Response header added - '{header}'");
         }
 
         public static void RewriteMiddlewareRequestContinueResults(this ILogger logger, string currentUrl)
@@ -142,6 +154,16 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
         public static void CustomResponse(this ILogger logger, string requestedUrl)
         {
             _customResponse(logger, requestedUrl, null);
+        }
+
+        public static void RequestHeaderAdded(this ILogger logger, string name, string value)
+        {
+            _requestHeaderAdded(logger, $"{name}:{value}", null);
+        }
+
+        public static void ResponseHeaderAdded(this ILogger logger, string name, string value)
+        {
+            _responseHeaderAdded(logger, $"{name}:{value}", null);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 
         private UrlMatch _initialMatch;
         private ConditionCollection _conditions;
+        private readonly IDictionary<string, ServerVariable> _serverVariables = new Dictionary<string, ServerVariable>();
         private UrlAction _action;
 
         public IISUrlRewriteRule Build()
@@ -28,7 +29,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 throw new InvalidOperationException("Cannot create UrlRewriteRule without action and match");
             }
 
-            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _action, Global);
+            return new IISUrlRewriteRule(Name, _initialMatch, _conditions, _serverVariables.Values, _action, Global);
         }
 
         public void AddUrlAction(UrlAction action)
@@ -91,6 +92,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 throw new InvalidOperationException($"You must first configure condition behavior by calling {nameof(ConfigureConditionBehavior)}");
             }
             _conditions.AddConditions(conditions);
+        }
+
+        public void SetServerVariable(ServerVariable serverVariable)
+        {
+            _serverVariables[serverVariable.Name] = serverVariable;
         }
     }
 }
