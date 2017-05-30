@@ -73,7 +73,7 @@ namespace ResponseCompressionSample
                 .ConfigureLogging(factory =>
                 {
                     factory.AddConsole()
-                        .SetMinimumlLevel(LogLevel.Debug);
+                        .SetMinimumLevel(LogLevel.Debug);
                 })
                 .UseStartup<Startup>()
                 .Build();
