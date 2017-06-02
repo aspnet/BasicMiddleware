@@ -39,5 +39,26 @@ namespace Microsoft.AspNetCore.Builder
 
             return app.UseMiddleware<RedirectToHttpsMiddleware>(options);
         }
+
+        /// <summary>
+        /// Ensures the scheme is Https
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/></param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseRedirectToHttps(this IApplicationBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            var marker = app.ApplicationServices.GetService<RedirectToHttpsMarkerService>();
+            if (marker == null)
+            {
+                throw new InvalidOperationException("The RedirectToHttps service needs to be registered");
+            }
+
+            return app.UseMiddleware<RedirectToHttpsMiddleware>();
+        }
     }
 }

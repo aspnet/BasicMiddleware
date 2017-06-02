@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Rewrite
 {
@@ -14,16 +15,14 @@ namespace Microsoft.AspNetCore.Rewrite
     {
         private readonly RequestDelegate _next;
         private readonly IFileProvider _fileProvider;
-        private readonly ILogger _logger;
         private RewriteMiddleware _rewriteMiddleware;
-        private RedirectToHttpsOptions _options;
 
 
         public RedirectToHttpsMiddleware(
             RequestDelegate next,
             IHostingEnvironment hostingEnvironment,
             ILoggerFactory loggerFactory,
-            RedirectToHttpsOptions options)
+            IOptions<RedirectToHttpsOptions> options)
         {
             if (next == null)
             {
@@ -36,11 +35,9 @@ namespace Microsoft.AspNetCore.Rewrite
             }
 
             _next = next;
-            _options = options;
             _fileProvider = hostingEnvironment.WebRootFileProvider;
-            _logger = loggerFactory.CreateLogger<RewriteMiddleware>();
 
-            var rewriteOptions = new RewriteOptions().AddRedirectToHttps(_options.StatusCode, _options.Port);
+            var rewriteOptions = new RewriteOptions().AddRedirectToHttps(options.Value.StatusCode, options.Value.Port);
             _rewriteMiddleware = new RewriteMiddleware(_next, hostingEnvironment, loggerFactory, rewriteOptions);
         }
 

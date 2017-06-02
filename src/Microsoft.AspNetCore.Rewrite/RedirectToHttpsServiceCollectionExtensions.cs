@@ -11,6 +11,7 @@ namespace Microsoft.AspNetCore.Rewrite
     {
         public static IServiceCollection AddRedirectToHttps(this IServiceCollection services)
         {
+            services.AddOptions();
             services.TryAddSingleton<RedirectToHttpsMarkerService>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<ConfigureDefaultOptions<RedirectToHttpsOptions>,RedirectToHttpsOptionsSetup>());
             return services;

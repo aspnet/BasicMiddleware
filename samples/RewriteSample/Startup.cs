@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System;
+using System.Diagnostics;
 
 namespace RewriteSample
 {
@@ -19,15 +21,11 @@ namespace RewriteSample
     {
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            var options = new RedirectToHttpsOptions();
-
-            app.UseRedirectToHttps(options);
+            app.UseRedirectToHttps();
 
             var rewriteOptions = new RewriteOptions()
                 .AddRedirect("(.*)/$", "$1")
-                .AddRewrite(@"app/(\d+)", "app?id=$1", skipRemainingRules: false)
-                .AddIISUrlRewrite(env.ContentRootFileProvider, "UrlRewrite.xml")
-                .AddApacheModRewrite(env.ContentRootFileProvider, "Rewrite.txt");
+                .AddRewrite(@"app/(\d+)", "app?id=$1", skipRemainingRules: false);
 
             app.UseRewriter(rewriteOptions);
             app.Run(context => context.Response.WriteAsync($"Rewritten Url: {context.Request.Path + context.Request.QueryString}"));
