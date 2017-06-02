@@ -23,9 +23,9 @@ namespace RewriteSample
 
             var rewriteOptions = new RewriteOptions()
                 .AddRedirect("(.*)/$", "$1")
-                .AddRewrite(@"app/(\d+)", "app?id=$1", skipRemainingRules: false);
-                //.AddIISUrlRewrite(env.ContentRootFileProvider, "UrlRewrite.xml")
-                //.AddApacheModRewrite(env.ContentRootFileProvider, "Rewrite.txt");
+                .AddRewrite(@"app/(\d+)", "app?id=$1", skipRemainingRules: false)
+                .AddIISUrlRewrite(env.ContentRootFileProvider, "UrlRewrite.xml")
+                .AddApacheModRewrite(env.ContentRootFileProvider, "Rewrite.txt");
 
             app.UseRewriter(rewriteOptions);
             app.Run(context => context.Response.WriteAsync($"Rewritten Url: {context.Request.Path + context.Request.QueryString}"));
@@ -37,7 +37,7 @@ namespace RewriteSample
                 .UseKestrel(options =>
                 {
                     options.Listen(IPAddress.Loopback, 5000);
-                    options.Listen(IPAddress.Loopback, 1234, listenOptions =>
+                    options.Listen(IPAddress.Loopback, 5001, listenOptions =>
                     {
                         // Configure HTTPS
                         listenOptions.UseHttps("testCert.pfx", "testPassword");
@@ -47,7 +47,7 @@ namespace RewriteSample
                 {
                     configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
                     {
-                        ["Microsoft:AspNetCore:RedirectToHttps:Port"] = "1234"
+                        ["Microsoft:AspNetCore:RedirectToHttps:Port"] = "5001"
                     });
                 })
                 .ConfigureServices(services =>

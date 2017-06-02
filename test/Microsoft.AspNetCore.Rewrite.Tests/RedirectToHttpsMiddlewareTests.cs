@@ -121,6 +121,5 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.RedirectToHttps
             Assert.Equal(StatusCodes.Status301MovedPermanently, (int)response.StatusCode);
         }
 
-
     }
 }
