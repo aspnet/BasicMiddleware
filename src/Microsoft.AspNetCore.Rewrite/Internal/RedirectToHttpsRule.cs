@@ -2,8 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
+using Microsoft.Extensions.Internal;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
@@ -13,7 +15,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
         public int? SSLPort { get; set; }
         public int StatusCode { get; set; }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual Task ApplyRuleAsync(RewriteContext context)
         {
             if (!context.HttpContext.Request.IsHttps)
             {
@@ -37,6 +39,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                 context.Result = RuleResult.EndResponse;
                 context.Logger?.RedirectedToHttps();
             }
+            return TaskCache.CompletedTask;
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Logging;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
@@ -35,7 +37,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             Global = global;
         }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual Task ApplyRuleAsync(RewriteContext context)
         {
             // Due to the path string always having a leading slash,
             // remove it from the path before regex comparison
@@ -53,7 +55,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             if (!initMatchResults.Success)
             {
                 context.Logger?.UrlRewriteDidNotMatchRule(Name);
-                return;
+                return TaskCache.CompletedTask;
             }
 
             MatchResults condResult = null;
@@ -63,13 +65,13 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                 if (!condResult.Success)
                 {
                     context.Logger?.UrlRewriteDidNotMatchRule(Name);
-                    return;
+                    return TaskCache.CompletedTask;
                 }
             }
 
             context.Logger?.UrlRewriteMatchedRule(Name);
             // at this point we know the rule passed, evaluate the replacement.
-            Action.ApplyAction(context, initMatchResults?.BackReferences, condResult?.BackReferences);
+            return Action.ApplyActionAsync(context, initMatchResults?.BackReferences, condResult?.BackReferences);
         }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Rewrite.Logging;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
@@ -19,7 +20,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             Actions = urlActions;
         }
 
-        public virtual void ApplyRule(RewriteContext context)
+        public virtual async Task ApplyRuleAsync(RewriteContext context)
         {
             // 1. Figure out which section of the string to match for the initial rule.
             var initMatchRes = InitialMatch.Evaluate(context.HttpContext.Request.Path, context);
@@ -30,10 +31,10 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 return;
             }
 
-            BackReferenceCollection condBackReferences = null;
+            MatchResults condResult = null;
             if (Conditions != null)
             {
-                var condResult = ConditionEvaluator.Evaluate(Conditions, context, initMatchRes.BackReferences);
+                condResult = ConditionEvaluator.Evaluate(Conditions, context, initMatchRes.BackReferences);
                 if (!condResult.Success)
                 {
                     context.Logger?.ModRewriteDidNotMatchRule();
@@ -47,7 +48,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
 
             foreach (var action in Actions)
             {
-                action.ApplyAction(context, initMatchRes?.BackReferences, condBackReferences);
+                await action.ApplyActionAsync(context, initMatchRes?.BackReferences, condResult?.BackReferences);
             }
         }
     }

@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Rewrite
         /// </summary>
         /// <param name="context">The <see cref="HttpContext"/> for the current request.</param>
         /// <returns>A task that represents the execution of this middleware.</returns>
-        public Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             if (context == null)
             {
@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.Rewrite
 
             foreach (var rule in _options.Rules)
             {
-                rule.ApplyRule(rewriteContext);
+                await rule.ApplyRuleAsync(rewriteContext);
                 switch (rewriteContext.Result)
                 {
                     case RuleResult.ContinueRules:
@@ -86,15 +86,16 @@ namespace Microsoft.AspNetCore.Rewrite
                         _logger.RewriteMiddlewareRequestResponseComplete(
                             context.Response.Headers[HeaderNames.Location],
                             context.Response.StatusCode);
-                        return TaskCache.CompletedTask;
+                        return;
                     case RuleResult.SkipRemainingRules:
                         _logger.RewriteMiddlewareRequestStopRules(context.Request.GetEncodedUrl());
-                        return _next(context);
+                        await _next(context);
+                        return;
                     default:
                         throw new ArgumentOutOfRangeException($"Invalid rule termination {rewriteContext.Result}");
                 }
             }
-            return _next(context);
+            await _next(context);
         }
     }
 }

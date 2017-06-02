@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Internal;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
@@ -41,7 +43,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
         {
         }
 
-        public override void ApplyAction(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
+        public override Task ApplyActionAsync(RewriteContext context, BackReferenceCollection ruleBackReferences, BackReferenceCollection conditionBackReferences)
         {
             var pattern = Url.Evaluate(context, ruleBackReferences, conditionBackReferences);
             var response = context.HttpContext.Response;
@@ -55,7 +57,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
             if (string.IsNullOrEmpty(pattern))
             {
                 response.Headers[HeaderNames.Location] = pathBase.HasValue ? pathBase.Value : "/";
-                return;
+                return TaskCache.CompletedTask;
             }
 
 
@@ -92,6 +94,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.UrlActions
                 }
             }
             context.Result = RuleResult.EndResponse;
+            return TaskCache.CompletedTask;
         }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite.Internal.UrlActions;
 using Microsoft.Net.Http.Headers;
@@ -12,7 +13,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
     public class ChangeCookieActionTests
     {
         [Fact]
-        public void SetsCookie()
+        public async Task SetsCookie()
         {
             var now = DateTimeOffset.UtcNow;
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
@@ -26,7 +27,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
                 HttpOnly = true
             };
 
-            action.ApplyAction(context, null, null);
+            await action.ApplyActionAsync(context, null, null);
 
             var cookieHeaders = context.HttpContext.Response.Headers[HeaderNames.SetCookie];
             var header = Assert.Single(cookieHeaders);
@@ -34,7 +35,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
         }
 
         [Fact]
-        public void ZeroLifetime()
+        public async Task ZeroLifetime()
         {
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
             var action = new ChangeCookieAction("Cookie")
@@ -42,7 +43,7 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
                 Value = "Chocolate Chip",
             };
 
-            action.ApplyAction(context, null, null);
+            await action.ApplyActionAsync(context, null, null);
 
             var cookieHeaders = context.HttpContext.Response.Headers[HeaderNames.SetCookie];
             var header = Assert.Single(cookieHeaders);
@@ -51,12 +52,12 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.UrlActions
 
 
         [Fact]
-        public void UnsetCookie()
+        public async Task UnsetCookie()
         {
             var context = new RewriteContext { HttpContext = new DefaultHttpContext() };
             var action = new ChangeCookieAction("Cookie");
 
-            action.ApplyAction(context, null, null);
+            await action.ApplyActionAsync(context, null, null);
 
             var cookieHeaders = context.HttpContext.Response.Headers[HeaderNames.SetCookie];
             var header = Assert.Single(cookieHeaders);
