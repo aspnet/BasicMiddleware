@@ -12,12 +12,32 @@ namespace Microsoft.AspNetCore.Builder
     /// </summary>
     public static class RedirectToHttpsExtensions
     {
+        /// <summary>
+        /// Ensures the scheme is Https
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/></param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseRedirectToHttps(this IApplicationBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            var marker = app.ApplicationServices.GetService<RedirectToHttpsMarkerService>();
+            if (marker == null)
+            {
+                throw new InvalidOperationException("The RedirectToHttps service needs to be registered");
+            }
+
+            return app.UseMiddleware<RedirectToHttpsMiddleware>();
+        }
 
         /// <summary>
         /// Ensures the scheme is Https
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/></param>
-        /// <param name="options">Options for rewrite.</param>
+        /// <param name="options">Options for the redirect to Https.</param>
         /// <returns></returns>
         public static IApplicationBuilder UseRedirectToHttps(this IApplicationBuilder app, RedirectToHttpsOptions options)
         {
@@ -38,27 +58,6 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             return app.UseMiddleware<RedirectToHttpsMiddleware>(options);
-        }
-
-        /// <summary>
-        /// Ensures the scheme is Https
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/></param>
-        /// <returns></returns>
-        public static IApplicationBuilder UseRedirectToHttps(this IApplicationBuilder app)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            var marker = app.ApplicationServices.GetService<RedirectToHttpsMarkerService>();
-            if (marker == null)
-            {
-                throw new InvalidOperationException("The RedirectToHttps service needs to be registered");
-            }
-
-            return app.UseMiddleware<RedirectToHttpsMiddleware>();
         }
     }
 }

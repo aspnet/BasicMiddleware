@@ -25,8 +25,4 @@
     <PackageReference Include="Microsoft.Extensions.TaskCache.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Internal\RedirectToHttps\" />
-  </ItemGroup>
-
 </Project>

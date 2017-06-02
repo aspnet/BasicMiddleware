@@ -10,8 +10,14 @@ namespace Microsoft.AspNetCore.Rewrite
     /// </summary>
     public class RedirectToHttpsOptions
     {
+        /// <summary>
+        /// The Port that the incoming request will be redirected to.
+        /// </summary>
         public int Port { get; set; } = 443;
 
+        /// <summary>
+        /// The status code for the redirected request.
+        /// </summary>
         public int StatusCode { get; set; } = StatusCodes.Status302Found;
     }
 }

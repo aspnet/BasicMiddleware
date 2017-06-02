@@ -17,7 +17,13 @@ namespace Microsoft.AspNetCore.Rewrite
         private readonly IFileProvider _fileProvider;
         private RewriteMiddleware _rewriteMiddleware;
 
-
+        /// <summary>
+        /// Creates a new instance of <see cref="RedirectToHttpsMiddleware"/>
+        /// </summary>
+        /// <param name="next">The delegate representing the next middleware in the request pipeline.</param>
+        /// <param name="hostingEnvironment">The Hosting Environment.</param>
+        /// <param name="loggerFactory">The Logger Factory.</param>
+        /// <param name="options">The middleware options for specifing the port and status code of the redirected request.</param>
         public RedirectToHttpsMiddleware(
             RequestDelegate next,
             IHostingEnvironment hostingEnvironment,
@@ -41,6 +47,41 @@ namespace Microsoft.AspNetCore.Rewrite
             _rewriteMiddleware = new RewriteMiddleware(_next, hostingEnvironment, loggerFactory, rewriteOptions);
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="RedirectToHttpsMiddleware"/>
+        /// </summary>
+        /// <param name="next">The delegate representing the next middleware in the request pipeline.</param>
+        /// <param name="hostingEnvironment">The Hosting Environment.</param>
+        /// <param name="loggerFactory">The Logger Factory.</param>
+        /// <param name="options">The middleware options for specifing the port and status code of the redirected request.</param>
+        public RedirectToHttpsMiddleware(
+            RequestDelegate next,
+            IHostingEnvironment hostingEnvironment,
+            ILoggerFactory loggerFactory,
+            RedirectToHttpsOptions options)
+        {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            _next = next;
+            _fileProvider = hostingEnvironment.WebRootFileProvider;
+
+            var rewriteOptions = new RewriteOptions().AddRedirectToHttps(options.StatusCode, options.Port);
+            _rewriteMiddleware = new RewriteMiddleware(_next, hostingEnvironment, loggerFactory, rewriteOptions);
+        }
+
+        /// <summary>
+        /// Executes the RedirectToHttpsMiddleware by invoking the RewriteMiddleware.
+        /// </summary>
+        /// <param name="context">The <see cref="HttpContext"/> for the current request.</param>
+        /// <returns>A task that represents the execution of this middleware.</returns>
         public Task Invoke(HttpContext context)
         {
            if (context == null)
