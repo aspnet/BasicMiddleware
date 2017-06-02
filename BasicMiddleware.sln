@@ -1,10 +1,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26127.3
+VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpOverrides", "src\Microsoft.AspNetCore.HttpOverrides\Microsoft.AspNetCore.HttpOverrides.csproj", "{517308C3-B477-4B01-B461-CAB9C10B6928}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5076D28-FA7E-4606-9410-FEDD0D603527}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.AspNetCore.Rewrite\RewriteMiddleware.cs = src\Microsoft.AspNetCore.Rewrite\RewriteMiddleware.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8437B0F3-3894-4828-A945-A9187F37631D}"
 EndProject
