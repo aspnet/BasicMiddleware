@@ -70,7 +70,7 @@ namespace ResponseCompressionSample
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-                .ConfigureLogging(factory =>
+                .ConfigureLogging((context, factory) =>
                 {
                     factory.AddConsole()
                         .SetMinimumLevel(LogLevel.Debug);
