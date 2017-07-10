@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal
                     return;
                 }
 
-                if (newPath.IndexOf("://", StringComparison.Ordinal) == -1 && newPath[0] != '/')
+                if (!(newPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || newPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) && newPath[0] != '/')
                 {
                     newPath = '/' + newPath;
                 }
