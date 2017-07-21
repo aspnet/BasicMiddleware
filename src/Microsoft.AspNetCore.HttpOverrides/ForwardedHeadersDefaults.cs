@@ -4,7 +4,7 @@
 namespace Microsoft.AspNetCore.HttpOverrides
 {
     /// <summary>
-    /// Default values related to <see cref="ForwardedHeadersMiddleware"/> middleware
+    /// Default values related to <see cref="ForwardedHeadersForwarder"/> middleware
     /// </summary>
     /// <seealso cref="Microsoft.AspNetCore.Builder.ForwardedHeadersOptions"/>
     public static class ForwardedHeadersDefaults
