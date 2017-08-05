@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -33,7 +32,5 @@ namespace Microsoft.AspNetCore.Rewrite
         /// should be taken. See <see cref="RuleResult"/>
         /// </summary>
         public RuleResult Result { get; set; }
-
-        internal StringBuilder Builder { get; set; } = new StringBuilder(64);
     }
 }
