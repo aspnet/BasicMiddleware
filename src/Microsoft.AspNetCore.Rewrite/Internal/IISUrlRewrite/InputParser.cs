@@ -136,6 +136,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                                 }
                                 return;
                             }
+                        case "RequestHeader":
+                            {
+                                Pattern pattern = ParseString(context, uriMatchPart);
+                                results.Add(new HeaderSegment(pattern));
+
+                                if (context.Current != CloseBrace)
+                                {
+                                    throw new FormatException(Resources.FormatError_InputParserMissingCloseBrace(context.Index));
+                                }
+                                return;
+                            }
                         case "R":
                             {
                                 var index = GetBackReferenceIndex(context);
