@@ -1,6 +1,5 @@
 <!-- This file may be overwritten by automation. Only values allowed here are VersionPrefix and VersionSuffix.  -->
 <Project>
   <PropertyGroup>
-    <VersionSuffix>rtm</VersionSuffix>
   </PropertyGroup>
 </Project>
