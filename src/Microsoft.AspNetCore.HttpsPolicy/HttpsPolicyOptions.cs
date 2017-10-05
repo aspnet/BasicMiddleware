@@ -11,22 +11,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     public class HttpsPolicyOptions
     {
         /// <summary>
-        /// Initializes a new <see cref="HttpsPolicyOptions"/>
-        /// </summary>
-        public HttpsPolicyOptions()
-        {
-            HstsOptions = new HstsOptions();
-        }
-
-        /// <summary>
         /// Whether to use HTTP Strict-Transport-Security (HSTS) on all HTTPS requests.
         /// </summary>
         public bool SetHsts { get; set; }
-
-        /// <summary>
-        ///  Options for using HSTS
-        /// </summary>
-        public HstsOptions HstsOptions { get; set; } // TODO should this be initialized at all? We could remove the bool if so.
 
         /// <summary>
         /// The status code to be used for Url Redirection

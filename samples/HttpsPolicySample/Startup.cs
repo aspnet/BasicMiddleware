@@ -18,11 +18,10 @@ namespace HttpsSample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpsPolicy(options => {
+            services.Configure<HttpsPolicyOptions>(options => {
                 options.SetHsts = true;
                 options.StatusCode = 302;
                 options.TlsPort = 5001;
-                options.HstsOptions.MaxAge = 60000;
             });
         }
 
