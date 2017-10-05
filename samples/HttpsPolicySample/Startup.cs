@@ -21,6 +21,7 @@ namespace HttpsSample
             services.AddHttpsPolicy(options => {
                 options.SetHsts = true;
                 options.StatusCode = 302;
+                options.TlsPort = 5001;
                 options.HstsOptions.MaxAge = 60000;
             });
         }

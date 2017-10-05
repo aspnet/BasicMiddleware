@@ -3,14 +3,15 @@
 
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Rewrite;
 
-namespace Microsoft.AspNetCore.HttpsPolicy
+namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
     /// Extension methods for the HttpsPolicy middleware.
     /// </summary>
-    public static class HttpsPolicyExtensions
+    public static class HttpsPolicyBuilderExtensions
     {
         /// <summary>
         /// Adds middleware for enforcing HTTPS for all HTTP Requests, including redirecting HTTP to HTTPS
