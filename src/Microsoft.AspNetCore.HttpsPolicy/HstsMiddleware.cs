@@ -8,10 +8,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
-namespace Microsoft.AspNetCore.HttpsEnforcement
+namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
-    /// Enables Http Strict Transport Security (HSTS)
+    /// Enables HTTP Strict Transport Security (HSTS)
     /// See https://tools.ietf.org/html/rfc6797.
     /// </summary>
     public class HstsMiddleware
@@ -26,6 +26,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
         /// Initialize the HSTS middleware.
         /// </summary>
         /// <param name="next"></param>
+        /// <param name="options"></param>
         public HstsMiddleware(RequestDelegate next, IOptions<HstsOptions> options)
         {
             if (next == null)
@@ -54,14 +55,11 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
         /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
-            context.Response.OnStarting(() =>
+
+            if (context.Request.IsHttps)
             {
-                if (context.Request.Scheme == "https")
-                {
-                    context.Response.Headers[HeaderNames.StrictTransportSecurity] = _nameValueHeaderValue;
-                }
-                return Task.CompletedTask;
-            });
+                context.Response.Headers[HeaderNames.StrictTransportSecurity] = _nameValueHeaderValue;
+            }
             await _next(context);
         }
     }

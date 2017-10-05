@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsEnforcement;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HttpsSample
@@ -18,14 +18,17 @@ namespace HttpsSample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpsPolicy(options => {
+                options.SetHsts = true;
+                options.StatusCode = 302;
+                options.HstsOptions.MaxAge = 60000;
+            });
         }
+
 
         public void Configure(IApplicationBuilder app)
         {
-            var httpsEnforcementOptions = new HttpsEnforcementOptions();
-            httpsEnforcementOptions.EnforceHsts = true;
-            httpsEnforcementOptions.StatusCode = 302;
-            app.UseHttpsEnforcement(httpsEnforcementOptions);
+            app.UseHttpsPolicy();
 
             app.Run(async context =>
             {
@@ -40,7 +43,7 @@ namespace HttpsSample
                 .UseKestrel(
                 options =>
                 {
-                    options.Listen(new IPEndPoint(IPAddress.Loopback, 443), listenOptions =>
+                    options.Listen(new IPEndPoint(IPAddress.Loopback, 5001), listenOptions =>
                     {
                         listenOptions.UseHttps("testCert.pfx", "testPassword");
                     });

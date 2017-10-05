@@ -1,17 +1,19 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.AspNetCore.HttpsEnforcement
+using Microsoft.AspNetCore.Http;
+
+namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
-    /// Options for the HttpsEnforcementMiddleware middleware
+    /// Options for the HttpsPolicyMiddleware middleware
     /// </summary>
-    public class HttpsEnforcementOptions
+    public class HttpsPolicyOptions
     {
         /// <summary>
-        /// Initializes a new <see cref="HttpsEnforcementOptions"/>
+        /// Initializes a new <see cref="HttpsPolicyOptions"/>
         /// </summary>
-        public HttpsEnforcementOptions()
+        public HttpsPolicyOptions()
         {
             HstsOptions = new HstsOptions();
         }
@@ -19,7 +21,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
         /// <summary>
         /// Whether to use HTTP Strict-Transport-Security (HSTS) on all HTTPS requests.
         /// </summary>
-        public bool EnforceHsts { get; set; }
+        public bool SetHsts { get; set; }
 
         /// <summary>
         ///  Options for using HSTS
@@ -29,7 +31,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
         /// <summary>
         /// The status code to be used for Url Redirection
         /// </summary>
-        public int StatusCode { get; set; } = 301; // TODO throw ArgumentOutOfRangeException from UrlRewrite redirect rule?
+        public int StatusCode { get; set; } = StatusCodes.Status301MovedPermanently; // TODO throw ArgumentOutOfRangeException from UrlRewrite redirect rule?
 
         /// <summary>
         /// The TLS port to be added to the redirected URL.

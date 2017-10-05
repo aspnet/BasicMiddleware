@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.AspNetCore.HttpsEnforcement
+namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
     /// Options for the Hsts Middleware
@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
         /// </summary>
         /// <remarks>
         /// Preload is not part of the RFC specification, but is supported by web browsers
-        /// such as Chrome to preload HSTS sites on fresh install. See https://hstspreload.org/.
+        /// to preload HSTS sites on fresh install. See https://hstspreload.org/.
         /// </remarks>
         public bool Preload { get; set; }
     }

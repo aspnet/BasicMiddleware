@@ -5,39 +5,41 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Rewrite;
 
-namespace Microsoft.AspNetCore.HttpsEnforcement
+namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
-    /// Extension methods for the HttpsEnforcement middleware.
+    /// Extension methods for the HttpsPolicy middleware.
     /// </summary>
-    public static class HttpsEnforcementExtensions
+    public static class HttpsPolicyExtensions
     {
         /// <summary>
-        /// Adds middleware for enforcing HTTPS for all HttpRequests.
+        /// Adds middleware for enforcing HTTPS for all HTTP Requests, including redirecting HTTP to HTTPS
+        /// and adding the HTTP Strict-Transport-Header.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> with HttpsEnforcement.</returns>
-        public static IApplicationBuilder UseHttpsEnforcement(this IApplicationBuilder app)
+        /// <returns>The <see cref="IApplicationBuilder"/> with HttpsPolicy.</returns>
+        public static IApplicationBuilder UseHttpsPolicy(this IApplicationBuilder app)
         {
             if (app == null)
             {
                 throw new ArgumentNullException(nameof(app));
             }
-            var httpsEnforcementOptions = new HttpsEnforcementOptions();
+            var httpsEnforcementOptions = new HttpsPolicyOptions();
 
-            return app.UseHttpsEnforcement(httpsEnforcementOptions);
+            return app.UseHttpsPolicy(httpsEnforcementOptions);
         }
 
         /// <summary>
-        /// Adds middleware for enforcing HTTPS for all HttpRequests.
+        /// Adds middleware for enforcing HTTPS for all HTTP Requests, including redirecting HTTP to HTTPS
+        /// and adding the HTTP Strict-Transport-Header.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <param name="options">The <see cref="HttpsEnforcementOptions"/> for specifying the behavior of the middleware.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> with HttpsEnforcement.</returns>
+        /// <param name="options">The <see cref="HttpsPolicyOptions"/> for specifying the behavior of the middleware.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/> with HttpsPolicy.</returns>
         /// <remarks>
         /// HTTPS Enforcement interanlly uses the UrlRewrite middleware to redirect HTTP requests to HTTPS
         /// </remarks>
-        public static IApplicationBuilder UseHttpsEnforcement(this IApplicationBuilder app, HttpsEnforcementOptions options)
+        public static IApplicationBuilder UseHttpsPolicy(this IApplicationBuilder app, HttpsPolicyOptions options)
         {
             if (app == null)
             {
@@ -48,7 +50,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (options.EnforceHsts)
+            if (options.SetHsts)
             {
                 app.UseHsts(options.HstsOptions);
             }

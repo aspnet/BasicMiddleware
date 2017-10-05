@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Net.Http.Headers;
 using Xunit;
 
-namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
+namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 {
     public class HstsMiddlewareTests
     {

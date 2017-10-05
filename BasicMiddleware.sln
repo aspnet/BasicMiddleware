@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26906.1
+VisualStudioVersion = 15.0.26815.3
 MinimumVisualStudioVersion = 15.0.26730.03
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpOverrides", "src\Microsoft.AspNetCore.HttpOverrides\Microsoft.AspNetCore.HttpOverrides.csproj", "{517308C3-B477-4B01-B461-CAB9C10B6928}"
 EndProject
@@ -57,11 +57,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.xml = version.xml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpsEnforcement", "src\Microsoft.AspNetCore.HttpsEnforcement\Microsoft.AspNetCore.HttpsEnforcement.csproj", "{4D39C29B-4EC8-497C-B411-922DA494D71B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpsPolicy", "src\Microsoft.AspNetCore.HttpsPolicy\Microsoft.AspNetCore.HttpsPolicy.csproj", "{4D39C29B-4EC8-497C-B411-922DA494D71B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpsSample", "samples\HttpsSample\HttpsSample.csproj", "{AC424AEE-4883-49C6-945F-2FC916B8CA1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpsPolicySample", "samples\HttpsPolicySample\HttpsPolicySample.csproj", "{AC424AEE-4883-49C6-945F-2FC916B8CA1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNetCore.HttpsEnforcement.Tests", "test\Microsoft.AspNetCore.HttpsEnforcement.Tests\Microsoft.AspNetCore.HttpsEnforcement.Tests.csproj", "{1C67B0F1-6E70-449E-A2F1-98B9D5C576CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpsPolicy.Tests", "test\Microsoft.AspNetCore.HttpsEnforcement.Tests\Microsoft.AspNetCore.HttpsPolicy.Tests.csproj", "{1C67B0F1-6E70-449E-A2F1-98B9D5C576CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

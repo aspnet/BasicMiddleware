@@ -13,9 +13,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Net.Http.Headers;
 using Xunit;
 
-namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
+namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 {
-    public class HttpsEnforcementMiddlewareTests
+    public class HttpsPolicyMiddlewareTests
     {
         [Fact]
         public async Task SetOptions_DefaultsSetCorrectly()
@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
                 })
                 .Configure(app =>
                 {
-                    app.UseHttpsEnforcement();
+                    app.UseHttpsPolicy();
                     app.Run(context =>
                     {
                         return context.Response.WriteAsync("Hello world");
@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
         [InlineData(301, 443, "https://localhost/")]
         public async Task SetOptions_SetStatusCodeTlsPort(int statusCode, int? tlsPort, string expected)
         {
-            var httpsEnforcementOptions = new HttpsEnforcementOptions
+            var httpsEnforcementOptions = new HttpsPolicyOptions
             {
                 StatusCode = statusCode,
                 TlsPort = tlsPort
@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
                 })
                 .Configure(app =>
                 {
-                    app.UseHttpsEnforcement(httpsEnforcementOptions);
+                    app.UseHttpsPolicy(httpsEnforcementOptions);
                     app.Run(context =>
                     {
                         return context.Response.WriteAsync("Hello world");
@@ -95,12 +95,12 @@ namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
         [InlineData(302, 5050, 0, true, true, "max-age=0; includeSubDomains; preload", "https://localhost:5050/")]
         public async Task SetOptions_UseHstsMiddleware(int statusCode, int? tlsPort, int maxAge, bool includeSubDomains, bool preload, string expectedHstsHeader, string expectedUrl)
         {
-            var httpsEnforcementOptions = new HttpsEnforcementOptions
+            var httpsEnforcementOptions = new HttpsPolicyOptions
             {
                 StatusCode = statusCode,
                 TlsPort = tlsPort
             };
-            httpsEnforcementOptions.EnforceHsts = true;
+            httpsEnforcementOptions.SetHsts = true;
             httpsEnforcementOptions.HstsOptions.MaxAge = maxAge;
             httpsEnforcementOptions.HstsOptions.IncludeSubDomains = includeSubDomains;
             httpsEnforcementOptions.HstsOptions.Preload = preload;
@@ -112,7 +112,7 @@ namespace Microsoft.AspNetCore.HttpsEnforcement.Tests
                 })
                 .Configure(app =>
                 {
-                    app.UseHttpsEnforcement(httpsEnforcementOptions);
+                    app.UseHttpsPolicy(httpsEnforcementOptions);
                     app.Run(context =>
                     {
                         return context.Response.WriteAsync("Hello world");
