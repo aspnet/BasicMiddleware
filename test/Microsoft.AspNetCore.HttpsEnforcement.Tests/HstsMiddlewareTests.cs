@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Xunit;
 
@@ -60,15 +61,15 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 .UseUrls("https://*:5050")
                 .ConfigureServices(services =>
                 {
+                    services.Configure<HstsOptions>(options => {
+                        options.Preload = preload;
+                        options.IncludeSubDomains = includeSubDomains;
+                        options.MaxAge = maxAge;
+                    });
                 })
                 .Configure(app =>
                 {
-                    app.UseHsts(new HstsOptions
-                    {
-                        MaxAge = maxAge,
-                        IncludeSubDomains = includeSubDomains,
-                        Preload = preload
-                    });
+                    app.UseHsts();
                     app.Run(context =>
                     {
                         return context.Response.WriteAsync("Hello world");

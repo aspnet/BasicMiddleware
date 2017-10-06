@@ -49,6 +49,25 @@ namespace Microsoft.AspNetCore.Builder
 
         public static IApplicationBuilder UseHttpsPolicy(this IApplicationBuilder app, bool enableHsts)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+            var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsPolicyOptions>>().Value;
+
+            if (enableHsts)
+            {
+                app.UseHsts();
+            }
+
+            var rewriteOptions = new RewriteOptions();
+            rewriteOptions.AddRedirectToHttps(
+                options.StatusCode,
+                options.TlsPort);
+
+            app.UseRewriter(rewriteOptions);
+
+            return app;
         }
     }
 }

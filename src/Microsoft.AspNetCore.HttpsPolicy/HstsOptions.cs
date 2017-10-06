@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+
 namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// Max-age is required; defaults to 0.
         /// See: https://tools.ietf.org/html/rfc6797#section-6.1.1
         /// </remarks>
-        public int MaxAge { get; set; }
+        public int MaxAge { get; set; } // TODO set this to a different default in dev/not dev?
 
         /// <summary>
         /// Sets the includeSubDomain parameter of the Strict-Transport-Security header.

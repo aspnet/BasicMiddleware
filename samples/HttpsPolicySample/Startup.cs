@@ -19,9 +19,14 @@ namespace HttpsSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<HttpsPolicyOptions>(options => {
-                options.SetHsts = true;
-                options.StatusCode = 302;
+                options.StatusCode = 301;
                 options.TlsPort = 5001;
+            });
+            services.Configure<HstsOptions>(options =>
+            {
+                options.MaxAge = 5000;
+                options.Preload = true;
+                options.IncludeSubDomains = true;
             });
         }
 
@@ -29,7 +34,7 @@ namespace HttpsSample
         public void Configure(IApplicationBuilder app)
         {
             app.UseHttpsPolicy();
-
+            app.UseHsts();
             app.Run(async context =>
             {
                 await context.Response.WriteAsync("Hello world!");
