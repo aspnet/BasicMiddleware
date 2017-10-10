@@ -41,7 +41,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var response = await client.SendAsync(request);
 
-            // By default, we will not redirect if we only use the Hsts Middleware.
             Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
             Assert.Equal("https://localhost/", response.Headers.Location.ToString());
         }
@@ -61,7 +60,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 {
                     services.Configure<HttpsPolicyOptions>(options =>
                     {
-                        options.StatusCode = statusCode;
+                        options.RedirectStatusCode = statusCode;
                         options.TlsPort = tlsPort;
                     });
                 })
@@ -81,11 +80,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var response = await client.SendAsync(request);
 
-            // By default, we will not redirect if we only use the Hsts Middleware.
             Assert.Equal(statusCode, (int)response.StatusCode);
             Assert.Equal(expected, response.Headers.Location.ToString());
         }
-
 
         [Theory]
         [InlineData(302, null, 0, false, false, "max-age=0", "https://localhost/")]
@@ -105,7 +102,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.Configure<HttpsPolicyOptions>(options =>
                     {
                         options.SetHsts = true;
-                        options.StatusCode = statusCode;
+                        options.RedirectStatusCode = statusCode;
                         options.TlsPort = tlsPort;
                     });
                     services.Configure<HstsOptions>(options =>
@@ -159,7 +156,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 {
                     services.Configure<HttpsPolicyOptions>(options =>
                     {
-                        options.StatusCode = statusCode;
+                        options.RedirectStatusCode = statusCode;
                         options.TlsPort = tlsPort;
                     });
                     services.Configure<HstsOptions>(options =>
@@ -207,7 +204,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData(302, 5050, 0, true, true, "max-age=0; includeSubDomains; preload", "https://localhost:5050/")]
         public async Task SetOptions_AddHstsMiddlewareAndEnableInPolicy(int statusCode, int? tlsPort, int maxAge, bool includeSubDomains, bool preload, string expectedHstsHeader, string expectedUrl)
         {
-
             // Note in this scenario the middleware is added twice.
             var builder = new WebHostBuilder()
                 .UseUrls("https://*:5050", "http://*:5050")
@@ -216,7 +212,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.Configure<HttpsPolicyOptions>(options =>
                     {
                         options.SetHsts = true;
-                        options.StatusCode = statusCode;
+                        options.RedirectStatusCode = statusCode;
                         options.TlsPort = tlsPort;
                     });
                     services.Configure<HstsOptions>(options =>

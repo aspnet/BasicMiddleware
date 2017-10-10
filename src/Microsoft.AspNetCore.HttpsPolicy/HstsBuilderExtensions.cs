@@ -3,14 +3,15 @@
 
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.HttpsPolicy
+namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
     /// Extension methods for the HSTS middleware.
     /// </summary>
-    public static class HstsExtensions
+    public static class HstsBuilderExtensions
     {
         /// <summary>
         /// Adds middleware for using HSTS, which adds the Strict-Transport-Security header.

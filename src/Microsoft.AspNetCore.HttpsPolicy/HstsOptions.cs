@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// Max-age is required; defaults to 0.
         /// See: https://tools.ietf.org/html/rfc6797#section-6.1.1
         /// </remarks>
-        public int MaxAge { get; set; } // TODO set this to a different default in dev/not dev?
+        public int MaxAge { get; set; }
 
         /// <summary>
         /// Sets the includeSubDomain parameter of the Strict-Transport-Security header.

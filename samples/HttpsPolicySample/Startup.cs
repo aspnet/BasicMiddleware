@@ -19,7 +19,7 @@ namespace HttpsSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<HttpsPolicyOptions>(options => {
-                options.StatusCode = 301;
+                options.RedirectStatusCode = 301;
                 options.TlsPort = 5001;
             });
             services.Configure<HstsOptions>(options =>
@@ -29,7 +29,6 @@ namespace HttpsSample
                 options.IncludeSubDomains = true;
             });
         }
-
 
         public void Configure(IApplicationBuilder app)
         {

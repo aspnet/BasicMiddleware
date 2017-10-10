@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         private const string Preload = "; preload";
 
         private readonly RequestDelegate _next;
-        private readonly StringValues _nameValueHeaderValue;
+        private readonly StringValues _strictTransportSecurityValue;
 
         /// <summary>
         /// Initialize the HSTS middleware.
@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
 
-            _nameValueHeaderValue = new StringValues($"max-age={hstsOptions.MaxAge}{includeSubdomains}{preload}");
+            _strictTransportSecurityValue = new StringValues($"max-age={hstsOptions.MaxAge}{includeSubdomains}{preload}");
         }
 
         /// <summary>
@@ -53,14 +53,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// </summary>
         /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <returns></returns>
-        public async Task Invoke(HttpContext context)
+        public void Invoke(HttpContext context)
         {
 
             if (context.Request.IsHttps)
             {
-                context.Response.Headers[HeaderNames.StrictTransportSecurity] = _nameValueHeaderValue;
+                context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
-            await _next(context);
+            _next(context);
         }
     }
 }

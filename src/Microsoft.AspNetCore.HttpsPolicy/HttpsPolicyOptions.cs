@@ -11,18 +11,21 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     public class HttpsPolicyOptions
     {
         /// <summary>
-        /// Whether to use HTTP Strict-Transport-Security (HSTS) on all HTTPS requests.
+        /// Whether to use HTTP Strict-Transport-Security (HSTS) on all HTTPS responses.
         /// </summary>
         public bool SetHsts { get; set; }
 
         /// <summary>
-        /// The status code to be used for Url Redirection
+        /// The status code to redirect the response to.
         /// </summary>
-        public int StatusCode { get; set; } = StatusCodes.Status301MovedPermanently; // TODO throw ArgumentOutOfRangeException from UrlRewrite redirect rule?
+        public int RedirectStatusCode { get; set; } = StatusCodes.Status301MovedPermanently;
 
         /// <summary>
         /// The TLS port to be added to the redirected URL.
         /// </summary>
+        /// <remarks>
+        /// Defaults to 443 if not provided.
+        /// </remarks>
         public int? TlsPort { get; set; }
     }
 }

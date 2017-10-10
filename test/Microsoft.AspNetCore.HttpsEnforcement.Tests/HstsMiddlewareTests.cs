@@ -43,7 +43,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var response = await client.SendAsync(request);
 
-            // By default, we will not redirect if we only use the Hsts Middleware.
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal("max-age=0", response.Headers.GetValues(HeaderNames.StrictTransportSecurity).FirstOrDefault());
         }
@@ -83,7 +82,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var response = await client.SendAsync(request);
 
-            // By default, we will not redirect if we only use the Hsts Middleware.
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(expected, response.Headers.GetValues(HeaderNames.StrictTransportSecurity).FirstOrDefault());
         }

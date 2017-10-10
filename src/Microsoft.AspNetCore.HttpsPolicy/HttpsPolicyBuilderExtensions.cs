@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.Builder
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(
-                options.StatusCode,
+                options.RedirectStatusCode,
                 options.TlsPort);
 
             app.UseRewriter(rewriteOptions);
@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Builder
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(
-                options.StatusCode,
+                options.RedirectStatusCode,
                 options.TlsPort);
 
             app.UseRewriter(rewriteOptions);
