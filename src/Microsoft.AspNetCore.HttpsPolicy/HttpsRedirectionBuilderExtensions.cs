@@ -24,41 +24,14 @@ namespace Microsoft.AspNetCore.Builder
         /// <remarks>
         /// HTTPS Enforcement interanlly uses the UrlRewrite middleware to redirect HTTP requests to HTTPS
         /// </remarks>
-        public static IApplicationBuilder UseHttpsPolicy(this IApplicationBuilder app)
+        public static IApplicationBuilder UseHttpsRedirection(this IApplicationBuilder app)
         {
             if (app == null)
             {
                 throw new ArgumentNullException(nameof(app));
             }
-            var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsPolicyOptions>>().Value;
 
-            if (options.SetHsts)
-            {
-                app.UseHsts();
-            }
-
-            var rewriteOptions = new RewriteOptions();
-            rewriteOptions.AddRedirectToHttps(
-                options.RedirectStatusCode,
-                options.TlsPort);
-
-            app.UseRewriter(rewriteOptions);
-
-            return app;
-        }
-
-        public static IApplicationBuilder UseHttpsPolicy(this IApplicationBuilder app, bool enableHsts)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-            var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsPolicyOptions>>().Value;
-
-            if (enableHsts)
-            {
-                app.UseHsts();
-            }
+            var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(

@@ -53,14 +53,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// </summary>
         /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <returns></returns>
-        public void Invoke(HttpContext context)
+        public Task Invoke(HttpContext context)
         {
 
             if (context.Request.IsHttps)
             {
                 context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
-            _next(context);
+            return  _next(context);
         }
     }
 }

@@ -6,14 +6,10 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.HttpsPolicy
 {
     /// <summary>
-    /// Options for the HttpsPolicyMiddleware middleware
+    /// Options for the HttpsRedirection middleware
     /// </summary>
-    public class HttpsPolicyOptions
+    public class HttpsRedirectionOptions
     {
-        /// <summary>
-        /// Whether to use HTTP Strict-Transport-Security (HSTS) on all HTTPS responses.
-        /// </summary>
-        public bool SetHsts { get; set; }
 
         /// <summary>
         /// The status code to redirect the response to.
