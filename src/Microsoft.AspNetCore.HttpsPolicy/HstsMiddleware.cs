@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
 
-            _strictTransportSecurityValue = new StringValues($"max-age={hstsOptions.MaxAge}{includeSubdomains}{preload}");
+            _strictTransportSecurityValue = new StringValues($"max-age={hstsOptions.MaxAge.TotalSeconds}{includeSubdomains}{preload}");
         }
 
         /// <summary>
@@ -55,11 +55,11 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
-
             if (context.Request.IsHttps)
             {
                 context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
+
             return  _next(context);
         }
     }

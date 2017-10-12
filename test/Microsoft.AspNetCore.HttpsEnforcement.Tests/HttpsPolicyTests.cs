@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.Configure<HstsOptions>(options =>
                     {
                         options.IncludeSubDomains = includeSubDomains;
-                        options.MaxAge = maxAge;
+                        options.MaxAge = TimeSpan.FromSeconds(maxAge);
                         options.Preload = preload;
                     });
                 })

@@ -19,13 +19,13 @@ namespace HttpsSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<HttpsRedirectionOptions>(options => {
-                options.RedirectStatusCode = 301;
+                options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
                 options.TlsPort = 5001;
             });
 
             services.Configure<HstsOptions>(options =>
             {
-                options.MaxAge = 5000;
+                options.MaxAge = TimeSpan.FromSeconds(5000);
                 options.Preload = true;
                 options.IncludeSubDomains = true;
             });
