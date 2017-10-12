@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,18 +10,17 @@ using Microsoft.Extensions.Options;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// Extension methods for the HttpsPolicy middleware.
+    /// Extension methods for the HttpsRedirection middleware.
     /// </summary>
     public static class HttpsPolicyBuilderExtensions
     {
         /// <summary>
-        /// Adds middleware for enforcing HTTPS for all HTTP Requests, including redirecting HTTP to HTTPS
-        /// and adding the HTTP Strict-Transport-Header.
+        /// Adds middleware for redirecting HTTP Requests to HTTPS.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> with HttpsPolicy.</returns>
+        /// <returns>The <see cref="IApplicationBuilder"/> for HttpsRedirection.</returns>
         /// <remarks>
-        /// HTTPS Enforcement interanlly uses the UrlRewrite middleware to redirect HTTP requests to HTTPS
+        /// HTTPS Enforcement interanlly uses the UrlRewrite middleware to redirect HTTP requests to HTTPS.
         /// </remarks>
         public static IApplicationBuilder UseHttpsRedirection(this IApplicationBuilder app)
         {
