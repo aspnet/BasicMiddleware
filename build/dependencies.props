@@ -1,21 +1,21 @@
 ﻿<Project>
   <PropertyGroup>
-    <InternalAspNetCoreSdkPackageVersion>2.0.2-beta-15522</InternalAspNetCoreSdkPackageVersion>
-    <MicrosoftAspNetCoreHostingAbstractionsPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreHostingAbstractionsPackageVersion>
-    <MicrosoftAspNetCoreHostingPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreHostingPackageVersion>
-    <MicrosoftAspNetCoreHttpAbstractionsPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreHttpAbstractionsPackageVersion>
-    <MicrosoftAspNetCoreHttpExtensionsPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreHttpExtensionsPackageVersion>
-    <MicrosoftAspNetCoreHttpPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreHttpPackageVersion>
-    <MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>
-    <MicrosoftAspNetCoreServerKestrelPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreServerKestrelPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>2.0.1-rtm-83</MicrosoftAspNetCoreTestHostPackageVersion>
+    <InternalAspNetCoreSdkPackageVersion>2.0.2-rc1-15526</InternalAspNetCoreSdkPackageVersion>
+    <MicrosoftAspNetCoreHostingAbstractionsPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreHostingAbstractionsPackageVersion>
+    <MicrosoftAspNetCoreHostingPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreHostingPackageVersion>
+    <MicrosoftAspNetCoreHttpAbstractionsPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreHttpAbstractionsPackageVersion>
+    <MicrosoftAspNetCoreHttpExtensionsPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreHttpExtensionsPackageVersion>
+    <MicrosoftAspNetCoreHttpPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreHttpPackageVersion>
+    <MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>
+    <MicrosoftAspNetCoreServerKestrelPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreServerKestrelPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreTestHostPackageVersion>
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <MicrosoftExtensionsFileProvidersAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsFileProvidersAbstractionsPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>2.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingTestingPackageVersion>2.0.0</MicrosoftExtensionsLoggingTestingPackageVersion>
     <MicrosoftExtensionsOptionsPackageVersion>2.0.0</MicrosoftExtensionsOptionsPackageVersion>
-    <MicrosoftNetHttpHeadersPackageVersion>2.0.1-rtm-83</MicrosoftNetHttpHeadersPackageVersion>
+    <MicrosoftNetHttpHeadersPackageVersion>2.0.1-rtm-105</MicrosoftNetHttpHeadersPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.3.0</MicrosoftNETTestSdkPackageVersion>
     <MoqPackageVersion>4.7.49</MoqPackageVersion>
     <XunitPackageVersion>2.3.0-beta2-build3683</XunitPackageVersion>

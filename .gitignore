@@ -34,6 +34,5 @@ project.lock.json
 *.nuget.targets
 global.json
 
-korebuild-lock.txt
 *.g.targets
 
