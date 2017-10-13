@@ -18,7 +18,8 @@ namespace HttpsSample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpsRedirection(options => {
+            services.AddHttpsRedirection(options =>
+            {
                 options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
                 options.TlsPort = 5001;
             });
