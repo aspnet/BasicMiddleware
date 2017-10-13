@@ -18,14 +18,14 @@ namespace HttpsSample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<HttpsRedirectionOptions>(options => {
+            services.AddHttpsRedirection(options => {
                 options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
                 options.TlsPort = 5001;
             });
 
-            services.Configure<HstsOptions>(options =>
+            services.AddHsts(options =>
             {
-                options.MaxAge = TimeSpan.FromSeconds(5000);
+                options.MaxAge = TimeSpan.FromDays(30);
                 options.Preload = true;
                 options.IncludeSubDomains = true;
             });
