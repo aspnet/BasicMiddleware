@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -42,10 +43,11 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             _next = next;
 
             var hstsOptions = options.Value;
+            var maxAge = Convert.ToInt64(Math.Floor(hstsOptions.MaxAge.TotalSeconds))
+                        .ToString(CultureInfo.InvariantCulture);
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
-
-            _strictTransportSecurityValue = new StringValues($"max-age={hstsOptions.MaxAge.TotalSeconds}{includeSubdomains}{preload}");
+            _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
         }
 
         /// <summary>

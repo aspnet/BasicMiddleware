@@ -10,7 +10,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     /// </summary>
     public class HttpsRedirectionOptions
     {
-
         /// <summary>
         /// The status code to redirect the response to.
         /// </summary>
