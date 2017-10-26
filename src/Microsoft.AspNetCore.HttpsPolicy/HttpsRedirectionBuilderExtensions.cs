@@ -30,6 +30,7 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
+            var configureOptions = app.ApplicationServices.GetService<IConfigureOptions<KestrelServerOptions>>();
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(
