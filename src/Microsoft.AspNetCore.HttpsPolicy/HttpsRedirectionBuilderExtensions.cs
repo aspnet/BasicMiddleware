@@ -4,6 +4,7 @@
 using System;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -31,10 +32,25 @@ namespace Microsoft.AspNetCore.Builder
 
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
 
+            // The tls port set in options will have priority over the one in configuration.
+            var tlsPort = options.SSLPort;
+            if (tlsPort == null)
+            {
+                // Only read configuration if there is no tlsPort
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+                var configTlsPort = config["SSL_PORT"];
+                // If the string isn't empty, try to parse it.
+                if (!string.IsNullOrEmpty(configTlsPort)
+                    && int.TryParse(configTlsPort, out var intTlsPort))
+                {
+                    tlsPort = intTlsPort;
+                }
+            }
+
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(
                 options.RedirectStatusCode,
-                options.TlsPort);
+                tlsPort);
 
             app.UseRewriter(rewriteOptions);
 

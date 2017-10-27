@@ -21,7 +21,7 @@ namespace HttpsSample
             services.AddHttpsRedirection(options =>
             {
                 options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
-                options.TlsPort = 5001;
+                options.SSLPort = 5001;
             });
 
             services.AddHsts(options =>
