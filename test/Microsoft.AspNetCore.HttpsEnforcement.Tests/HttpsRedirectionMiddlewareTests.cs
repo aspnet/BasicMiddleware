@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData(308, null, "https://localhost/")]
         [InlineData(301, 5050, "https://localhost:5050/")]
         [InlineData(301, 443, "https://localhost/")]
-        public async Task SetOptions_SetStatusCodeSSLPort(int statusCode, int? sslPort, string expected)
+        public async Task SetOptions_SetStatusCodeHttpsPort(int statusCode, int? httpsPort, string expected)
         {
 
             var builder = new WebHostBuilder()
@@ -61,7 +61,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.Configure<HttpsRedirectionOptions>(options =>
                     {
                         options.RedirectStatusCode = statusCode;
-                        options.SSLPort = sslPort;
+                        options.HttpsPort = httpsPort;
                     });
                 })
                 .Configure(app =>
@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData(308, null, "https://localhost/")]
         [InlineData(301, 5050, "https://localhost:5050/")]
         [InlineData(301, 443, "https://localhost/")]
-        public async Task SetOptionsThroughHelperMethod_SetStatusCodeSSLPort(int statusCode, int? sslPort, string expectedUrl)
+        public async Task SetOptionsThroughHelperMethod_SetStatusCodeAndHttpsPort(int statusCode, int? httpsPort, string expectedUrl)
         {
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
@@ -99,7 +99,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.AddHttpsRedirection(options =>
                     {
                         options.RedirectStatusCode = statusCode;
-                        options.SSLPort = sslPort;
+                        options.HttpsPort = httpsPort;
                     });
                 })
                 .Configure(app =>
@@ -129,14 +129,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData(443, "5000", "https://localhost/")]
         [InlineData(4000, "5000", "https://localhost:4000/")]
         [InlineData(5000, null, "https://localhost:5000/")]
-        public async Task SetSSLPortEnvironmentVariable_ReturnsCorrectStatusCodeOnResponse(int? optionsSslPort, string configSslPort, string expectedUrl)
+        public async Task SetHttpsPortEnvironmentVariable_ReturnsCorrectStatusCodeOnResponse(int? optionsHttpsPort, string configHttpsPort, string expectedUrl)
         {
             var builder = new WebHostBuilder()
                .ConfigureServices(services =>
                {
                    services.AddHttpsRedirection(options =>
                    {
-                       options.SSLPort = optionsSslPort;
+                       options.HttpsPort = optionsHttpsPort;
                    });
                })
                .Configure(app =>
@@ -147,7 +147,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                        return context.Response.WriteAsync("Hello world");
                    });
                });
-            builder.UseSetting("SSL_PORT", configSslPort);
+            builder.UseSetting("HTTPS_PORT", configHttpsPort);
             var server = new TestServer(builder);
             var client = server.CreateClient();
 

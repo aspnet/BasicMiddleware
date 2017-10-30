@@ -33,24 +33,24 @@ namespace Microsoft.AspNetCore.Builder
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
 
             // The tls port set in options will have priority over the one in configuration.
-            var tlsPort = options.SSLPort;
-            if (tlsPort == null)
+            var httpsPort = options.HttpsPort;
+            if (httpsPort == null)
             {
                 // Only read configuration if there is no tlsPort
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-                var configTlsPort = config["SSL_PORT"];
+                var configHttpsPort = config["HTTPS_PORT"];
                 // If the string isn't empty, try to parse it.
-                if (!string.IsNullOrEmpty(configTlsPort)
-                    && int.TryParse(configTlsPort, out var intTlsPort))
+                if (!string.IsNullOrEmpty(configHttpsPort)
+                    && int.TryParse(configHttpsPort, out var intHttpsPort))
                 {
-                    tlsPort = intTlsPort;
+                    httpsPort = intHttpsPort;
                 }
             }
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.AddRedirectToHttps(
                 options.RedirectStatusCode,
-                tlsPort);
+                httpsPort);
 
             app.UseRewriter(rewriteOptions);
 

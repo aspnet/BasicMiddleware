@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                     services.Configure<HttpsRedirectionOptions>(options =>
                     {
                         options.RedirectStatusCode = statusCode;
-                        options.SSLPort = tlsPort;
+                        options.HttpsPort = tlsPort;
                     });
                     services.Configure<HstsOptions>(options =>
                     {
