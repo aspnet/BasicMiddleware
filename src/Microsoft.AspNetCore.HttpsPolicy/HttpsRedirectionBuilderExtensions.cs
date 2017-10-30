@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Builder
             var httpsPort = options.HttpsPort;
             if (httpsPort == null)
             {
-                // Only read configuration if there is no tlsPort
+                // Only read configuration if there is no httpsPort
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
                 var configHttpsPort = config["HTTPS_PORT"];
                 // If the string isn't empty, try to parse it.
