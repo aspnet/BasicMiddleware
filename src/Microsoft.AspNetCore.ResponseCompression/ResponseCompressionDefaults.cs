@@ -27,6 +27,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
             "text/xml",
             "application/json",
             "text/json",
+	        "image/svg+xml"
         };
     }
 }
