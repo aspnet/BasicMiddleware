@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         public bool AddHstsHeaderToLocahostRequests { get; set; }
 
         /// <summary>
-        /// A list of host names that will not add the HSTS header
+        /// A list of host names that will not add the HSTS header.
         /// </summary>
         public IList<string> ExcludedDomains { get; set; } = new List<string>();
     }

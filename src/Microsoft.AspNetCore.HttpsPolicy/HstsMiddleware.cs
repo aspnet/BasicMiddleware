@@ -20,16 +20,16 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     {
         private const string IncludeSubDomains = "; includeSubDomains";
         private const string Preload = "; preload";
-        private static readonly string[] localhostDomains =
+        private static readonly string[] localhostStrings =
         {
             "localhost",
-            "127.0.0.1",
-            "[::1]"
+            "127.0.0.1", // ipv4
+            "[::1]" // ipv6
         };
 
         private readonly RequestDelegate _next;
         private readonly StringValues _strictTransportSecurityValue;
-        private readonly List<string> _blacklistedDomains;
+        private readonly List<string> _excludedDomains;
         /// <summary>
         /// Initialize the HSTS middleware.
         /// </summary>
@@ -51,13 +51,13 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
             var hstsOptions = options.Value;
             var maxAge = Convert.ToInt64(Math.Floor(hstsOptions.MaxAge.TotalSeconds))
-                        .ToString(CultureInfo.InvariantCulture);
+                            .ToString(CultureInfo.InvariantCulture);
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
 
-            _blacklistedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(localhostDomains);
-            _blacklistedDomains.AddRange(hstsOptions.ExcludedDomains);
+            _excludedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(localhostStrings);
+            _excludedDomains.AddRange(hstsOptions.ExcludedDomains);
         }
 
         /// <summary>
@@ -80,9 +80,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private bool IsDomainBlocked(string host)
         {
-            for (var i = 0; i < _blacklistedDomains.Count; i++)
+            for (var i = 0; i < _excludedDomains.Count; i++)
             {
-                if (host.Equals(_blacklistedDomains[i], StringComparison.OrdinalIgnoreCase))
+                if (host.Equals(_excludedDomains[i], StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
