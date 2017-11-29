@@ -140,7 +140,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData(443, "5000", "https://localhost:4444/", "https://localhost/")]
         [InlineData(4000, "5000", "https://localhost:4444/", "https://localhost:4000/")]
         [InlineData(5000, null, "https://localhost:4444/", "https://localhost:5000/")]
-        public async Task SetHttpsPortEnvironmentVariable_ReturnsCorrectStatusCodeOnResponse(int? optionsHttpsPort, string configHttpsPort, string serverAddressFeatureUrl, string expectedUrl)
+        public async Task SetHttpsPortEnvironmentVariableAndServerFeature_ReturnsCorrectStatusCodeOnResponse(int? optionsHttpsPort, string configHttpsPort, string serverAddressFeatureUrl, string expectedUrl)
         {
             var builder = new WebHostBuilder()
                .ConfigureServices(services =>
