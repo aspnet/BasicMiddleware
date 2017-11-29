@@ -38,19 +38,16 @@ namespace Microsoft.AspNetCore.Builder
             // 2. HTTPS_PORT environment variable
             // 3. IServerAddressesFeature
             // 4. 443 (or not set.)
-
-
             var httpsPort = 0;
             if (options.HttpsPort == null)
             {
-                if (TryGetHttpsPortFromEnvironmentVariable(app, out httpsPort)
-                    || TryGetHttpsPortFromIServerAddressesFeature(app, out httpsPort))
+                if (TryGetHttpsPortFromEnvironmentVariable(app, out httpsPort))
                 {
                     options.HttpsPort = httpsPort;
                 }
             }
 
-            app.UseMiddleware<HttpsRedirectionMiddleware>();
+            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>());
 
             return app;
         }
@@ -68,14 +65,5 @@ namespace Microsoft.AspNetCore.Builder
             return false;
         }
 
-        private static bool TryGetHttpsPortFromIServerAddressesFeature(IApplicationBuilder app, out int httpsPort)
-        {
-            httpsPort = 0;
-            var addressFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
-            foreach (var address in addressFeature.Addresses)
-            {
-            }
-            return false;
-        }
     }
 }

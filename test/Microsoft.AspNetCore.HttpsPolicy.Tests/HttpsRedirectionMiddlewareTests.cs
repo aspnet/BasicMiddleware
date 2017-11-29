@@ -8,7 +8,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
@@ -147,7 +149,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                        return context.Response.WriteAsync("Hello world");
                    });
                });
+
             builder.UseSetting("HTTPS_PORT", configHttpsPort);
+
             var server = new TestServer(builder);
             var client = server.CreateClient();
 
@@ -156,6 +160,39 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
             var response = await client.SendAsync(request);
 
             Assert.Equal(expectedUrl, response.Headers.Location.ToString());
+        }
+
+        [Fact]
+        public async Task SetServerAddressesFeature_PicksFirstHttpsPort()
+        {
+            var builder = new WebHostBuilder()
+               .ConfigureServices(services =>
+               {
+                   services.AddHttpsRedirection(options =>
+                   {
+                   });
+               })
+               .Configure(app =>
+               {
+                   app.UseHttpsRedirection();
+                   app.Run(context =>
+                   {
+                       return context.Response.WriteAsync("Hello world");
+                   });
+               });
+
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
+            var server = new TestServer(builder, featureCollection);
+
+            server.Features.Get<IServerAddressesFeature>().Addresses.Add("https://localhost:5050");
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+
+            var response = await client.SendAsync(request);
+
+            Assert.Equal("https://localhost:5050/", response.Headers.Location.ToString());
         }
     }
 }
