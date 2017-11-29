@@ -35,5 +35,10 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// to preload HSTS sites on fresh install. See https://hstspreload.org/.
         /// </remarks>
         public bool Preload { get; set; }
+
+        /// <summary>
+        /// Whether to add the HSTS header to localhost requests.
+        /// </summary>
+        public bool SetHeaderOnLocalhost { get; set; }
     }
 }

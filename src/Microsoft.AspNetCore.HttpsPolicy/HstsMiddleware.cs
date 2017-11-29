@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private readonly RequestDelegate _next;
         private readonly StringValues _strictTransportSecurityValue;
-
+        private readonly bool _setHeaderOnLocalhost;
         /// <summary>
         /// Initialize the HSTS middleware.
         /// </summary>
@@ -48,6 +48,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
+            _setHeaderOnLocalhost = hstsOptions.SetHeaderOnLocalhost;
         }
 
         /// <summary>
@@ -59,10 +60,21 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         {
             if (context.Request.IsHttps)
             {
+                if (!_setHeaderOnLocalhost)
+                {
+                    // check hsts list
+                }
                 context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
 
             return  _next(context);
+        }
+
+        static 
+
+        private bool CheckIfRequestIsLocalhost()
+        {
+
         }
     }
 }
