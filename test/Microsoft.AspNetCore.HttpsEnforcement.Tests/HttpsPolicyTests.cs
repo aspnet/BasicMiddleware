@@ -42,6 +42,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                         options.IncludeSubDomains = includeSubDomains;
                         options.MaxAge = TimeSpan.FromSeconds(maxAge);
                         options.Preload = preload;
+                        options.AddHstsHeaderToLocahostRequests = true; // Allow localhost for testing
                     });
                 })
                 .Configure(app =>

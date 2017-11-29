@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,10 +20,16 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     {
         private const string IncludeSubDomains = "; includeSubDomains";
         private const string Preload = "; preload";
+        private static readonly string[] localhostDomains =
+        {
+            "localhost",
+            "127.0.0.1",
+            "[::1]"
+        };
 
         private readonly RequestDelegate _next;
         private readonly StringValues _strictTransportSecurityValue;
-        private readonly bool _setHeaderOnLocalhost;
+        private readonly List<string> _blacklistedDomains;
         /// <summary>
         /// Initialize the HSTS middleware.
         /// </summary>
@@ -48,7 +55,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
-            _setHeaderOnLocalhost = hstsOptions.SetHeaderOnLocalhost;
+
+            _blacklistedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(localhostDomains);
+            _blacklistedDomains.AddRange(hstsOptions.ExcludedDomains);
         }
 
         /// <summary>
@@ -60,21 +69,25 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         {
             if (context.Request.IsHttps)
             {
-                if (!_setHeaderOnLocalhost)
+                if (!IsDomainBlocked(context.Request.Host.Host))
                 {
-                    // check hsts list
+                    context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
                 }
-                context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
 
             return  _next(context);
         }
 
-        static 
-
-        private bool CheckIfRequestIsLocalhost()
+        private bool IsDomainBlocked(string host)
         {
-
+            for (var i = 0; i < _blacklistedDomains.Count; i++)
+            {
+                if (host.Equals(_blacklistedDomains[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

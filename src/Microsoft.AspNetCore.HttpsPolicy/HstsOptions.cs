@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.AspNetCore.HttpsPolicy
 {
@@ -39,6 +40,11 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <summary>
         /// Whether to add the HSTS header to localhost requests.
         /// </summary>
-        public bool SetHeaderOnLocalhost { get; set; }
+        public bool AddHstsHeaderToLocahostRequests { get; set; }
+
+        /// <summary>
+        /// A list of host names that will not add the HSTS header
+        /// </summary>
+        public IList<string> ExcludedDomains { get; set; } = new List<string>();
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var server = new TestServer(builder);
             var client = server.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:5050");
+            client.BaseAddress = new Uri("https://example.com:5050");
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
 
@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var server = new TestServer(builder);
             var client = server.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:5050");
+            client.BaseAddress = new Uri("https://example.com:5050");
             var request = new HttpRequestMessage(HttpMethod.Get, "");
 
             var response = await client.SendAsync(request);
@@ -113,13 +113,106 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             var server = new TestServer(builder);
             var client = server.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:5050");
+            client.BaseAddress = new Uri("https://example.com:5050");
             var request = new HttpRequestMessage(HttpMethod.Get, "");
 
             var response = await client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(expected, response.Headers.GetValues(HeaderNames.StrictTransportSecurity).FirstOrDefault());
+        }
+
+        [Theory]
+        [InlineData("localhost")]
+        [InlineData("Localhost")]
+        [InlineData("LOCALHOST")]
+        [InlineData("127.0.0.1")]
+        [InlineData("[::1]")]
+        public async Task DefaultBlocksCommonLocalhostDomains_DoesNotSetHstsHeader(string host)
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseHsts();
+                    app.Run(context =>
+                    {
+                        return context.Response.WriteAsync("Hello world");
+                    });
+                });
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+            client.BaseAddress = new Uri($"https://{host}:5050");
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+
+            var response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Empty(response.Headers);
+        }
+
+        [Theory]
+        [InlineData("localhost")]
+        [InlineData("127.0.0.1")]
+        [InlineData("[::1]")]
+        [InlineData("example.com")]
+        public async Task AllowLocalhostDomains_SetHstsHeader(string host)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddHsts(options => {
+                        options.AddHstsHeaderToLocahostRequests = true;
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseHsts();
+                    app.Run(context =>
+                    {
+                        return context.Response.WriteAsync("Hello world");
+                    });
+                });
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+            client.BaseAddress = new Uri($"https://{host}:5050");
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+
+            var response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Single(response.Headers);
+        }
+        
+        [Theory]
+        [InlineData("example.com")]
+        [InlineData("Example.com")]
+        [InlineData("EXAMPLE.COM")]
+        public async Task AddBlockedDomains_DoesNotAddHstsHeader(string host)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddHsts(options => {
+                        options.ExcludedDomains.Add(host);
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseHsts();
+                    app.Run(context =>
+                    {
+                        return context.Response.WriteAsync("Hello world");
+                    });
+                });
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+            client.BaseAddress = new Uri($"https://{host}:5050");
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+
+            var response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Empty(response.Headers);
         }
     }
 }
