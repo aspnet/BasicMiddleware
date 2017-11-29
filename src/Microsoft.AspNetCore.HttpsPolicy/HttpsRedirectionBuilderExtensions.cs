@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
@@ -32,29 +33,49 @@ namespace Microsoft.AspNetCore.Builder
 
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
 
-            // The tls port set in options will have priority over the one in configuration.
-            var httpsPort = options.HttpsPort;
-            if (httpsPort == null)
+            // Order for finding the HTTPS port:
+            // 1. Set in the HttpsRedirectionOptions
+            // 2. HTTPS_PORT environment variable
+            // 3. IServerAddressesFeature
+            // 4. 443 (or not set.)
+
+
+            var httpsPort = 0;
+            if (options.HttpsPort == null)
             {
-                // Only read configuration if there is no httpsPort
-                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-                var configHttpsPort = config["HTTPS_PORT"];
-                // If the string isn't empty, try to parse it.
-                if (!string.IsNullOrEmpty(configHttpsPort)
-                    && int.TryParse(configHttpsPort, out var intHttpsPort))
+                if (TryGetHttpsPortFromEnvironmentVariable(app, out httpsPort)
+                    || TryGetHttpsPortFromIServerAddressesFeature(app, out httpsPort))
                 {
-                    httpsPort = intHttpsPort;
+                    options.HttpsPort = httpsPort;
                 }
             }
 
-            var rewriteOptions = new RewriteOptions();
-            rewriteOptions.AddRedirectToHttps(
-                options.RedirectStatusCode,
-                httpsPort);
-
-            app.UseRewriter(rewriteOptions);
+            app.UseMiddleware<HttpsRedirectionMiddleware>();
 
             return app;
+        }
+
+        private static bool TryGetHttpsPortFromEnvironmentVariable(IApplicationBuilder app, out int httpsPort)
+        {
+            httpsPort = 0;
+            var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+            var configHttpsPort = config["HTTPS_PORT"];
+            // If the string isn't empty, try to parse it.
+            if (!string.IsNullOrEmpty(configHttpsPort))
+            {
+                return int.TryParse(configHttpsPort, out httpsPort);
+            }
+            return false;
+        }
+
+        private static bool TryGetHttpsPortFromIServerAddressesFeature(IApplicationBuilder app, out int httpsPort)
+        {
+            httpsPort = 0;
+            var addressFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
+            foreach (var address in addressFeature.Addresses)
+            {
+            }
+            return false;
         }
     }
 }
