@@ -16,11 +16,8 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         public int RedirectStatusCode { get; set; } = StatusCodes.Status302Found;
 
         /// <summary>
-        /// The TLS port to be added to the redirected URL.
+        /// The HTTPS port to be added to the redirected URL.
         /// </summary>
-        /// <remarks>
-        /// Defaults to 443 if not provided.
-        /// </remarks>
         public int? HttpsPort { get; set; }
     }
 }

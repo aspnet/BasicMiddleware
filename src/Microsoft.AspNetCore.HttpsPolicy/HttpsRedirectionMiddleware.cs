@@ -2,8 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
@@ -18,9 +16,17 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         private readonly RequestDelegate _next;
         private int? _httpsPort;
         private readonly int _statusCode;
+
         private readonly IServerAddressesFeature _serverAddressesFeature;
         private bool _evaluatedServerAddressesFeature;
-        public HttpsRedirectionMiddleware(RequestDelegate next, IOptions<HttpsRedirectionOptions> options, IServerAddressesFeature serverAddressesFeature)
+
+        /// <summary>
+        /// Initializes the HttpsRedirectionMiddleware
+        /// </summary>
+        /// <param name="next"></param>
+        /// <param name="serverAddressesFeature">The</param>
+        /// <param name="options"></param>
+        public HttpsRedirectionMiddleware(RequestDelegate next, IServerAddressesFeature serverAddressesFeature, IOptions<HttpsRedirectionOptions> options)
         {
             if (next == null)
             {
@@ -39,11 +45,16 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             _serverAddressesFeature = serverAddressesFeature;
         }
 
+        /// <summary>
+        /// Invokes the HttpsRedirectionMiddleware
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
             if (!context.Request.IsHttps)
             {
-                if (!_evaluatedServerAddressesFeature)
+                if (!_evaluatedServerAddressesFeature && _httpsPort == null)
                 {
                     CheckAddressesFeatureForHttpsPorts();
                 }
@@ -60,14 +71,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy
                 }
 
                 var request = context.Request;
-                var newUrl = UriHelper.BuildAbsolute("https", 
+                var redirectUrl = UriHelper.BuildAbsolute("https", 
                                                         host,
                                                         request.PathBase,
                                                         request.Path,
                                                         request.QueryString);
 
                 context.Response.StatusCode = _statusCode;
-                context.Response.Headers[HeaderNames.Location] = newUrl;
+                context.Response.Headers[HeaderNames.Location] = redirectUrl;
                 return Task.CompletedTask;
             }
 
@@ -76,21 +87,28 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private void CheckAddressesFeatureForHttpsPorts()
         {
-            if (_serverAddressesFeature == null || _serverAddressesFeature.Addresses == null)
-            {
-                return;
-            }
+            // The IServerAddressesFeature will not be ready until the middleware is Invoked,
+            int? httpsPort = null;
             foreach (var address in _serverAddressesFeature.Addresses)
             {
                 if (Uri.TryCreate(address, UriKind.Absolute, out var uri))
                 {
                     if (uri.Scheme == "https")
                     {
-                        _httpsPort = uri.Port;
-                        return;
+                        // If we find multiple https ports specified, throw
+                        if (httpsPort != null)
+                        {
+                            throw new ArgumentException($"Cannot specify multiple https ports in IServerAddressesFeature. " +
+                                $"Conflict found with ports: {httpsPort.Value}, {uri.Port}.");
+                        }
+                        else
+                        {
+                            httpsPort = uri.Port;
+                        }
                     }
                 }
             }
+            _httpsPort = httpsPort;
         }
     }
 }

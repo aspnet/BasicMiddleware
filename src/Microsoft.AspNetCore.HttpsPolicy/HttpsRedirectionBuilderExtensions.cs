@@ -36,14 +36,21 @@ namespace Microsoft.AspNetCore.Builder
             // Order for finding the HTTPS port:
             // 1. Set in the HttpsRedirectionOptions
             // 2. HTTPS_PORT environment variable
-            // 3. IServerAddressesFeature
-            // 4. 443 (or not set.)
+            // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
+            // 4. 443 (or not set)
             var httpsPort = 0;
             if (options.HttpsPort == null)
             {
-                if (TryGetHttpsPortFromEnvironmentVariable(app, out httpsPort))
+                httpsPort = 0;
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+                var configHttpsPort = config["HTTPS_PORT"];
+                // If the string isn't empty, try to parse it.
+                if (!string.IsNullOrEmpty(configHttpsPort))
                 {
-                    options.HttpsPort = httpsPort;
+                    if (int.TryParse(configHttpsPort, out httpsPort))
+                    {
+                        options.HttpsPort = httpsPort;
+                    }
                 }
             }
 
@@ -51,19 +58,5 @@ namespace Microsoft.AspNetCore.Builder
 
             return app;
         }
-
-        private static bool TryGetHttpsPortFromEnvironmentVariable(IApplicationBuilder app, out int httpsPort)
-        {
-            httpsPort = 0;
-            var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-            var configHttpsPort = config["HTTPS_PORT"];
-            // If the string isn't empty, try to parse it.
-            if (!string.IsNullOrEmpty(configHttpsPort))
-            {
-                return int.TryParse(configHttpsPort, out httpsPort);
-            }
-            return false;
-        }
-
     }
 }
