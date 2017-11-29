@@ -38,19 +38,15 @@ namespace Microsoft.AspNetCore.Builder
             // 2. HTTPS_PORT environment variable
             // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
             // 4. 443 (or not set)
-            var httpsPort = 0;
             if (options.HttpsPort == null)
             {
-                httpsPort = 0;
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
                 var configHttpsPort = config["HTTPS_PORT"];
                 // If the string isn't empty, try to parse it.
-                if (!string.IsNullOrEmpty(configHttpsPort))
+                if (!string.IsNullOrEmpty(configHttpsPort)
+                                    && int.TryParse(configHttpsPort, out var intHttpsPort))
                 {
-                    if (int.TryParse(configHttpsPort, out httpsPort))
-                    {
-                        options.HttpsPort = httpsPort;
-                    }
+                        options.HttpsPort = intHttpsPort;
                 }
             }
 
