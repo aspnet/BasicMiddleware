@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     {
         private const string IncludeSubDomains = "; includeSubDomains";
         private const string Preload = "; preload";
-        private static readonly string[] localhostStrings =
+        private static readonly string[] LocalhostStrings =
         {
             "localhost",
             "127.0.0.1", // ipv4
@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
 
-            _excludedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(localhostStrings);
+            _excludedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(LocalhostStrings);
             _excludedDomains.AddRange(hstsOptions.ExcludedDomains);
         }
 
