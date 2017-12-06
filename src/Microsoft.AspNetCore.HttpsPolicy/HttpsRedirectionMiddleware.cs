@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
             if (!_evaluatedServerAddressesFeature && !_httpsPort.HasValue)
             {
-                CheckAddressesFeatureForHttpsPorts();
+                CheckForHttpsPorts();
             }
             _evaluatedServerAddressesFeature = true;
 
@@ -87,7 +87,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             return Task.CompletedTask;
         }
 
-        private void CheckAddressesFeatureForHttpsPorts()
+        private void CheckForHttpsPorts()
         {
             // The IServerAddressesFeature will not be ready until the middleware is Invoked,
             // Order for finding the HTTPS port:
@@ -95,6 +95,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             // 2. HTTPS_PORT environment variable
             // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
             // 4. 443 (or not set)
+
             if (_httpsPort != null)
             {
                 return;
