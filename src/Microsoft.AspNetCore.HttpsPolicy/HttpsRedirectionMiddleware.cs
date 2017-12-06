@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
@@ -18,6 +20,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         private readonly int _statusCode;
 
         private readonly IServerAddressesFeature _serverAddressesFeature;
+        private readonly IConfiguration _config;
         private bool _evaluatedServerAddressesFeature;
 
         /// <summary>
@@ -26,23 +29,20 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <param name="next"></param>
         /// <param name="serverAddressesFeature">The</param>
         /// <param name="options"></param>
-        public HttpsRedirectionMiddleware(RequestDelegate next, IServerAddressesFeature serverAddressesFeature, IOptions<HttpsRedirectionOptions> options)
+        /// <param name="config"></param>
+        public HttpsRedirectionMiddleware(RequestDelegate next, IServerAddressesFeature serverAddressesFeature, IOptions<HttpsRedirectionOptions> options, IConfiguration config)
         {
-            if (next == null)
-            {
-                throw new ArgumentNullException(nameof(next));
-            }
-
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
-            _next = next;
+            _config = config ?? throw new ArgumentException(nameof(config));
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _serverAddressesFeature = serverAddressesFeature ?? throw new ArgumentNullException(nameof(serverAddressesFeature));
 
             var httpsRedirectionOptions = options.Value;
             _httpsPort = httpsRedirectionOptions.HttpsPort;
             _statusCode = httpsRedirectionOptions.RedirectStatusCode;
-            _serverAddressesFeature = serverAddressesFeature;
         }
 
         /// <summary>
@@ -52,59 +52,78 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
-            if (!context.Request.IsHttps)
+            if (context.Request.IsHttps)
             {
-                if (!_evaluatedServerAddressesFeature && _httpsPort == null)
-                {
-                    CheckAddressesFeatureForHttpsPorts();
-                }
-                _evaluatedServerAddressesFeature = true;
-
-                var host = context.Request.Host;
-                if (_httpsPort.HasValue && _httpsPort.Value > 0)
-                {
-                    host = new HostString(host.Host, _httpsPort.Value);
-                }
-                else
-                {
-                    host = new HostString(host.Host);
-                }
-
-                var request = context.Request;
-                var redirectUrl = UriHelper.BuildAbsolute("https", 
-                                                        host,
-                                                        request.PathBase,
-                                                        request.Path,
-                                                        request.QueryString);
-
-                context.Response.StatusCode = _statusCode;
-                context.Response.Headers[HeaderNames.Location] = redirectUrl;
-                return Task.CompletedTask;
+                return _next(context);
             }
 
-            return _next(context);
+            if (!_evaluatedServerAddressesFeature && !_httpsPort.HasValue)
+            {
+                CheckAddressesFeatureForHttpsPorts();
+            }
+            _evaluatedServerAddressesFeature = true;
+
+            var host = context.Request.Host;
+            if (_httpsPort.HasValue)
+            {
+                host = new HostString(host.Host, _httpsPort.Value);
+            }
+            else
+            {
+                host = new HostString(host.Host);
+            }
+
+            var request = context.Request;
+            var redirectUrl = UriHelper.BuildAbsolute(
+                "https", 
+                host,
+                request.PathBase,
+                request.Path,
+                request.QueryString);
+
+            context.Response.StatusCode = _statusCode;
+            context.Response.Headers[HeaderNames.Location] = redirectUrl;
+
+            return Task.CompletedTask;
         }
 
         private void CheckAddressesFeatureForHttpsPorts()
         {
             // The IServerAddressesFeature will not be ready until the middleware is Invoked,
+            // Order for finding the HTTPS port:
+            // 1. Set in the HttpsRedirectionOptions
+            // 2. HTTPS_PORT environment variable
+            // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
+            // 4. 443 (or not set)
+            if (_httpsPort != null)
+            {
+                return;
+            }
+
+            var configHttpsPort = _config["HTTPS_PORT"];
+            if (!string.IsNullOrEmpty(configHttpsPort)
+                                && int.TryParse(configHttpsPort, out var intHttpsPort))
+            {
+                _httpsPort = intHttpsPort;
+                return;
+            }
+
             int? httpsPort = null;
             foreach (var address in _serverAddressesFeature.Addresses)
             {
-                if (Uri.TryCreate(address, UriKind.Absolute, out var uri))
+                var serverAddress = ServerAddress.FromUrl(address);
+                if (serverAddress.Scheme == "https")
                 {
-                    if (uri.Scheme == "https")
+
+                    // If we find multiple different https ports specified, throw
+                    if (httpsPort != null && httpsPort != serverAddress.Port)
                     {
-                        // If we find multiple https ports specified, throw
-                        if (httpsPort != null)
-                        {
-                            throw new ArgumentException($"Cannot specify multiple https ports in IServerAddressesFeature. " +
-                                $"Conflict found with ports: {httpsPort.Value}, {uri.Port}.");
-                        }
-                        else
-                        {
-                            httpsPort = uri.Port;
-                        }
+                        throw new ArgumentException($"Cannot specify multiple https ports in IServerAddressesFeature. " +
+                            $"Conflict found with ports: {httpsPort.Value}, {serverAddress.Port}.");
+                    }
+                    else
+                    {
+                        httpsPort = serverAddress.Port;
                     }
                 }
             }

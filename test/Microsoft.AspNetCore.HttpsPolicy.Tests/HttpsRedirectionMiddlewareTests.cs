@@ -165,7 +165,10 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
             featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
 
             var server = new TestServer(builder, featureCollection);
-            server.Features.Get<IServerAddressesFeature>().Addresses.Add(serverAddressFeatureUrl);
+            if (serverAddressFeatureUrl != null)
+            {
+                server.Features.Get<IServerAddressesFeature>().Addresses.Add(serverAddressFeatureUrl);
+            }
 
             var client = server.CreateClient();
 

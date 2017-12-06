@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -32,25 +31,9 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
+            var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
 
-            // Order for finding the HTTPS port:
-            // 1. Set in the HttpsRedirectionOptions
-            // 2. HTTPS_PORT environment variable
-            // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
-            // 4. 443 (or not set)
-            if (options.HttpsPort == null)
-            {
-                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-                var configHttpsPort = config["HTTPS_PORT"];
-                // If the string isn't empty, try to parse it.
-                if (!string.IsNullOrEmpty(configHttpsPort)
-                                    && int.TryParse(configHttpsPort, out var intHttpsPort))
-                {
-                        options.HttpsPort = intHttpsPort;
-                }
-            }
-
-            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>());
+            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>(), config);
 
             return app;
         }
