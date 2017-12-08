@@ -21,7 +21,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private readonly IServerAddressesFeature _serverAddressesFeature;
         private readonly IConfiguration _config;
-        private bool _evaluatedServerAddressesFeature;
 
         /// <summary>
         /// Initializes the HttpsRedirectionMiddleware
@@ -57,14 +56,13 @@ namespace Microsoft.AspNetCore.HttpsPolicy
                 return _next(context);
             }
 
-            if (!_evaluatedServerAddressesFeature && !_httpsPort.HasValue)
+            if (!_httpsPort.HasValue)
             {
                 CheckForHttpsPorts();
             }
-            _evaluatedServerAddressesFeature = true;
 
             var host = context.Request.Host;
-            if (_httpsPort.HasValue)
+            if (_httpsPort != 443)
             {
                 host = new HostString(host.Host, _httpsPort.Value);
             }
@@ -93,21 +91,15 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             // Order for finding the HTTPS port:
             // 1. Set in the HttpsRedirectionOptions
             // 2. HTTPS_PORT environment variable
-            // 3. IServerAddressesFeature (checked in HttpsRedirectionMiddleware.Invoke
+            // 3. IServerAddressesFeature
             // 4. 443 (or not set)
 
-            if (_httpsPort != null)
+            var configHttpsPort = _config.GetValue<int?>("HTTPS_PORT");
+            if (configHttpsPort.HasValue)
             {
+                _httpsPort = configHttpsPort;
                 return;
-            }
-
-            var configHttpsPort = _config["HTTPS_PORT"];
-            if (!string.IsNullOrEmpty(configHttpsPort)
-                                && int.TryParse(configHttpsPort, out var intHttpsPort))
-            {
-                _httpsPort = intHttpsPort;
-                return;
-            }
+            } 
 
             int? httpsPort = null;
             foreach (var address in _serverAddressesFeature.Addresses)
@@ -115,7 +107,6 @@ namespace Microsoft.AspNetCore.HttpsPolicy
                 var serverAddress = ServerAddress.FromUrl(address);
                 if (serverAddress.Scheme == "https")
                 {
-
                     // If we find multiple different https ports specified, throw
                     if (httpsPort != null && httpsPort != serverAddress.Port)
                     {
@@ -128,7 +119,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
                     }
                 }
             }
-            _httpsPort = httpsPort;
+            _httpsPort = httpsPort ?? 443;
         }
     }
 }
