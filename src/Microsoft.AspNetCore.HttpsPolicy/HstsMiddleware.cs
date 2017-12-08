@@ -62,14 +62,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy
                 }
             }
 
-            return  _next(context);
+            return _next(context);
         }
 
         private bool IsDomainExcluded(string host)
         {
             for (var i = 0; i < _excludedDomains.Count; i++)
             {
-                if (host.Equals(_excludedDomains[i], StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(host, _excludedDomains[i], StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
