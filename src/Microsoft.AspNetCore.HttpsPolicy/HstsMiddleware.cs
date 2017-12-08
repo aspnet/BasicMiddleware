@@ -67,6 +67,11 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private bool IsDomainExcluded(string host)
         {
+            if (_excludedDomains == null)
+            {
+                return false;
+            }
+
             for (var i = 0; i < _excludedDomains.Count; i++)
             {
                 if (string.Equals(host, _excludedDomains[i], StringComparison.OrdinalIgnoreCase))
