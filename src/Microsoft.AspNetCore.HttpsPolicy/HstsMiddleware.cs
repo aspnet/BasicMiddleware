@@ -20,16 +20,10 @@ namespace Microsoft.AspNetCore.HttpsPolicy
     {
         private const string IncludeSubDomains = "; includeSubDomains";
         private const string Preload = "; preload";
-        private static readonly string[] _localhostStrings =
-        {
-            "localhost",
-            "127.0.0.1", // ipv4
-            "[::1]" // ipv6
-        };
 
         private readonly RequestDelegate _next;
         private readonly StringValues _strictTransportSecurityValue;
-        private readonly List<string> _excludedDomains;
+        private readonly IList<string> _excludedDomains;
         /// <summary>
         /// Initialize the HSTS middleware.
         /// </summary>
@@ -50,9 +44,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
-
-            _excludedDomains = hstsOptions.AddHstsHeaderToLocahostRequests ? new List<string>() : new List<string>(_localhostStrings);
-            _excludedDomains.AddRange(hstsOptions.ExcludedDomains);
+            _excludedDomains = hstsOptions.ExcludedDomains;
         }
 
         /// <summary>
@@ -64,7 +56,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         {
             if (context.Request.IsHttps)
             {
-                if (!IsDomainBlocked(context.Request.Host.Host))
+                if (!IsDomainExcluded(context.Request.Host.Host))
                 {
                     context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
                 }
@@ -73,7 +65,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             return  _next(context);
         }
 
-        private bool IsDomainBlocked(string host)
+        private bool IsDomainExcluded(string host)
         {
             for (var i = 0; i < _excludedDomains.Count; i++)
             {

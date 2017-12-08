@@ -38,13 +38,15 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         public bool Preload { get; set; }
 
         /// <summary>
-        /// Whether to add the HSTS header to localhost requests.
-        /// </summary>
-        public bool AddHstsHeaderToLocahostRequests { get; set; }
-
-        /// <summary>
         /// A list of host names that will not add the HSTS header.
         /// </summary>
-        public IList<string> ExcludedDomains { get; set; } = new List<string>();
+        public IList<string> ExcludedDomains { get; set; } = new List<string>(_localhostStrings);
+
+        private static readonly string[] _localhostStrings =
+        {
+            "localhost",
+            "127.0.0.1", // ipv4
+            "[::1]" // ipv6
+        };
     }
 }
