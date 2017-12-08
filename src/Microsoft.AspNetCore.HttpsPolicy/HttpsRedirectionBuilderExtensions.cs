@@ -31,9 +31,8 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
-            var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
 
-            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>(), config);
+            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>());
 
             return app;
         }
