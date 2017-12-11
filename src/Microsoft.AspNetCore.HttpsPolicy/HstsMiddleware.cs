@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
-            if (context.Request.IsHttps && !IsDomainExcluded(context.Request.Host.Host))
+            if (context.Request.IsHttps && !IsHostExcluded(context.Request.Host.Host))
             {
                 context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             return _next(context);
         }
 
-        private bool IsDomainExcluded(string host)
+        private bool IsHostExcluded(string host)
         {
             if (_excludedHosts == null)
             {
