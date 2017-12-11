@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -42,7 +43,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                         options.IncludeSubDomains = includeSubDomains;
                         options.MaxAge = TimeSpan.FromSeconds(maxAge);
                         options.Preload = preload;
-                        options.AddHstsHeaderToLocahostRequests = true; // Allow localhost for testing
+                        options.ExcludedDomains = new List<string>(); // allowing localhost for testing
                     });
                 })
                 .Configure(app =>

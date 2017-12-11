@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -154,14 +155,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData("localhost")]
         [InlineData("127.0.0.1")]
         [InlineData("[::1]")]
-        [InlineData("example.com")]
-        public async Task AllowLocalhostDomains_SetHstsHeader(string host)
+        public async Task AllowLocalhostDomainsIfListIsReset_SetHstsHeader(string host)
         {
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddHsts(options => {
-                        options.AddHstsHeaderToLocahostRequests = true;
+                    services.AddHsts(options =>
+                    {
+                        options.ExcludedDomains = new List<string>();
                     });
                 })
                 .Configure(app =>
