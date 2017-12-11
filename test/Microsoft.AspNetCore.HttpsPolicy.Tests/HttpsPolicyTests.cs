@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                         options.IncludeSubDomains = includeSubDomains;
                         options.MaxAge = TimeSpan.FromSeconds(maxAge);
                         options.Preload = preload;
-                        options.ExcludedDomains = new List<string>(); // allowing localhost for testing
+                        options.ExcludedHosts.Clear(); // allowing localhost for testing
                     });
                 })
                 .Configure(app =>

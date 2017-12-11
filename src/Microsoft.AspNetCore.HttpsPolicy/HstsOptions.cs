@@ -40,9 +40,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <summary>
         /// A list of host names that will not add the HSTS header.
         /// </summary>
-        public IList<string> ExcludedDomains { get; set; } = new List<string>
+        public IList<string> ExcludedHosts { get; } = new List<string>
         {
-             "localhost",
+            "localhost",
             "127.0.0.1", // ipv4
             "[::1]" // ipv6
         };

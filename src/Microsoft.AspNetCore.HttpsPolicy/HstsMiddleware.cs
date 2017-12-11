@@ -23,7 +23,8 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private readonly RequestDelegate _next;
         private readonly StringValues _strictTransportSecurityValue;
-        private readonly IList<string> _excludedDomains;
+        private readonly IList<string> _excludedHosts;
+
         /// <summary>
         /// Initialize the HSTS middleware.
         /// </summary>
@@ -44,7 +45,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             var includeSubdomains = hstsOptions.IncludeSubDomains ? IncludeSubDomains : StringSegment.Empty;
             var preload = hstsOptions.Preload ? Preload : StringSegment.Empty;
             _strictTransportSecurityValue = new StringValues($"max-age={maxAge}{includeSubdomains}{preload}");
-            _excludedDomains = hstsOptions.ExcludedDomains;
+            _excludedHosts = hstsOptions.ExcludedHosts;
         }
 
         /// <summary>
@@ -54,12 +55,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
-            if (context.Request.IsHttps)
+            if (context.Request.IsHttps && !IsDomainExcluded(context.Request.Host.Host))
             {
-                if (!IsDomainExcluded(context.Request.Host.Host))
-                {
-                    context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
-                }
+                context.Response.Headers[HeaderNames.StrictTransportSecurity] = _strictTransportSecurityValue;
             }
 
             return _next(context);
@@ -67,14 +65,14 @@ namespace Microsoft.AspNetCore.HttpsPolicy
 
         private bool IsDomainExcluded(string host)
         {
-            if (_excludedDomains == null)
+            if (_excludedHosts == null)
             {
                 return false;
             }
 
-            for (var i = 0; i < _excludedDomains.Count; i++)
+            for (var i = 0; i < _excludedHosts.Count; i++)
             {
-                if (string.Equals(host, _excludedDomains[i], StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(host, _excludedHosts[i], StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

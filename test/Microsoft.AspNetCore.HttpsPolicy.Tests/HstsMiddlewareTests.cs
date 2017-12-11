@@ -162,7 +162,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 {
                     services.AddHsts(options =>
                     {
-                        options.ExcludedDomains = new List<string>();
+                        options.ExcludedHosts.Clear();
                     });
                 })
                 .Configure(app =>
@@ -194,7 +194,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 .ConfigureServices(services =>
                 {
                     services.AddHsts(options => {
-                        options.ExcludedDomains.Add(host);
+                        options.ExcludedHosts.Add(host);
                     });
                 })
                 .Configure(app =>
