@@ -129,7 +129,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData("LOCALHOST")]
         [InlineData("127.0.0.1")]
         [InlineData("[::1]")]
-        public async Task DefaultBlocksCommonLocalhostDomains_DoesNotSetHstsHeader(string host)
+        public async Task DefaultExcludesCommonLocalhostDomains_DoesNotSetHstsHeader(string host)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -188,7 +188,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
         [InlineData("example.com")]
         [InlineData("Example.com")]
         [InlineData("EXAMPLE.COM")]
-        public async Task AddBlockedDomains_DoesNotAddHstsHeader(string host)
+        public async Task AddExcludedDomains_DoesNotAddHstsHeader(string host)
         {
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
