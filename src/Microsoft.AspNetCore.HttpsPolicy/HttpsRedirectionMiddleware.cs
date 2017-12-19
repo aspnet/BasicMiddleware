@@ -104,18 +104,18 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             int? httpsPort = null;
             foreach (var address in _serverAddressesFeature.Addresses)
             {
-                var serverAddress = BindingAddress;
-                if (serverAddress.Scheme == "https")
+                var bindingAddress = BindingAddress.Parse(address);
+                if (bindingAddress.Scheme == "https")
                 {
                     // If we find multiple different https ports specified, throw
-                    if (httpsPort != null && httpsPort != serverAddress.Port)
+                    if (httpsPort != null && httpsPort != bindingAddress.Port)
                     {
                         throw new ArgumentException($"Cannot specify multiple https ports in IServerAddressesFeature. " +
-                            $"Conflict found with ports: {httpsPort.Value}, {serverAddress.Port}.");
+                            $"Conflict found with ports: {httpsPort.Value}, {bindingAddress.Port}.");
                     }
                     else
                     {
-                        httpsPort = serverAddress.Port;
+                        httpsPort = bindingAddress.Port;
                     }
                 }
             }
