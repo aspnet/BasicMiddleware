@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -104,7 +104,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             int? httpsPort = null;
             foreach (var address in _serverAddressesFeature.Addresses)
             {
-                var serverAddress = ServerAddress.FromUrl(address);
+                var serverAddress = BindingAddress;
                 if (serverAddress.Scheme == "https")
                 {
                     // If we find multiple different https ports specified, throw
