@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Hosting;
-using System;
 
 namespace Microsoft.AspNetCore.Rewrite
 {
