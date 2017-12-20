@@ -94,10 +94,9 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             // 3. IServerAddressesFeature
             // 4. 443 (or not set)
 
-            var configHttpsPort = _config.GetValue<int?>("HTTPS_PORT");
-            if (configHttpsPort.HasValue)
+            _httpsPort = _config.GetValue<int?>("HTTPS_PORT");
+            if (_httpsPort.HasValue)
             {
-                _httpsPort = configHttpsPort;
                 return;
             } 
 
@@ -105,13 +104,13 @@ namespace Microsoft.AspNetCore.HttpsPolicy
             foreach (var address in _serverAddressesFeature.Addresses)
             {
                 var bindingAddress = BindingAddress.Parse(address);
-                if (bindingAddress.Scheme == "https")
+                if (bindingAddress.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
                 {
                     // If we find multiple different https ports specified, throw
-                    if (httpsPort != null && httpsPort != bindingAddress.Port)
+                    if (httpsPort.HasValue && httpsPort != bindingAddress.Port)
                     {
-                        throw new ArgumentException($"Cannot specify multiple https ports in IServerAddressesFeature. " +
-                            $"Conflict found with ports: {httpsPort.Value}, {bindingAddress.Port}.");
+                        throw new ArgumentException("Cannot determine the https port from IServerAddressesFeature, multiple values were found. " +
+                            "Please set the desired port explicitly on HttpsRedirectionOptions.HttpsPort.");
                     }
                     else
                     {
