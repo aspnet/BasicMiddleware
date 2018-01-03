@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private static bool UseLowerRegexTimeouts;
         // For testing
         internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
-        private TimeSpan _regexTimeout;
+        internal TimeSpan _regexTimeout;
 
         static RuleBuilder()
         {
@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
                 case ConditionType.Regex:
                     if (_regexTimeout == TimeSpan.Zero)
                     {
-                        _regexTimeout = UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
+                        _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
                     }
 
                     if (flags.HasFlag(FlagType.NoCase))
@@ -174,7 +174,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         {
             if (_regexTimeout == TimeSpan.Zero)
             {
-                _regexTimeout = UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
+                _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
             }
 
             if (flags.HasFlag(FlagType.NoCase))
