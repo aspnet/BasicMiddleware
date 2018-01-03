@@ -10,8 +10,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class UrlRewriteRuleBuilder
     {
-        private readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
-
         public string Name { get; set; }
         public bool Enabled { get; set; }
         public bool Global { get; set; }
@@ -20,6 +18,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private UrlMatch _initialMatch;
         private ConditionCollection _conditions;
         private UrlAction _action;
+
+        private const string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
+        private static bool UseLowerRegexTimeouts;
+        // For testing
+        internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
+        private TimeSpan _regexTimeout;
+
+        static UrlRewriteRuleBuilder()
+        {
+            AppContext.TryGetSwitch(UseLowerRegexTimeoutsSwitch, out UseLowerRegexTimeouts);
+        }
+
 
         public IISUrlRewriteRule Build()
         {
@@ -48,12 +58,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
                     {
                         if (ignoreCase)
                         {
-                            var regex = new Regex(input, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+                            var regex = new Regex(input, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout);
                             _initialMatch = new RegexMatch(regex, negate);
                         }
                         else
                         {
-                            var regex = new Regex(input, RegexOptions.CultureInvariant | RegexOptions.Compiled, RegexTimeout);
+                            var regex = new Regex(input, RegexOptions.CultureInvariant | RegexOptions.Compiled, _regexTimeout);
                             _initialMatch = new RegexMatch(regex, negate);
                         }
                         break;

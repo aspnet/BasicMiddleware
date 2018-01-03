@@ -18,7 +18,16 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
-        private readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
+        private const string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
+        private static bool UseLowerRegexTimeouts;
+        // For testing
+        internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
+        private TimeSpan _regexTimeout;
+
+        static RuleBuilder()
+        {
+            AppContext.TryGetSwitch(UseLowerRegexTimeoutsSwitch, out UseLowerRegexTimeouts);
+        }
 
         public ApacheModRewriteRule Build()
         {
@@ -66,13 +75,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             switch (input.ConditionType)
             {
                 case ConditionType.Regex:
+                    if (_regexTimeout == TimeSpan.Zero)
+                    {
+                        _regexTimeout = UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
+                    }
+
                     if (flags.HasFlag(FlagType.NoCase))
                     {
-                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout), input.Invert);
+                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout), input.Invert);
                     }
                     else
                     {
-                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, RegexTimeout), input.Invert);
+                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, _regexTimeout), input.Invert);
                     }
                     break;
                 case ConditionType.IntComp:
@@ -158,13 +172,18 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             ParsedModRewriteInput input,
             Flags flags)
         {
+            if (_regexTimeout == TimeSpan.Zero)
+            {
+                _regexTimeout = UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
+            }
+
             if (flags.HasFlag(FlagType.NoCase))
             {
-                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout), input.Invert);
+                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout), input.Invert);
             }
             else
             {
-                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, RegexTimeout), input.Invert);
+                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, _regexTimeout), input.Invert);
             }
         }
 
