@@ -20,7 +20,6 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
             Assert.Equal(TimeSpan.FromSeconds(1), ruleBuilder._regexTimeout);
         }
 
-
         [Fact]
         public void AddRule_QuirkSet_SetsRegexTimeoutToOneMillisecond()
         {
