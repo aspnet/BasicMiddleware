@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using Xunit;
 
@@ -23,9 +24,10 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
         [Fact]
         public void AddRule_QuirkSet_SetsRegexTimeoutToOneMillisecond()
         {
+            AppContext.SetSwitch(RegexTimeoutSwitchUtility.UseLowerRegexTimeoutsSwitch, true);
+
             var ruleBuilder = new UrlRewriteRuleBuilder();
 
-            ruleBuilder._uselowerRegexTimeouts = true;
             ruleBuilder.AddUrlMatch("test");
 
             Assert.Equal(TimeSpan.FromMilliseconds(1), ruleBuilder._regexTimeout);

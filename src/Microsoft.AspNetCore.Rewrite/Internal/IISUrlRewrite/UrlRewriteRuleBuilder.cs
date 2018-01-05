@@ -19,15 +19,12 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private ConditionCollection _conditions;
         private UrlAction _action;
 
-        private const string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
-        private static bool UseLowerRegexTimeouts;
-        // For testing
-        internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
+        internal bool _uselowerRegexTimeouts = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts;
         internal TimeSpan _regexTimeout;
 
-        static UrlRewriteRuleBuilder()
+        public UrlRewriteRuleBuilder()
         {
-            AppContext.TryGetSwitch(UseLowerRegexTimeoutsSwitch, out UseLowerRegexTimeouts);
+            _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
         }
 
         public IISUrlRewriteRule Build()
@@ -55,10 +52,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
             {
                 case PatternSyntax.ECMAScript:
                     {
-                        if (_regexTimeout == TimeSpan.Zero)
-                        {
-                            _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-                        }
                         if (ignoreCase)
                         {
                             var regex = new Regex(input, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout);

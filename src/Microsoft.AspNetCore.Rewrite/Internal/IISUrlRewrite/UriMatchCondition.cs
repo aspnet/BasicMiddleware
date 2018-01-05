@@ -9,31 +9,17 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
 {
     public class UriMatchCondition : Condition
     {
-        private const string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
-        private static bool UseLowerRegexTimeouts;
-        // For testing
-        internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
+        internal bool _uselowerRegexTimeouts = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts;
         internal TimeSpan _regexTimeout;
-
-        static UriMatchCondition()
-        {
-            AppContext.TryGetSwitch(UseLowerRegexTimeoutsSwitch, out UseLowerRegexTimeouts);
-        }
-
         public UriMatchCondition(InputParser inputParser, string input, string pattern, UriMatchPart uriMatchPart, bool ignoreCase, bool negate)
         {
-            if (_regexTimeout == TimeSpan.Zero)
-            {
-                _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-            }
-
+            _regexTimeout = _uselowerRegexTimeouts? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
             var regexOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled;
             regexOptions = ignoreCase ? regexOptions | RegexOptions.IgnoreCase : regexOptions;
             var regex = new Regex(
                 pattern,
                 regexOptions,
-                _regexTimeout
-            );
+                _regexTimeout);
             Input = inputParser.ParseInputString(input, uriMatchPart);
             Match = new RegexMatch(regex, negate);
         }

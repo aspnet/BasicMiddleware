@@ -18,15 +18,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
-        private const string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
-        private static bool UseLowerRegexTimeouts;
-        // For testing
-        internal bool _uselowerRegexTimeouts = UseLowerRegexTimeouts;
         internal TimeSpan _regexTimeout;
 
-        static RuleBuilder()
+        public RuleBuilder()
         {
-            AppContext.TryGetSwitch(UseLowerRegexTimeoutsSwitch, out UseLowerRegexTimeouts);
+            _regexTimeout = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
         }
 
         public ApacheModRewriteRule Build()
@@ -75,10 +71,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             switch (input.ConditionType)
             {
                 case ConditionType.Regex:
-                    if (_regexTimeout == TimeSpan.Zero)
-                    {
-                        _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-                    }
 
                     if (flags.HasFlag(FlagType.NoCase))
                     {
@@ -172,10 +164,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             ParsedModRewriteInput input,
             Flags flags)
         {
-            if (_regexTimeout == TimeSpan.Zero)
-            {
-                _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-            }
 
             if (flags.HasFlag(FlagType.NoCase))
             {
