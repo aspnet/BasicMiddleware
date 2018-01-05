@@ -18,12 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
-        internal TimeSpan _regexTimeout;
-
-        public RuleBuilder()
-        {
-            _regexTimeout = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-        }
+        internal TimeSpan _regexTimeout = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
 
         public ApacheModRewriteRule Build()
         {
@@ -164,7 +159,6 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             ParsedModRewriteInput input,
             Flags flags)
         {
-
             if (flags.HasFlag(FlagType.NoCase))
             {
                 _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout), input.Invert);

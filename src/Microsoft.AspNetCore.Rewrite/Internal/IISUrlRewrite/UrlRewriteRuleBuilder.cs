@@ -19,13 +19,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite
         private ConditionCollection _conditions;
         private UrlAction _action;
 
-        internal bool _uselowerRegexTimeouts = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts;
-        internal TimeSpan _regexTimeout;
-
-        public UrlRewriteRuleBuilder()
-        {
-            _regexTimeout = _uselowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
-        }
+        internal TimeSpan _regexTimeout = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1); 
 
         public IISUrlRewriteRule Build()
         {

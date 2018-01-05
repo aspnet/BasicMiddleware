@@ -19,17 +19,5 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
 
             Assert.Equal(TimeSpan.FromSeconds(1), ruleBuilder._regexTimeout);
         }
-
-        [Fact]
-        public void AddRule_QuirkSet_SetsRegexTimeoutToOneMillisecond()
-        {
-            AppContext.SetSwitch(RegexTimeoutSwitchUtility.UseLowerRegexTimeoutsSwitch, true);
-
-            var ruleBuilder = new UrlRewriteRuleBuilder();
-
-            ruleBuilder.AddUrlMatch("test");
-
-            Assert.Equal(TimeSpan.FromMilliseconds(1), ruleBuilder._regexTimeout);
-        }
     }
 }

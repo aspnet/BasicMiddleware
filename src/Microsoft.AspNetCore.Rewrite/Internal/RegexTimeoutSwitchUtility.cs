@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Microsoft.AspNetCore.Rewrite.Internal
 {
-    public class RegexTimeoutSwitchUtility
+    internal class RegexTimeoutSwitchUtility
     {
         internal static readonly string UseLowerRegexTimeoutsSwitch = "Switch.Microsoft.AspNetCore.Rewrite.UseLowerRegexTimeouts";
-        // For testing
-        public static bool UseLowerRegexTimeouts;
+        internal static bool UseLowerRegexTimeouts;
 
         static RegexTimeoutSwitchUtility()
         {

@@ -48,16 +48,5 @@ namespace Microsoft.AspNetCore.Rewrite.Tests
 
             Assert.Equal(TimeSpan.FromSeconds(1), ruleBuilder._regexTimeout);
         }
-
-        [Fact]
-        public void AddRule_QuirkSet_SetsRegexTimeoutToOneMillisecond()
-        {
-            AppContext.SetSwitch(RegexTimeoutSwitchUtility.UseLowerRegexTimeoutsSwitch, true);
-
-            var ruleBuilder = new RuleBuilder();
-            ruleBuilder.AddRule("RewriteRule /hey/(.*) /$1 [L]");
-
-            Assert.Equal(TimeSpan.FromMilliseconds(1), ruleBuilder._regexTimeout);
-        }
     }
 }
