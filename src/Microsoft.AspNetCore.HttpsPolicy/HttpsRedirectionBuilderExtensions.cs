@@ -29,10 +29,10 @@ namespace Microsoft.AspNetCore.Builder
             {
                 throw new ArgumentNullException(nameof(app));
             }
-            var serverAddress = app.ServerFeatures.Get<IServerAddressesFeature>();
-            if (serverAddress != null)
+            var serverAddressFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
+            if (serverAddressFeature != null)
             {
-                app.UseMiddleware<HttpsRedirectionMiddleware>(serverAddress);
+                app.UseMiddleware<HttpsRedirectionMiddleware>(serverAddressFeature);
             }
             else
             {

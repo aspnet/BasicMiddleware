@@ -299,14 +299,13 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                         return context.Response.WriteAsync("Hello world");
                     });
                 });
+
             var server = new TestServer(builder);
-
             var client = server.CreateClient();
-
             var request = new HttpRequestMessage(HttpMethod.Get, "");
             var response = await client.SendAsync(request);
-            Assert.Equal("https://localhost/", response.Headers.Location.ToString());
 
+            Assert.Equal("https://localhost/", response.Headers.Location.ToString());
         }
     }
 }
