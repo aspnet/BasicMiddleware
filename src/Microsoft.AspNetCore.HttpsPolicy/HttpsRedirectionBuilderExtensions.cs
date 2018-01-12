@@ -29,11 +29,15 @@ namespace Microsoft.AspNetCore.Builder
             {
                 throw new ArgumentNullException(nameof(app));
             }
-
-            var options = app.ApplicationServices.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value;
-
-            app.UseMiddleware<HttpsRedirectionMiddleware>(app.ServerFeatures.Get<IServerAddressesFeature>());
-
+            var serverAddress = app.ServerFeatures.Get<IServerAddressesFeature>();
+            if (serverAddress != null)
+            {
+                app.UseMiddleware<HttpsRedirectionMiddleware>(serverAddress);
+            }
+            else
+            {
+                app.UseMiddleware<HttpsRedirectionMiddleware>();
+            }
             return app;
         }
     }

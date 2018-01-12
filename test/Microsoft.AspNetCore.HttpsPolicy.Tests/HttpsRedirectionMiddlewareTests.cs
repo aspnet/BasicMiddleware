@@ -280,5 +280,33 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
 
             Assert.Equal("https://localhost:5050/", response.Headers.Location.ToString());
         }
+
+        [Fact]
+        public async Task NoServerAddressFeature_DoesNotThrow_DefaultsTo443()
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddHttpsRedirection(options =>
+                    {
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseHttpsRedirection();
+                    app.Run(context =>
+                    {
+                        return context.Response.WriteAsync("Hello world");
+                    });
+                });
+            var server = new TestServer(builder);
+
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            var response = await client.SendAsync(request);
+            Assert.Equal("https://localhost/", response.Headers.Location.ToString());
+
+        }
     }
 }
