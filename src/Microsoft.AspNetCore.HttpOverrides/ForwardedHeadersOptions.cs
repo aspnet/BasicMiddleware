@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -9,6 +11,25 @@ namespace Microsoft.AspNetCore.Builder
 {
     public class ForwardedHeadersOptions
     {
+        private const string UseRelaxedHeaderValidationSwitch = "Switch.Microsoft.AspNetCore.HttpOverrides.UseRelaxedHeaderValidation";
+        private static readonly bool GlobalUseRelaxedHeaderValidation;
+
+        static ForwardedHeadersOptions()
+        {
+#if NET451
+            var value = System.Configuration.ConfigurationManager.AppSettings.GetValues(UseRelaxedHeaderValidationSwitch)?.FirstOrDefault();
+            var isEnabled = false;
+            if (bool.TryParse(value, out isEnabled))
+            {
+                GlobalUseRelaxedHeaderValidation = isEnabled;
+            }
+#else
+            AppContext.TryGetSwitch(UseRelaxedHeaderValidationSwitch, out GlobalUseRelaxedHeaderValidation);
+#endif
+        }
+
+        internal bool UseRelaxedHeaderValidation { get; set; } = GlobalUseRelaxedHeaderValidation;
+
         /// <summary>
         /// Use this header instead of <see cref="ForwardedHeadersDefaults.XForwardedForHeaderName"/>
         /// </summary>
