@@ -12,7 +12,9 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Xunit;
 
@@ -301,6 +303,36 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
                 });
 
             var server = new TestServer(builder);
+            var client = server.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            var response = await client.SendAsync(request);
+
+            Assert.Equal("https://localhost/", response.Headers.Location.ToString());
+        }
+
+        [Fact]
+        public async Task SetNullAddressFeature_DoesNotThrow()
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddHttpsRedirection(options =>
+                    {
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseHttpsRedirection();
+                    app.Run(context =>
+                    {
+                        return context.Response.WriteAsync("Hello world");
+                    });
+                });
+
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set<IServerAddressesFeature>(null);
+            var server = new TestServer(builder, featureCollection);
+
             var client = server.CreateClient();
             var request = new HttpRequestMessage(HttpMethod.Get, "");
             var response = await client.SendAsync(request);
