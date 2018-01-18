@@ -1,0 +1,21 @@
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
+using Xunit;
+
+namespace Microsoft.AspNetCore.Rewrite.Tests.IISUrlRewrite
+{
+    public class UriMatchConditionTests
+    {
+        [Fact]
+        public void AddRule_SetsRegexTimeoutToOneSecond()
+        {
+            var inputParser = new InputParser();
+            var matchCondition = new UriMatchCondition(inputParser, "test", "test", UriMatchPart.Full, false, false);
+
+            Assert.Equal(TimeSpan.FromSeconds(1), matchCondition._regexTimeout);
+        }
+    }
+}

@@ -38,5 +38,15 @@ namespace Microsoft.AspNetCore.Rewrite.Tests
 
             Assert.Equal(StatusCodes.Status302Found, redirectAction.StatusCode);
         }
+
+        [Fact]
+        public void AddRule_SetsRegexTimeoutToOneSecond()
+        {
+            var ruleBuilder = new RuleBuilder();
+
+            ruleBuilder.AddRule("RewriteRule /hey/(.*) /$1 [L]");
+
+            Assert.Equal(TimeSpan.FromSeconds(1), ruleBuilder._regexTimeout);
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         private UrlMatch _match;
         private CookieActionFactory _cookieActionFactory = new CookieActionFactory();
 
-        private readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(1);
+        internal TimeSpan _regexTimeout = RegexTimeoutSwitchUtility.UseLowerRegexTimeouts ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromSeconds(1);
 
         public ApacheModRewriteRule Build()
         {
@@ -66,13 +66,14 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
             switch (input.ConditionType)
             {
                 case ConditionType.Regex:
+
                     if (flags.HasFlag(FlagType.NoCase))
                     {
-                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout), input.Invert);
+                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout), input.Invert);
                     }
                     else
                     {
-                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, RegexTimeout), input.Invert);
+                        condition.Match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, _regexTimeout), input.Invert);
                     }
                     break;
                 case ConditionType.IntComp:
@@ -160,11 +161,11 @@ namespace Microsoft.AspNetCore.Rewrite.Internal.ApacheModRewrite
         {
             if (flags.HasFlag(FlagType.NoCase))
             {
-                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout), input.Invert);
+                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeout), input.Invert);
             }
             else
             {
-                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, RegexTimeout), input.Invert);
+                _match = new RegexMatch(new Regex(input.Operand, RegexOptions.CultureInvariant | RegexOptions.Compiled, _regexTimeout), input.Invert);
             }
         }
 
