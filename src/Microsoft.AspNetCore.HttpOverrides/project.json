@@ -34,7 +34,7 @@
     },
     "netstandard1.3": {
       "dependencies": {
-        "System.AppContext": "4.3.0"
+        "System.AppContext": "4.1.0"
       }
     }
   }
