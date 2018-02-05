@@ -9,7 +9,9 @@
     <MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreServerKestrelHttpsPackageVersion>
     <MicrosoftAspNetCoreServerKestrelPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreServerKestrelPackageVersion>
     <MicrosoftAspNetCoreTestHostPackageVersion>2.0.1-rtm-105</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreTestingPackageVersion>2.0.0</MicrosoftAspNetCoreTestingPackageVersion>
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>2.0.0</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <MicrosoftExtensionsFileProvidersAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsFileProvidersAbstractionsPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>2.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>2.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>

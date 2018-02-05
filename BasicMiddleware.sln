@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26127.3
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HttpOverrides", "src\Microsoft.AspNetCore.HttpOverrides\Microsoft.AspNetCore.HttpOverrides.csproj", "{517308C3-B477-4B01-B461-CAB9C10B6928}"
 EndProject
@@ -31,6 +31,17 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.ResponseCompression.Tests", "test\Microsoft.AspNetCore.ResponseCompression.Tests\Microsoft.AspNetCore.ResponseCompression.Tests.csproj", "{3360A5D1-70C0-49EE-9051-04A6A6B836DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResponseCompressionSample", "samples\ResponseCompressionSample\ResponseCompressionSample.csproj", "{B2A3CE38-51B2-4486-982C-98C380AF140E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HostFilteringSample", "samples\HostFilteringSample\HostFilteringSample.csproj", "{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{86887F43-7356-43AA-8F0B-FD8E283CBAB8}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+		build\dependencies.props = build\dependencies.props
+		build\sources.props = build\sources.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HostFiltering.Tests", "test\Microsoft.AspNetCore.HostFiltering.Tests\Microsoft.AspNetCore.HostFiltering.Tests.csproj", "{A639024E-2FE9-497D-9A8D-F888184417E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +97,14 @@ Global
 		{B2A3CE38-51B2-4486-982C-98C380AF140E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A3CE38-51B2-4486-982C-98C380AF140E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A3CE38-51B2-4486-982C-98C380AF140E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A639024E-2FE9-497D-9A8D-F888184417E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A639024E-2FE9-497D-9A8D-F888184417E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A639024E-2FE9-497D-9A8D-F888184417E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A639024E-2FE9-497D-9A8D-F888184417E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,5 +122,10 @@ Global
 		{45308A9D-F4C6-46A8-A24F-E73D995CC223} = {A5076D28-FA7E-4606-9410-FEDD0D603527}
 		{3360A5D1-70C0-49EE-9051-04A6A6B836DC} = {8437B0F3-3894-4828-A945-A9187F37631D}
 		{B2A3CE38-51B2-4486-982C-98C380AF140E} = {9587FE9F-5A17-42C4-8021-E87F59CECB98}
+		{DBB5A71D-4CA8-4FD2-B205-46D39E9B79F7} = {9587FE9F-5A17-42C4-8021-E87F59CECB98}
+		{A639024E-2FE9-497D-9A8D-F888184417E9} = {8437B0F3-3894-4828-A945-A9187F37631D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E49C22AA-DCBE-44D6-934D-EB9533FC1A4F}
 	EndGlobalSection
 EndGlobal

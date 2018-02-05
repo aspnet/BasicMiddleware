@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
+    <!--
+      Workaround for "Use executable flags in Microsoft.NET.Test.Sdk" (https://github.com/Microsoft/vstest/issues/792).
+      Remove when fixed.
+    -->
+    <HasRuntimeOutput>true</HasRuntimeOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\HostFilteringSample\HostFilteringSample.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="$(MicrosoftAspNetCoreTestHostPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Testing" Version="$(MicrosoftAspNetCoreTestingPackageVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+  </ItemGroup>
+
+</Project>
