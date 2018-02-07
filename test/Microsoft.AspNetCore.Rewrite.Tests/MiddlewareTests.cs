@@ -147,6 +147,76 @@ namespace Microsoft.AspNetCore.Rewrite.Tests.CodeRules
             Assert.Equal(StatusCodes.Status301MovedPermanently, (int)response.StatusCode);
         }
 
+        [Theory]
+        [InlineData(StatusCodes.Status301MovedPermanently)]
+        [InlineData(StatusCodes.Status302Found)]
+        [InlineData(StatusCodes.Status307TemporaryRedirect)]
+        [InlineData(StatusCodes.Status308PermanentRedirect)]
+        public async Task CheckRedirectToWww(int statusCode)
+        {
+            var options = new RewriteOptions().AddRedirectToWww(statusCode: statusCode);
+            var builder = new WebHostBuilder()
+            .Configure(app =>
+            {
+                app.UseRewriter(options);
+            });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync(new Uri("https://example.com"));
+
+            Assert.Equal("https://www.example.com/", response.Headers.Location.OriginalString);
+            Assert.Equal(statusCode, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckPermanentRedirectToWww()
+        {
+            var options = new RewriteOptions().AddRedirectToWwwPermanent();
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseRewriter(options);
+                });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync(new Uri("https://example.com"));
+
+            Assert.Equal("https://www.example.com/", response.Headers.Location.OriginalString);
+            Assert.Equal(StatusCodes.Status301MovedPermanently, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CheckNoRedirectToWwwWhenAlreadyWww()
+        {
+            var options = new RewriteOptions().AddRedirectToWww();
+            var builder = new WebHostBuilder()
+            .Configure(app =>
+            {
+                app.UseRewriter(options);
+            });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync(new Uri("https://www.example.com"));
+
+            Assert.Null(response.Headers.Location);
+        }
+
+        [Fact]
+        public async Task CheckNoRedirectToWwwWhenLocalhost()
+        {
+            var options = new RewriteOptions().AddRedirectToWww();
+            var builder = new WebHostBuilder()
+            .Configure(app =>
+            {
+                app.UseRewriter(options);
+            });
+            var server = new TestServer(builder);
+
+            var response = await server.CreateClient().GetAsync(new Uri("https://localhost:443"));
+
+            Assert.Null(response.Headers.Location);
+        }
+
         [Fact]
         public async Task CheckIfEmptyStringRedirectCorrectly()
         {
