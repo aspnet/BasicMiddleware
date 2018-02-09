@@ -87,7 +87,7 @@ namespace Microsoft.AspNetCore.Rewrite.Logging
             _redirectedToWww = LoggerMessage.Define(
                             LogLevel.Information,
                             13,
-                            "Request redirected to WWW");
+                            "Request redirected to www");
         }
 
         public static void RewriteMiddlewareRequestContinueResults(this ILogger logger, string currentUrl)
