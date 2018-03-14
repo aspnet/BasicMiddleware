@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
     {
         private readonly ICompressionProvider[] _providers;
         private readonly HashSet<string> _mimeTypes;
+        private readonly MimeTypesUsage _mimeTypesUsage;
         private readonly bool _enableForHttps;
 
         /// <summary>
@@ -49,12 +50,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 }
             }
 
-            var mimeTypes = options.Value.MimeTypes;
-            if (mimeTypes == null || !mimeTypes.Any())
-            {
-                mimeTypes = ResponseCompressionDefaults.MimeTypes;
-            }
+            var mimeTypes = options.Value.MimeTypes ?? Enumerable.Empty<string>();
             _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
+
+            _mimeTypesUsage = options.Value.MimeTypesUsage;
 
             _enableForHttps = options.Value.EnableForHttps;
         }
@@ -111,13 +110,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 return false;
             }
 
-            var mimeType = context.Response.ContentType;
-
-            if (string.IsNullOrEmpty(mimeType))
-            {
-                return false;
-            }
-
+            var mimeType = context.Response.ContentType ?? "";
             var separator = mimeType.IndexOf(';');
             if (separator >= 0)
             {
@@ -127,7 +120,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
 
             // TODO PERF: StringSegments?
-            return _mimeTypes.Contains(mimeType);
+            return
+                (_mimeTypes.Contains(mimeType) && _mimeTypesUsage == MimeTypesUsage.CompressSpecified)
+                || (!_mimeTypes.Contains(mimeType) && _mimeTypesUsage == MimeTypesUsage.CompressAllExceptSpecified);
+
         }
 
         /// <inheritdoc />

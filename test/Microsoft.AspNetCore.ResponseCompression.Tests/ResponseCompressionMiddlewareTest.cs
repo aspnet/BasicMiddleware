@@ -89,6 +89,41 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             CheckResponseCompressed(response, expectedBodyLength: 24);
         }
 
+        [Theory]
+        [InlineData("mime/type")]
+        [InlineData("type/mime")]
+        public async Task ContentType_CompressAllExceptSpecified_Compress(string contentType)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(
+                    services =>
+                        services.AddResponseCompression(options => options.MimeTypesUsage = MimeTypesUsage.CompressAllExceptSpecified)
+                )
+                .Configure(
+                    app =>
+                    {
+                        app.UseResponseCompression();
+                        app.Run(context =>
+                            {
+                                context.Response.Headers[HeaderNames.ContentMD5] = "MD5";
+                                context.Response.ContentType = contentType;
+                                return context.Response.WriteAsync(new string('a', 100));
+                            }
+                        );
+                    }
+                );
+
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            request.Headers.AcceptEncoding.ParseAdd("gzip");
+
+            var response = await client.SendAsync(request);
+
+            CheckResponseCompressed(response, expectedBodyLength: 24);
+        }
+
         [Fact]
         public async Task GZipCompressionProvider_OptionsSetInDI_Compress()
         {
@@ -140,6 +175,48 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                         return context.Response.WriteAsync(new string('a', 100));
                     });
                 });
+
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            request.Headers.AcceptEncoding.ParseAdd("gzip");
+
+            var response = await client.SendAsync(request);
+
+            CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: false);
+        }
+
+        [Theory]
+        [InlineData("text/plain")]
+        [InlineData("application/json")]
+        public async Task MimeTypes_CompressAllExceptSpecified_NoMatch(string contentType)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(
+                    services =>
+                        services.AddResponseCompression(
+                            options =>
+                            {
+                                options.MimeTypes = new[] { "text/plain", "application/json", "another/mimetype" };
+                                options.MimeTypesUsage = MimeTypesUsage.CompressAllExceptSpecified;
+                            }
+                        )
+                )
+                .Configure(
+                    app =>
+                    {
+                        app.UseResponseCompression();
+                        app.Run(
+                            context =>
+                            {
+                                context.Response.Headers[HeaderNames.ContentMD5] = "MD5";
+                                context.Response.ContentType = contentType;
+                                return context.Response.WriteAsync(new string('a', 100));
+                            }
+                        );
+                    }
+                );
 
             var server = new TestServer(builder);
             var client = server.CreateClient();
