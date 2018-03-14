@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.AspNetCore.ResponseCompression
 {
 	/// <summary>
-	/// Specifies how the MIME types specified in compression options should be used.
+	/// Specifies how the MIME types specified in compression options will be used.
 	/// </summary>
 	public enum MimeTypesUsage
 	{
