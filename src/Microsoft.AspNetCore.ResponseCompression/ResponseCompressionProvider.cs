@@ -121,9 +121,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             // TODO PERF: StringSegments?
             return
-                (_mimeTypes.Contains(mimeType) && _mimeTypesUsage == MimeTypesUsage.CompressSpecified)
-                || (!_mimeTypes.Contains(mimeType) && _mimeTypesUsage == MimeTypesUsage.CompressAllExceptSpecified);
-
+                (_mimeTypesUsage == MimeTypesUsage.CompressSpecified && _mimeTypes.Contains(mimeType))
+                || (_mimeTypesUsage == MimeTypesUsage.CompressAllExceptSpecified && !_mimeTypes.Contains(mimeType));
         }
 
         /// <inheritdoc />
