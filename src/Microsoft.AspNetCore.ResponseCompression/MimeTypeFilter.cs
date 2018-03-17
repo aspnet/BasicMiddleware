@@ -36,6 +36,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="mimeTypes">MIME types to add. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
         /// <returns>This instance of MimeTypeFilter.</returns>
         public MimeTypeFilter AddCompressed(params string[] mimeTypes) =>
+            AddCompressed((IEnumerable<string>)mimeTypes);
+
+        /// <inheritdoc cref="AddCompressed(string[])"/>
+        public MimeTypeFilter AddCompressed(IEnumerable<string> mimeTypes) =>
             Add(_compressed, mimeTypes);
 
         /// <summary>
@@ -44,6 +48,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="mimeTypes">MIME types to add. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
         /// <returns>This instance of MimeTypeFilter.</returns>
         public MimeTypeFilter AddNotCompressed(params string[] mimeTypes) =>
+            AddNotCompressed((IEnumerable<string>)mimeTypes);
+
+        /// <inheritdoc cref="AddNotCompressed(string[])"/>
+        public MimeTypeFilter AddNotCompressed(IEnumerable<string> mimeTypes) =>
             Add(_notCompressed, mimeTypes);
 
         /// <summary>
@@ -52,6 +60,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="mimeTypes">MIME types to remove. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
         /// <returns>This instance of MimeTypeFilter.</returns>
         public MimeTypeFilter RemoveCompressed(params string[] mimeTypes) =>
+            RemoveCompressed((IEnumerable<string>)mimeTypes);
+
+        /// <inheritdoc cref="RemoveCompressed(string[])"/>
+        public MimeTypeFilter RemoveCompressed(IEnumerable<string> mimeTypes) =>
             Remove(_compressed, mimeTypes);
 
         /// <summary>
@@ -60,6 +72,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <param name="mimeTypes">MIME types to remove. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
         /// <returns>This instance of MimeTypeFilter.</returns>
         public MimeTypeFilter RemoveNotCompressed(params string[] mimeTypes) =>
+            RemoveNotCompressed((IEnumerable<string>)mimeTypes);
+
+        /// <inheritdoc cref="RemoveNotCompressed(string[])"/>
+        public MimeTypeFilter RemoveNotCompressed(IEnumerable<string> mimeTypes) =>
             Remove(_notCompressed, mimeTypes);
 
         /// <summary>

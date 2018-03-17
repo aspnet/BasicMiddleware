@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Fact]
-        public void AddCompressed_CorrectCompressedMimeTypes()
+        public void AddCompressed_Array_CorrectCompressedMimeTypes()
         {
             var sut = new MimeTypeFilter().AddCompressed("a/b", "x/y", "A/B");
 
@@ -78,7 +78,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Fact]
-        public void AddNotCompressed_CorrectNotCompressedMimeTypes()
+        public void AddNotCompressed_Array_CorrectNotCompressedMimeTypes()
         {
             var sut = new MimeTypeFilter().AddNotCompressed("a/b", "x/y", "A/B");
 
@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Fact]
-        public void RemoveCompressed_CorrectCompressedMimeTypes()
+        public void RemoveCompressed_Array_CorrectCompressedMimeTypes()
         {
             var sut = new MimeTypeFilter()
                 .AddCompressed("a/b", "c/d", "e/f", "g/h")
@@ -102,11 +102,59 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Fact]
-        public void RemoveNotCompressed_CorrectNotCompressedMimeTypes()
+        public void RemoveNotCompressed_Array_CorrectNotCompressedMimeTypes()
         {
             var sut = new MimeTypeFilter()
                 .AddNotCompressed("a/b", "c/d", "e/f", "g/h")
                 .RemoveNotCompressed("A/B", "e/f");
+
+            var expected = (IEnumerable<string>)new[] { "c/d", "g/h" };
+            var actual = sut.NotCompressedMimeTypes;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void AddCompressed_IEnumerable_CorrectCompressedMimeTypes()
+        {
+            var sut = new MimeTypeFilter().AddCompressed((IEnumerable<string>)new[] { "a/b", "x/y", "A/B" });
+
+            var expected = (IEnumerable<string>)new[] { "a/b", "x/y" };
+            var actual = sut.CompressedMimeTypes;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void AddNotCompressed_IEnumerable_CorrectNotCompressedMimeTypes()
+        {
+            var sut = new MimeTypeFilter().AddNotCompressed((IEnumerable<string>)new[] { "a/b", "x/y", "A/B" });
+
+            var expected = (IEnumerable<string>)new[] { "a/b", "x/y" };
+            var actual = sut.NotCompressedMimeTypes;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void RemoveCompressed_IEnumerable_CorrectCompressedMimeTypes()
+        {
+            var sut = new MimeTypeFilter()
+                .AddCompressed((IEnumerable<string>)new[] { "a/b", "c/d", "e/f", "g/h" })
+                .RemoveCompressed((IEnumerable<string>)new[] { "A/B", "e/f" });
+
+            var expected = (IEnumerable<string>)new[] { "c/d", "g/h" };
+            var actual = sut.CompressedMimeTypes;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void RemoveNotCompressed_IEnumerable_CorrectNotCompressedMimeTypes()
+        {
+            var sut = new MimeTypeFilter()
+                .AddNotCompressed((IEnumerable<string>)new[] { "a/b", "c/d", "e/f", "g/h" })
+                .RemoveNotCompressed((IEnumerable<string>)new[] { "A/B", "e/f" });
 
             var expected = (IEnumerable<string>)new[] { "c/d", "g/h" };
             var actual = sut.NotCompressedMimeTypes;
@@ -221,11 +269,21 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData(new[] { "c/d" }, new[] { "c/d" }, false)]
         public void ShouldCompress_CorrectResult(string[] compressed, string[] notCompressed, bool expected)
         {
+            //test with arrays
             var sut = new MimeTypeFilter()
                 .AddCompressed(compressed)
                 .AddNotCompressed(notCompressed);
 
             var actual = sut.ShouldCompress("a/b");
+
+            Assert.Equal(expected, actual);
+
+            //test with IEnumerables
+            sut = new MimeTypeFilter()
+                .AddCompressed((IEnumerable<string>)compressed)
+                .AddNotCompressed((IEnumerable<string>)notCompressed);
+
+            actual = sut.ShouldCompress("a/b");
 
             Assert.Equal(expected, actual);
         }

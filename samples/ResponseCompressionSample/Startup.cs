@@ -25,9 +25,9 @@ namespace ResponseCompressionSample
                 options.Providers.Add<GzipCompressionProvider>();
                 options.Providers.Add<CustomCompressionProvider>();
 
-	            options.MimeTypeFilter
-		            .AddCompressed(ResponseCompressionDefaults.MimeTypes)
-		            .AddCompressed("image/svg+xml");
+                options.MimeTypeFilter
+                    .AddCompressed(ResponseCompressionDefaults.MimeTypes)
+                    .AddCompressed("image/svg+xml");
             });
         }
 
