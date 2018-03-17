@@ -34,50 +34,54 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// Adds MIME types to compress responses for.
         /// </summary>
         /// <param name="mimeTypes">MIME types to add. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
-        public void AddCompressed(params string[] mimeTypes) =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter AddCompressed(params string[] mimeTypes) =>
             Add(_compressed, mimeTypes);
 
         /// <summary>
         /// Adds MIME types to not compress responses for.
         /// </summary>
         /// <param name="mimeTypes">MIME types to add. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
-        public void AddNotCompressed(params string[] mimeTypes) =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter AddNotCompressed(params string[] mimeTypes) =>
             Add(_notCompressed, mimeTypes);
 
         /// <summary>
         /// Removes from the list of MIME types to compress responses for.
         /// </summary>
         /// <param name="mimeTypes">MIME types to remove. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
-        public void RemoveCompressed(params string[] mimeTypes) =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter RemoveCompressed(params string[] mimeTypes) =>
             Remove(_compressed, mimeTypes);
 
         /// <summary>
         /// Removes from the list of MIME types to not compress responses for.
         /// </summary>
         /// <param name="mimeTypes">MIME types to remove. Supported strings are "&lt;type>/&lt;subtype>", "&lt;type>/*" and "*/*".</param>
-        public void RemoveNotCompressed(params string[] mimeTypes) =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter RemoveNotCompressed(params string[] mimeTypes) =>
             Remove(_notCompressed, mimeTypes);
 
         /// <summary>
         /// Clears the list of MIME types to compress responses for.
         /// </summary>
-        public void ClearCompressed() =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter ClearCompressed() =>
             Clear(_compressed);
 
         /// <summary>
         /// Clears the list of MIME types to not compress responses for.
         /// </summary>
-        public void ClearNotCompressed() =>
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter ClearNotCompressed() =>
             Clear(_notCompressed);
 
         /// <summary>
         /// Clears the lists of MIME types to compress responses for and to not compress responses for.
         /// </summary>
-        public void ClearAll()
-        {
-            ClearCompressed();
-            ClearNotCompressed();
-        }
+        /// <returns>This instance of MimeTypeFilter.</returns>
+        public MimeTypeFilter ClearAll() =>
+            ClearCompressed().ClearNotCompressed();
 
         /// <summary>
         /// Determines if the response with the passed MIME type should be compressed.
@@ -122,7 +126,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
             return false;
         }
 
-        private void Add(ISet<string> set, IEnumerable<string> mimeTypes)
+        private MimeTypeFilter Add(ISet<string> set, IEnumerable<string> mimeTypes)
         {
             if (mimeTypes != null)
             {
@@ -141,9 +145,10 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
 
             HasBeenPopulated = true;
+            return this;
         }
 
-        private void Remove(ISet<string> set, IEnumerable<string> mimeTypes)
+        private MimeTypeFilter Remove(ISet<string> set, IEnumerable<string> mimeTypes)
         {
             if (mimeTypes != null)
             {
@@ -151,12 +156,14 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
 
             HasBeenPopulated = true;
+            return this;
         }
 
-        private void Clear(ISet<string> set)
+        private MimeTypeFilter Clear(ISet<string> set)
         {
             set.Clear();
             HasBeenPopulated = true;
+            return this;
         }
 
         //This is NOT a proper MIME type validation. It only checks conformance to the format

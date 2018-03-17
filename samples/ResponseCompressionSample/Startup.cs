@@ -24,8 +24,10 @@ namespace ResponseCompressionSample
             {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.Providers.Add<CustomCompressionProvider>();
-                // .Append(TItem) is only available on Core.
-                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
+
+	            options.MimeTypeFilter
+		            .AddCompressed(ResponseCompressionDefaults.MimeTypes)
+		            .AddCompressed("image/svg+xml");
             });
         }
 

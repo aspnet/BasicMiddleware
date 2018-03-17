@@ -20,64 +20,56 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void AddCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b");
+            var sut = new MimeTypeFilter().AddCompressed("a/b");
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void AddNotCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddNotCompressed("a/b");
+            var sut = new MimeTypeFilter().AddNotCompressed("a/b");
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void RemoveCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.RemoveCompressed("a/b");
+            var sut = new MimeTypeFilter().RemoveCompressed("a/b");
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void RemoveNotCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.RemoveNotCompressed("a/b");
+            var sut = new MimeTypeFilter().RemoveNotCompressed("a/b");
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void ClearCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.ClearCompressed();
+            var sut = new MimeTypeFilter().ClearCompressed();
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void ClearNotCompressed_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.ClearNotCompressed();
+            var sut = new MimeTypeFilter().ClearNotCompressed();
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void ClearAll_HasBeenPopulated_True()
         {
-            var sut = new MimeTypeFilter();
-            sut.ClearAll();
+            var sut = new MimeTypeFilter().ClearAll();
             Assert.True(sut.HasBeenPopulated);
         }
 
         [Fact]
         public void AddCompressed_CorrectCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b", "x/y", "A/B");
+            var sut = new MimeTypeFilter().AddCompressed("a/b", "x/y", "A/B");
 
             var expected = (IEnumerable<string>)new[] { "a/b", "x/y" };
             var actual = sut.CompressedMimeTypes;
@@ -88,8 +80,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void AddNotCompressed_CorrectNotCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddNotCompressed("a/b", "x/y", "A/B");
+            var sut = new MimeTypeFilter().AddNotCompressed("a/b", "x/y", "A/B");
 
             var expected = (IEnumerable<string>)new[] { "a/b", "x/y" };
             var actual = sut.NotCompressedMimeTypes;
@@ -100,9 +91,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void RemoveCompressed_CorrectCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b", "c/d", "e/f", "g/h");
-            sut.RemoveCompressed("A/B", "e/f");
+            var sut = new MimeTypeFilter()
+                .AddCompressed("a/b", "c/d", "e/f", "g/h")
+                .RemoveCompressed("A/B", "e/f");
 
             var expected = (IEnumerable<string>)new[] { "c/d", "g/h" };
             var actual = sut.CompressedMimeTypes;
@@ -113,9 +104,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void RemoveNotCompressed_CorrectNotCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddNotCompressed("a/b", "c/d", "e/f", "g/h");
-            sut.RemoveNotCompressed("A/B", "e/f");
+            var sut = new MimeTypeFilter()
+                .AddNotCompressed("a/b", "c/d", "e/f", "g/h")
+                .RemoveNotCompressed("A/B", "e/f");
 
             var expected = (IEnumerable<string>)new[] { "c/d", "g/h" };
             var actual = sut.NotCompressedMimeTypes;
@@ -126,10 +117,10 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void ClearCompressed_NoCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b", "c/d");
-            sut.AddNotCompressed("e/f", "g/h");
-            sut.ClearCompressed();
+            var sut = new MimeTypeFilter()
+                .AddCompressed("a/b", "c/d")
+                .AddNotCompressed("e/f", "g/h")
+                .ClearCompressed();
 
             var expected = Enumerable.Empty<string>();
             var actual = sut.CompressedMimeTypes;
@@ -140,10 +131,10 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void ClearNotCompressed_NoNotCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b", "c/d");
-            sut.AddNotCompressed("e/f", "g/h");
-            sut.ClearNotCompressed();
+            var sut = new MimeTypeFilter()
+                .AddCompressed("a/b", "c/d")
+                .AddNotCompressed("e/f", "g/h")
+                .ClearNotCompressed();
 
             var expected = Enumerable.Empty<string>();
             var actual = sut.NotCompressedMimeTypes;
@@ -154,10 +145,10 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public void ClearAll_NoCompressedMimeTypes_NoNotCompressedMimeTypes()
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed("a/b", "c/d");
-            sut.AddNotCompressed("e/f", "g/h");
-            sut.ClearAll();
+            var sut = new MimeTypeFilter()
+                .AddCompressed("a/b", "c/d")
+                .AddNotCompressed("e/f", "g/h")
+                .ClearAll();
 
             var expected = new string[0];
             var actualCompressed = sut.CompressedMimeTypes;
@@ -230,9 +221,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData(new[] { "c/d" }, new[] { "c/d" }, false)]
         public void ShouldCompress_CorrectResult(string[] compressed, string[] notCompressed, bool expected)
         {
-            var sut = new MimeTypeFilter();
-            sut.AddCompressed(compressed);
-            sut.AddNotCompressed(notCompressed);
+            var sut = new MimeTypeFilter()
+                .AddCompressed(compressed)
+                .AddNotCompressed(notCompressed);
 
             var actual = sut.ShouldCompress("a/b");
 
