@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 }
                 else
                 {
-                    _mimeTypeFilter.AddCompressed(ResponseCompressionDefaults.MimeTypes.ToArray());
+                    _mimeTypeFilter.AddCompressed(ResponseCompressionDefaults.MimeTypes);
                 }
             }
 
