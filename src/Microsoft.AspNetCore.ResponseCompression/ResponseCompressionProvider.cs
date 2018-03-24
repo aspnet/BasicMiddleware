@@ -144,7 +144,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 return false;
             }
-
             return !string.IsNullOrEmpty(context.Request.Headers[HeaderNames.AcceptEncoding]);
         }
     }
