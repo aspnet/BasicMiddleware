@@ -269,7 +269,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                     services.AddResponseCompression(options =>
                     {
                         options.EnableForHttps = enableHttps;
-                        options.MimeTypeFilter.AddCompressed(TextPlain);
+                        options.MimeTypes = new[] { TextPlain };
                     });
                 })
                 .Configure(app =>

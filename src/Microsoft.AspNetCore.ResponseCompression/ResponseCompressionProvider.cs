@@ -15,7 +15,8 @@ namespace Microsoft.AspNetCore.ResponseCompression
     public class ResponseCompressionProvider : IResponseCompressionProvider
     {
         private readonly ICompressionProvider[] _providers;
-        private readonly MimeTypeFilter _mimeTypeFilter;
+        private readonly HashSet<string> _mimeTypes;
+        private readonly IMimeTypeFilter _mimeTypeFilter;
         private readonly bool _enableForHttps;
 
         /// <summary>
@@ -29,19 +30,19 @@ namespace Microsoft.AspNetCore.ResponseCompression
             {
                 throw new ArgumentNullException(nameof(services));
             }
-
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            _providers = options.Value.Providers.ToArray();
+            var responseCompressionOptions = options.Value;
+
+            _providers = responseCompressionOptions.Providers.ToArray();
             if (_providers.Length == 0)
             {
                 // Use the factory so it can resolve IOptions<GzipCompressionProviderOptions> from DI.
                 _providers = new ICompressionProvider[] { new CompressionProviderFactory(typeof(GzipCompressionProvider)) };
             }
-
             for (var i = 0; i < _providers.Length; i++)
             {
                 var factory = _providers[i] as CompressionProviderFactory;
@@ -51,28 +52,16 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 }
             }
 
-            _mimeTypeFilter = options.Value.MimeTypeFilter;
-
-            //If MimeTypeFilter has not been explicitly populated, populate it with default MIME types.
-            if (!_mimeTypeFilter.HasBeenPopulated)
+            var mimeTypes = responseCompressionOptions.MimeTypes;
+            if (mimeTypes == null || !mimeTypes.Any())
             {
-                //For backward compatibility, check if obsolete property ResponseCompressionOptions.MimeTypes
-                //has been set. If yes, populate MimeTypeFilter from it, rather than using default MIME types.
-#pragma warning disable CS0618 // Type or member is obsolete
-                var mimeTypes = options.Value.MimeTypes?.ToArray();
-#pragma warning restore CS0618 // Type or member is obsolete
-
-                if (mimeTypes != null && mimeTypes.Any())
-                {
-                    _mimeTypeFilter.AddCompressed(mimeTypes);
-                }
-                else
-                {
-                    _mimeTypeFilter.AddCompressed(ResponseCompressionDefaults.MimeTypes);
-                }
+                mimeTypes = ResponseCompressionDefaults.MimeTypes;
             }
+            _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
 
-            _enableForHttps = options.Value.EnableForHttps;
+            _mimeTypeFilter = responseCompressionOptions.MimeTypeFilter;
+
+            _enableForHttps = responseCompressionOptions.EnableForHttps;
         }
 
         /// <inheritdoc />
@@ -128,17 +117,24 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 return false;
             }
 
-            var mimeType = context.Response.ContentType ?? "";
-            var separatorPos = mimeType.IndexOf(';');
+            var mimeType = context.Response.ContentType;
 
-            if (separatorPos > 0)
+            if (string.IsNullOrEmpty(mimeType) && _mimeTypeFilter == null)
+            {
+                return false;
+            }
+
+            var separatorPos = mimeType?.IndexOf(';');
+
+            if (separatorPos >= 0)
             {
                 // Remove the content-type optional parameters
-                mimeType = mimeType.Substring(0, separatorPos);
+                mimeType = mimeType.Substring(0, separatorPos.Value);
                 mimeType = mimeType.Trim();
             }
 
-            return _mimeTypeFilter.ShouldCompress(mimeType);
+            // TODO PERF: StringSegments?
+            return _mimeTypeFilter?.ShouldCompress(mimeType) ?? _mimeTypes.Contains(mimeType);
         }
 
         /// <inheritdoc />
