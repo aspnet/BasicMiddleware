@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
     {
         private readonly ICompressionProvider[] _providers;
         private readonly HashSet<string> _mimeTypes;
-        private readonly IMimeTypeFilter _mimeTypeFilter;
+        private readonly HashSet<string> _excludedMimeTypes;
         private readonly bool _enableForHttps;
 
         /// <summary>
@@ -52,14 +52,19 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 }
             }
 
-            var mimeTypes = responseCompressionOptions.MimeTypes;
-            if (mimeTypes == null || !mimeTypes.Any())
-            {
-                mimeTypes = ResponseCompressionDefaults.MimeTypes;
-            }
-            _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
+            _excludedMimeTypes = new HashSet<string>(
+                responseCompressionOptions.ExcludedMimeTypes ?? Enumerable.Empty<string>(),
+                StringComparer.OrdinalIgnoreCase
+            );
 
-            _mimeTypeFilter = responseCompressionOptions.MimeTypeFilter;
+            _mimeTypes = new HashSet<string>(
+                responseCompressionOptions.MimeTypes ?? Enumerable.Empty<string>(),
+                StringComparer.OrdinalIgnoreCase
+            );
+            if (_mimeTypes.Count == 0 && _excludedMimeTypes.Count == 0)
+            {
+                _mimeTypes.UnionWith(ResponseCompressionDefaults.MimeTypes);
+            }
 
             _enableForHttps = responseCompressionOptions.EnableForHttps;
         }
@@ -119,22 +124,24 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             var mimeType = context.Response.ContentType;
 
-            if (string.IsNullOrEmpty(mimeType) && _mimeTypeFilter == null)
+            if (string.IsNullOrEmpty(mimeType))
             {
                 return false;
             }
 
-            var separatorPos = mimeType?.IndexOf(';');
+            var separator = mimeType.IndexOf(';');
 
-            if (separatorPos >= 0)
+            if (separator >= 0)
             {
                 // Remove the content-type optional parameters
-                mimeType = mimeType.Substring(0, separatorPos.Value);
+                mimeType = mimeType.Substring(0, separator);
                 mimeType = mimeType.Trim();
             }
 
-            // TODO PERF: StringSegments?
-            return _mimeTypeFilter?.ShouldCompress(mimeType) ?? _mimeTypes.Contains(mimeType);
+            return ShouldCompressExact(mimeType) //check exact match type/subtype
+                ?? ShouldCompressPartial(mimeType) //check partial match type/*
+                ?? ShouldCompressExact("*/*") //check wildcard */*
+                ?? false; //no matches - do not compress
         }
 
         /// <inheritdoc />
@@ -145,6 +152,35 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 return false;
             }
             return !string.IsNullOrEmpty(context.Request.Headers[HeaderNames.AcceptEncoding]);
+        }
+
+        private bool? ShouldCompressExact(string mimeType)
+        {
+            //Check excluded MIME types first, then included
+            if (_excludedMimeTypes.Contains(mimeType))
+            {
+                return false;
+            }
+
+            if (_mimeTypes.Contains(mimeType))
+            {
+                return true;
+            }
+
+            return null;
+        }
+
+        private bool? ShouldCompressPartial(string mimeType)
+        {
+            int? slashPos = mimeType?.IndexOf('/');
+
+            if (slashPos >= 0)
+            {
+                string partialMimeType = $"{mimeType.Substring(0, slashPos.Value)}/*";
+                return ShouldCompressExact(partialMimeType);
+            }
+
+            return null;
         }
     }
 }

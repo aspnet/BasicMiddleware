@@ -26,17 +26,6 @@ namespace ResponseCompressionSample
                 options.Providers.Add<CustomCompressionProvider>();
                 // .Append(TItem) is only available on Core.
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
-
-                ////Sample MIME type filter usage: compress everything except media files and zip archives.
-                //options.UseMimeTypeFilter(
-                //    config =>
-                //        config
-                //            .AddCompressed("*/*")
-                //            .AddNotCompressed(
-                //                "audio/*", "video/*", "image/*",
-                //                "application/x-zip-compressed", "application/zip"
-                //            )
-                //);
             });
         }
 
