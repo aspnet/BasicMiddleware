@@ -27,7 +27,7 @@ namespace ResponseCompressionSample
                 // .Append(TItem) is only available on Core.
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
 
-                ////Example of using excluded MIME types:
+                ////Example of using excluded and wildcard MIME types:
                 ////Compress all MIME types except various media types, but do compress SVG images.
                 //options.MimeTypes = new[] { "*/*", "image/svg+xml" };
                 //options.ExcludedMimeTypes = new[] { "image/*", "audio/*", "video/*" };
