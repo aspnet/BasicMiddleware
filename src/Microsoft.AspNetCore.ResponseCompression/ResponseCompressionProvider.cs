@@ -171,7 +171,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             if (slashPos >= 0)
             {
-                string partialMimeType = mimeType.Substring(0, slashPos.Value)+ "/*";
+                string partialMimeType = mimeType.Substring(0, slashPos.Value) + "/*";
                 return ShouldCompressExact(partialMimeType);
             }
 
