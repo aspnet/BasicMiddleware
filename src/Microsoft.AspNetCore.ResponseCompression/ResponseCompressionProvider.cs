@@ -52,19 +52,17 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 }
             }
 
+            var mimeTypes = responseCompressionOptions.MimeTypes;
+            if (mimeTypes == null || !mimeTypes.Any())
+            {
+                mimeTypes = ResponseCompressionDefaults.MimeTypes;
+            }
+            _mimeTypes = new HashSet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
+
             _excludedMimeTypes = new HashSet<string>(
                 responseCompressionOptions.ExcludedMimeTypes ?? Enumerable.Empty<string>(),
                 StringComparer.OrdinalIgnoreCase
             );
-
-            _mimeTypes = new HashSet<string>(
-                responseCompressionOptions.MimeTypes ?? Enumerable.Empty<string>(),
-                StringComparer.OrdinalIgnoreCase
-            );
-            if (_mimeTypes.Count == 0 && _excludedMimeTypes.Count == 0)
-            {
-                _mimeTypes.UnionWith(ResponseCompressionDefaults.MimeTypes);
-            }
 
             _enableForHttps = responseCompressionOptions.EnableForHttps;
         }
@@ -138,8 +136,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             return ShouldCompressExact(mimeType) //check exact match type/subtype
                 ?? ShouldCompressPartial(mimeType) //check partial match type/*
-                ?? ShouldCompressExact("*/*") //check wildcard */*
-                ?? false; //no matches - do not compress
+                ?? _mimeTypes.Contains("*/*"); //check wildcard */*
         }
 
         /// <inheritdoc />
@@ -174,7 +171,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             if (slashPos >= 0)
             {
-                string partialMimeType = $"{mimeType.Substring(0, slashPos.Value)}/*";
+                string partialMimeType = mimeType.Substring(0, slashPos.Value)+ "/*";
                 return ShouldCompressExact(partialMimeType);
             }
 

@@ -156,14 +156,14 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData(null, null, "text/plain", true)]
         [InlineData(null, new string[0], "text/plain", true)]
         [InlineData(null, new[] { "TEXT/plain" }, "text/plain", false)]
-        [InlineData(null, new[] { "TEXT/*" }, "text/plain", false)]
-        [InlineData(null, new[] { "*/*" }, "text/plain", false)]
+        [InlineData(null, new[] { "TEXT/*" }, "text/plain", true)]
+        [InlineData(null, new[] { "*/*" }, "text/plain", true)]
 
         [InlineData(new string[0], null, "text/plain", true)]
         [InlineData(new string[0], new string[0], "text/plain", true)]
         [InlineData(new string[0], new[] { "TEXT/plain" }, "text/plain", false)]
-        [InlineData(new string[0], new[] { "TEXT/*" }, "text/plain", false)]
-        [InlineData(new string[0], new[] { "*/*" }, "text/plain", false)]
+        [InlineData(new string[0], new[] { "TEXT/*" }, "text/plain", true)]
+        [InlineData(new string[0], new[] { "*/*" }, "text/plain", true)]
 
         [InlineData(new[] { "TEXT/plain" }, null, "text/plain", true)]
         [InlineData(new[] { "TEXT/plain" }, new string[0], "text/plain", true)]
@@ -181,7 +181,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData(new[] { "*/*" }, new string[0], "text/plain", true)]
         [InlineData(new[] { "*/*" }, new[] { "TEXT/plain" }, "text/plain", false)]
         [InlineData(new[] { "*/*" }, new[] { "TEXT/*" }, "text/plain", false)]
-        [InlineData(new[] { "*/*" }, new[] { "*/*" }, "text/plain", false)]
+        [InlineData(new[] { "*/*" }, new[] { "*/*" }, "text/plain", true)]
 
         [InlineData(null, null, "text/plain2", false)]
         [InlineData(null, new string[0], "text/plain2", false)]
@@ -211,7 +211,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData(new[] { "*/*" }, new string[0], "text/plain2", true)]
         [InlineData(new[] { "*/*" }, new[] { "TEXT/plain" }, "text/plain2", true)]
         [InlineData(new[] { "*/*" }, new[] { "TEXT/*" }, "text/plain2", false)]
-        [InlineData(new[] { "*/*" }, new[] { "*/*" }, "text/plain2", false)]
+        [InlineData(new[] { "*/*" }, new[] { "*/*" }, "text/plain2", true)]
         public async Task MimeTypes_IncludedAndExcluded(
             string[] mimeTypes,
             string[] excludedMimeTypes,
@@ -261,6 +261,42 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             {
                 CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: false);
             }
+        }
+
+        [Fact]
+        public async Task NoIncludedMimeTypes_UseDefaults()
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(
+                    services =>
+                        services.AddResponseCompression(
+                            options => options.ExcludedMimeTypes = new []{ "text/*" }
+                        )
+                )
+                .Configure(
+                    app =>
+                    {
+                        app.UseResponseCompression();
+                        app.Run(
+                            context =>
+                            {
+                                context.Response.Headers[HeaderNames.ContentMD5] = "MD5";
+                                context.Response.ContentType = TextPlain;
+                                return context.Response.WriteAsync(new string('a', 100));
+                            }
+                        );
+                    }
+                );
+
+            var server = new TestServer(builder);
+            var client = server.CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "");
+            request.Headers.AcceptEncoding.ParseAdd("gzip");
+
+            var response = await client.SendAsync(request);
+
+            CheckResponseCompressed(response, expectedBodyLength: 24);
         }
 
         [Theory]
