@@ -270,7 +270,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                 .ConfigureServices(
                     services =>
                         services.AddResponseCompression(
-                            options => options.ExcludedMimeTypes = new []{ "text/*" }
+                            options => options.ExcludedMimeTypes = new[] { "text/*" }
                         )
                 )
                 .Configure(
