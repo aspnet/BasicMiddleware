@@ -102,7 +102,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
                         // Any
                         return _providers[0];
                     }
-
                     if (StringSegment.Equals("identity", encoding.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         // No compression
@@ -130,7 +129,6 @@ namespace Microsoft.AspNetCore.ResponseCompression
             }
 
             var separator = mimeType.IndexOf(';');
-
             if (separator >= 0)
             {
                 // Remove the content-type optional parameters
