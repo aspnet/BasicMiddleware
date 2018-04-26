@@ -4,12 +4,15 @@
     "PresetHeaders": "Json",
 
     "Source": {
-      "Repository": "https://github.com/aspnet/KestrelHttpServer.git",
+      "Repository": "https://github.com/aspnet/BasicMiddleware.git",
       "BranchOrCommit": "dev",
-      "Project": "benchmarkapps/PlatformBenchmarks/PlatformBenchmarks.csproj"
+      "Project": "benchmarkapps/BufferingBenchmarks/BufferingBenchmarks.csproj"
     }
   },
-  "JsonPlatform": {
-    "Path": "/json"
+  "Buffered": {
+    "Path": "/buffered"
+  },
+  "NonBuffered": {
+    "Path": "/nonbuffered"
   }
 }
