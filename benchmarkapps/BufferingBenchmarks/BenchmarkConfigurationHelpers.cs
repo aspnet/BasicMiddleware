@@ -28,26 +28,13 @@ namespace BufferingBenchmarks
                 theadCount = value;
             }
 
-            if (string.Equals(webHost, "Libuv", StringComparison.OrdinalIgnoreCase))
+            builder.UseSockets(options =>
             {
-                builder.UseLibuv(options =>
+                if (theadCount.HasValue)
                 {
-                    if (theadCount.HasValue)
-                    {
-                        options.ThreadCount = theadCount.Value;
-                    }
-                });
-            }
-            else if (string.Equals(webHost, "Sockets", StringComparison.OrdinalIgnoreCase))
-            {
-                builder.UseSockets(options =>
-                {
-                    if (theadCount.HasValue)
-                    {
-                        options.IOQueueCount = theadCount.Value;
-                    }
-                });
-            }
+                    options.IOQueueCount = theadCount.Value;
+                }
+            });
 
             return builder;
         }

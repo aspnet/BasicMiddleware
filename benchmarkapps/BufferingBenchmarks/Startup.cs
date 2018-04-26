@@ -10,13 +10,13 @@ namespace BufferingBenchmarks
     {
         public void Configure(IApplicationBuilder app)
         {
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("buffered", StringComparison.Ordinal), builder =>
+            app.Map("/buffered", builder =>
             {
                 builder.UseResponseBuffering();
                 builder.UseJson();
             });
 
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("nonbuffered", StringComparison.Ordinal), builder =>
+            app.Map("/nonbuffered", builder =>
             {
                 builder.UseJson();
             });
