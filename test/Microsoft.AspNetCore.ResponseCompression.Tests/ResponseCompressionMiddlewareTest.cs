@@ -92,6 +92,27 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
         }
 
+#if NETCOREAPP2_2
+        [Theory]
+        [InlineData("gzip", "br")]
+        [InlineData("br", "gzip")]
+        public async Task Request_AcceptMixed_ConfiguredOrder_CompressedBrotli(string encoding1, string encoding2)
+        {
+            void Configure(ResponseCompressionOptions options)
+            {
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            }
+
+            var response = await InvokeMiddleware(100, new[] { encoding1, encoding2 }, responseType: TextPlain, configure: Configure);
+
+            CheckResponseCompressed(response, expectedBodyLength: 20, expectedEncoding: "br");
+        }
+#elif NET461
+#else
+#error Target frameworks need to be updated.
+#endif
+
         [Fact]
         public async Task Request_AcceptUnknown_NotCompressed()
         {
@@ -804,12 +825,17 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.False(fakeSendFile.Invoked);
         }
 
-        private Task<HttpResponseMessage> InvokeMiddleware(int uncompressedBodyLength, string[] requestAcceptEncodings, string responseType, Action<HttpResponse> addResponseAction = null)
+        private Task<HttpResponseMessage> InvokeMiddleware(
+            int uncompressedBodyLength,
+            string[] requestAcceptEncodings,
+            string responseType,
+            Action<HttpResponse> addResponseAction = null,
+            Action<ResponseCompressionOptions> configure = null)
         {
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddResponseCompression();
+                    services.AddResponseCompression(configure ?? (_ => { }));
                 })
                 .Configure(app =>
                 {
