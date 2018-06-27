@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,26 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
     public class ResponseCompressionMiddlewareTest
     {
         private const string TextPlain = "text/plain";
+
+        public static IEnumerable<object[]> SupportedEncodings =>
+            TestData.Select(x => new object[] { x.EncodingName });
+
+        public static IEnumerable<object[]> SupportedEncodingsWithBodyLength =>
+            TestData.Select(x => new object[] { x.EncodingName, x.ExpectedBodyLength });
+
+        private static IEnumerable<EncodingTestData> TestData
+        {
+            get
+            {
+                yield return new EncodingTestData("gzip", expectedBodyLength: 24);
+#if NETCOREAPP2_2
+                yield return new EncodingTestData("br", expectedBodyLength: 20);
+#elif NET461
+#else
+#error Target frameworks need to be updated.
+#endif
+            }
+        }
 
         [Fact]
         public void Options_HttpsDisabledByDefault()
@@ -308,8 +329,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.Equal(expectedLength, response.Content.ReadAsByteArrayAsync().Result.Length);
         }
 
-        [Fact]
-        public async Task FlushHeaders_SendsHeaders_Compresses()
+        [Theory]
+        [MemberData(nameof(SupportedEncodingsWithBodyLength))]
+        public async Task FlushHeaders_SendsHeaders_Compresses(string encoding, int expectedBodyLength)
         {
             var responseReceived = new ManualResetEvent(false);
 
@@ -335,18 +357,19 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             responseReceived.Set();
 
             await response.Content.LoadIntoBufferAsync();
 
-            CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
+            CheckResponseCompressed(response, expectedBodyLength, encoding);
         }
 
-        [Fact]
-        public async Task FlushAsyncHeaders_SendsHeaders_Compresses()
+        [Theory]
+        [MemberData(nameof(SupportedEncodingsWithBodyLength))]
+        public async Task FlushAsyncHeaders_SendsHeaders_Compresses(string encoding, int expectedBodyLength)
         {
             var responseReceived = new ManualResetEvent(false);
 
@@ -372,18 +395,19 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             responseReceived.Set();
 
             await response.Content.LoadIntoBufferAsync();
 
-            CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
+            CheckResponseCompressed(response, expectedBodyLength, encoding);
         }
 
-        [Fact]
-        public async Task FlushBody_CompressesAndFlushes()
+        [Theory]
+        [MemberData(nameof(SupportedEncodings))]
+        public async Task FlushBody_CompressesAndFlushes(string encoding)
         {
             var responseReceived = new ManualResetEvent(false);
 
@@ -411,13 +435,13 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             IEnumerable<string> contentMD5 = null;
             Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
-            Assert.Single(response.Content.Headers.ContentEncoding, "gzip");
+            Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 
             var body = await response.Content.ReadAsStreamAsync();
             var read = await body.ReadAsync(new byte[100], 0, 100);
@@ -429,8 +453,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.True(read > 0);
         }
 
-        [Fact]
-        public async Task FlushAsyncBody_CompressesAndFlushes()
+        [Theory]
+        [MemberData(nameof(SupportedEncodings))]
+        public async Task FlushAsyncBody_CompressesAndFlushes(string encoding)
         {
             var responseReceived = new ManualResetEvent(false);
 
@@ -457,13 +482,13 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             IEnumerable<string> contentMD5 = null;
             Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
-            Assert.Single(response.Content.Headers.ContentEncoding, "gzip");
+            Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 
             var body = await response.Content.ReadAsStreamAsync();
             var read = await body.ReadAsync(new byte[100], 0, 100);
@@ -475,8 +500,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.True(read > 0);
         }
 
-        [Fact]
-        public async Task TrickleWriteAndFlush_FlushesEachWrite()
+        [Theory]
+        [MemberData(nameof(SupportedEncodings))]
+        public async Task TrickleWriteAndFlush_FlushesEachWrite(string encoding)
         {
             var responseReceived = new[]
             {
@@ -515,7 +541,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
@@ -525,7 +551,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 #elif NETCOREAPP2_2 // Flush supported, compression enabled
             IEnumerable<string> contentMD5 = null;
             Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
-            Assert.Single(response.Content.Headers.ContentEncoding, "gzip");
+            Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 #else
 #error Target frameworks need to be updated.
 #endif
@@ -541,8 +567,9 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             }
         }
 
-        [Fact]
-        public async Task TrickleWriteAndFlushAsync_FlushesEachWrite()
+        [Theory]
+        [MemberData(nameof(SupportedEncodings))]
+        public async Task TrickleWriteAndFlushAsync_FlushesEachWrite(string encoding)
         {
             var responseReceived = new[]
             {
@@ -580,7 +607,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
-            request.Headers.AcceptEncoding.ParseAdd("gzip");
+            request.Headers.AcceptEncoding.ParseAdd(encoding);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
@@ -590,7 +617,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 #elif NETCOREAPP2_2 // Flush supported, compression enabled
             IEnumerable<string> contentMD5 = null;
             Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
-            Assert.Single(response.Content.Headers.ContentEncoding, "gzip");
+            Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 #else
 #error Target framework needs to be updated
 #endif
@@ -871,6 +898,19 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                     await file.CopyToAsync(_innerBody, 81920, cancellation);
                 }
             }
+        }
+
+        private readonly struct EncodingTestData
+        {
+            public EncodingTestData(string encodingName, int expectedBodyLength)
+            {
+                EncodingName = encodingName;
+                ExpectedBodyLength = expectedBodyLength;
+            }
+
+            public string EncodingName { get; }
+
+            public int ExpectedBodyLength { get; }
         }
     }
 }
