@@ -72,42 +72,79 @@ namespace Microsoft.AspNetCore.ResponseCompression
         /// <inheritdoc />
         public virtual ICompressionProvider GetCompressionProvider(HttpContext context)
         {
-            IList<StringWithQualityHeaderValue> unsorted;
-
             // e.g. Accept-Encoding: gzip, deflate, sdch
             var accept = context.Request.Headers[HeaderNames.AcceptEncoding];
-            if (!StringValues.IsNullOrEmpty(accept)
-                && StringWithQualityHeaderValue.TryParseList(accept, out unsorted)
-                && unsorted != null && unsorted.Count > 0)
-            {
-                // TODO PERF: clients don't usually include quality values so this sort will not have any effect. Fast-path?
-                var sorted = unsorted
-                    .Where(s => s.Quality.GetValueOrDefault(1) > 0)
-                    .OrderByDescending(s => s.Quality.GetValueOrDefault(1));
 
-                foreach (var encoding in sorted)
+            if (StringValues.IsNullOrEmpty(accept))
+            {
+                return null;
+            }
+
+            if (StringWithQualityHeaderValue.TryParseList(accept, out var encodings))
+            {
+                if (encodings.Count == 0)
                 {
-                    // There will rarely be more than three providers, and there's only one by default
-                    foreach (var provider in _providers)
+                    return null;
+                }
+
+                var candidates = new HashSet<ProviderCandidate>();
+
+                foreach (var encoding in encodings)
+                {
+                    var encodingName = encoding.Value;
+                    var quality = encoding.Quality.GetValueOrDefault(1);
+
+                    if (Math.Abs(quality) < double.Epsilon)
                     {
-                        if (StringSegment.Equals(provider.EncodingName, encoding.Value, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    }
+
+                    for (int i = 0; i < _providers.Length; i++)
+                    {
+                        var provider = _providers[i];
+
+                        if (StringSegment.Equals(provider.EncodingName, encodingName, StringComparison.OrdinalIgnoreCase))
                         {
-                            return provider;
+                            candidates.Add(new ProviderCandidate(provider.EncodingName, quality, i, provider));
                         }
                     }
 
                     // Uncommon but valid options
-                    if (StringSegment.Equals("*", encoding.Value, StringComparison.Ordinal))
+                    if (StringSegment.Equals("*", encodingName, StringComparison.Ordinal))
                     {
-                        // Any
-                        return _providers[0];
+                        for (int i = 0; i < _providers.Length; i++)
+                        {
+                            var provider = _providers[i];
+                            
+                            // Any provider is a candidate.
+                            candidates.Add(new ProviderCandidate(provider.EncodingName, quality, i, provider));
+                        }
+
+                        break;
                     }
-                    if (StringSegment.Equals("identity", encoding.Value, StringComparison.OrdinalIgnoreCase))
+
+                    if (StringSegment.Equals("identity", encodingName, StringComparison.OrdinalIgnoreCase))
                     {
-                        // No compression
-                        return null;
+                        candidates.Add(new ProviderCandidate(encodingName.Value, quality, int.MaxValue, null));
                     }
                 }
+
+                if (candidates.Count == 0)
+                {
+                    return null;
+                }
+
+                if (candidates.Count == 1)
+                {
+                    return candidates.ElementAt(0).Provider;
+                }
+
+                var accepted = candidates
+                    .OrderByDescending(x => x.Quality)
+                    .ThenBy(x => x.Order)
+                    .First();
+
+                return accepted.Provider;
             }
 
             return null;
@@ -148,6 +185,40 @@ namespace Microsoft.AspNetCore.ResponseCompression
                 return false;
             }
             return !string.IsNullOrEmpty(context.Request.Headers[HeaderNames.AcceptEncoding]);
+        }
+
+        private readonly struct ProviderCandidate : IEquatable<ProviderCandidate>
+        {
+            public ProviderCandidate(string encodingName, double quality, int order, ICompressionProvider provider)
+            {
+                EncodingName = encodingName;
+                Quality = quality;
+                Order = order;
+                Provider = provider;
+            }
+
+            public string EncodingName { get; }
+
+            public double Quality { get; }
+
+            public int Order { get; }
+
+            public ICompressionProvider Provider { get; }
+
+            public bool Equals(ProviderCandidate other)
+            {
+                return string.Equals(EncodingName, other.EncodingName, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ProviderCandidate candidate && Equals(candidate);
+            }
+
+            public override int GetHashCode()
+            {
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(EncodingName);
+            }
         }
     }
 }
