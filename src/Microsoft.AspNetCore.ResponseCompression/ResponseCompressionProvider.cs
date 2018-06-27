@@ -38,7 +38,17 @@ namespace Microsoft.AspNetCore.ResponseCompression
             if (_providers.Length == 0)
             {
                 // Use the factory so it can resolve IOptions<GzipCompressionProviderOptions> from DI.
-                _providers = new ICompressionProvider[] { new CompressionProviderFactory(typeof(GzipCompressionProvider)) };
+                _providers = new ICompressionProvider[]
+                {
+                    new CompressionProviderFactory(typeof(GzipCompressionProvider)),
+#if NETCOREAPP2_1
+                    new CompressionProviderFactory(typeof(BrotliCompressionProvider))
+#elif NET461 || NETSTANDARD2_0
+                    // Brotli is only supported in .NET Core 2.1+
+#else
+#error Target frameworks need to be updated.
+#endif
+                };
             }
             for (var i = 0; i < _providers.Length; i++)
             {
