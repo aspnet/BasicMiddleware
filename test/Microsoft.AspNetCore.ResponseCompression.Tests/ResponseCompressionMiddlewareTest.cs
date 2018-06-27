@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Request_AcceptGzipDeflate_CompressedGzip()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "gzip", "deflate" }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "gzip", "deflate" }, responseType: TextPlain);
 
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
         }
@@ -71,7 +71,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Request_AcceptBrotli_CompressedBrotli()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "br" }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "br" }, responseType: TextPlain);
 
 #if NET461
             CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: true);
@@ -87,7 +87,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [InlineData("br", "gzip")]
         public async Task Request_AcceptMixed_CompressedGzip(string encoding1, string encoding2)
         {
-            var response = await InvokeMiddleware(100, new string[] { encoding1, encoding2 }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, new[] { encoding1, encoding2 }, responseType: TextPlain);
 
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
         }
@@ -95,7 +95,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Request_AcceptUnknown_NotCompressed()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "unknown" }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "unknown" }, responseType: TextPlain);
 
             CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: true);
         }
@@ -236,7 +236,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Request_AcceptStar_Compressed()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "*" }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "*" }, responseType: TextPlain);
 
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
         }
@@ -244,15 +244,15 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Request_AcceptIdentity_NotCompressed()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "identity" }, responseType: TextPlain);
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "identity" }, responseType: TextPlain);
 
             CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: true);
         }
 
         [Theory]
-        [InlineData(new string[] { "identity;q=0.5", "gzip;q=1" }, 24)]
-        [InlineData(new string[] { "identity;q=0", "gzip;q=0.8" }, 24)]
-        [InlineData(new string[] { "identity;q=0.5", "gzip" }, 24)]
+        [InlineData(new[] { "identity;q=0.5", "gzip;q=1" }, 24)]
+        [InlineData(new[] { "identity;q=0", "gzip;q=0.8" }, 24)]
+        [InlineData(new[] { "identity;q=0.5", "gzip" }, 24)]
         public async Task Request_AcceptWithHigherCompressionQuality_Compressed(string[] acceptEncodings, int expectedBodyLength)
         {
             var response = await InvokeMiddleware(100, requestAcceptEncodings: acceptEncodings, responseType: TextPlain);
@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { "gzip;q=0.5", "identity;q=0.8" }, 100)]
+        [InlineData(new[] { "gzip;q=0.5", "identity;q=0.8" }, 100)]
         public async Task Request_AcceptWithhigherIdentityQuality_NotCompressed(string[] acceptEncodings, int expectedBodyLength)
         {
             var response = await InvokeMiddleware(100, requestAcceptEncodings: acceptEncodings, responseType: TextPlain);
@@ -272,7 +272,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Response_UnknownMimeType_NotCompressed()
         {
-            var response = await InvokeMiddleware(100, requestAcceptEncodings: new string[] { "gzip" }, responseType: "text/custom");
+            var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "gzip" }, responseType: "text/custom");
 
             CheckResponseNotCompressed(response, expectedBodyLength: 100, sendVaryHeader: false);
         }
@@ -280,7 +280,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Fact]
         public async Task Response_WithContentRange_NotCompressed()
         {
-            var response = await InvokeMiddleware(50, requestAcceptEncodings: new string[] { "gzip" }, responseType: TextPlain, addResponseAction: (r) =>
+            var response = await InvokeMiddleware(50, requestAcceptEncodings: new[] { "gzip" }, responseType: TextPlain, addResponseAction: (r) =>
             {
                 r.Headers[HeaderNames.ContentRange] = "1-2/*";
             });
@@ -293,7 +293,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         {
             var otherContentEncoding = "something";
 
-            var response = await InvokeMiddleware(50, requestAcceptEncodings: new string[] { "gzip" }, responseType: TextPlain, addResponseAction: (r) =>
+            var response = await InvokeMiddleware(50, requestAcceptEncodings: new[] { "gzip" }, responseType: TextPlain, addResponseAction: (r) =>
             {
                 r.Headers[HeaderNames.ContentEncoding] = otherContentEncoding;
             });
@@ -327,8 +327,11 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                     });
                 });
 
-            var server = new TestServer(builder);
-            server.BaseAddress = new Uri("https://localhost/");
+            var server = new TestServer(builder)
+            {
+                BaseAddress = new Uri("https://localhost/")
+            };
+
             var client = server.CreateClient();
 
             var request = new HttpRequestMessage(HttpMethod.Get, "");
@@ -449,8 +452,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            IEnumerable<string> contentMD5 = null;
-            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
+            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out _));
             Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 
             var body = await response.Content.ReadAsStreamAsync();
@@ -496,8 +498,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            IEnumerable<string> contentMD5 = null;
-            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
+            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out _));
             Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 
             var body = await response.Content.ReadAsStreamAsync();
@@ -559,8 +560,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.NotNull(response.Content.Headers.GetValues(HeaderNames.ContentMD5));
             Assert.Empty(response.Content.Headers.ContentEncoding);
 #elif NETCOREAPP2_2 // Flush supported, compression enabled
-            IEnumerable<string> contentMD5 = null;
-            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
+            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out _));
             Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 #else
 #error Target frameworks need to be updated.
@@ -625,8 +625,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
             Assert.NotNull(response.Content.Headers.GetValues(HeaderNames.ContentMD5));
             Assert.Empty(response.Content.Headers.ContentEncoding);
 #elif NETCOREAPP2_2 // Flush supported, compression enabled
-            IEnumerable<string> contentMD5 = null;
-            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
+            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out _));
             Assert.Single(response.Content.Headers.ContentEncoding, encoding);
 #else
 #error Target framework needs to be updated
@@ -820,10 +819,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                         context.Response.Headers[HeaderNames.ContentMD5] = "MD5";
                         context.Response.ContentType = responseType;
                         Assert.Null(context.Features.Get<IHttpSendFileFeature>());
-                        if (addResponseAction != null)
-                        {
-                            addResponseAction(context.Response);
-                        }
+                        addResponseAction?.Invoke(context.Response);
                         return context.Response.WriteAsync(new string('a', uncompressedBodyLength));
                     });
                 });
@@ -842,8 +838,6 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 
         private void CheckResponseCompressed(HttpResponseMessage response, int expectedBodyLength, string expectedEncoding)
         {
-            IEnumerable<string> contentMD5 = null;
-
             var containsVaryAcceptEncoding = false;
             foreach (var value in response.Headers.GetValues(HeaderNames.Vary))
             {
@@ -854,7 +848,7 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
                 }
             }
             Assert.True(containsVaryAcceptEncoding);
-            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out contentMD5));
+            Assert.False(response.Content.Headers.TryGetValues(HeaderNames.ContentMD5, out _));
             Assert.Single(response.Content.Headers.ContentEncoding, expectedEncoding);
             Assert.Equal(expectedBodyLength, response.Content.Headers.ContentLength);
         }
