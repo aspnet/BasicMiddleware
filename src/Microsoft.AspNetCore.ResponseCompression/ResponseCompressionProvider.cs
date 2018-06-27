@@ -94,7 +94,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
                     var encodingName = encoding.Value;
                     var quality = encoding.Quality.GetValueOrDefault(1);
 
-                    if (Math.Abs(quality) < double.Epsilon)
+                    if (quality < double.Epsilon)
                     {
                         continue;
                     }
@@ -129,19 +129,14 @@ namespace Microsoft.AspNetCore.ResponseCompression
                     }
                 }
 
-                if (candidates.Count == 0)
+                if (candidates.Count <= 1)
                 {
-                    return null;
-                }
-
-                if (candidates.Count == 1)
-                {
-                    return candidates.ElementAt(0).Provider;
+                    return candidates.ElementAtOrDefault(0).Provider;
                 }
 
                 var accepted = candidates
                     .OrderByDescending(x => x.Quality)
-                    .ThenBy(x => x.Order)
+                    .ThenBy(x => x.Priority)
                     .First();
 
                 return accepted.Provider;
@@ -189,11 +184,11 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
         private readonly struct ProviderCandidate : IEquatable<ProviderCandidate>
         {
-            public ProviderCandidate(string encodingName, double quality, int order, ICompressionProvider provider)
+            public ProviderCandidate(string encodingName, double quality, int priority, ICompressionProvider provider)
             {
                 EncodingName = encodingName;
                 Quality = quality;
-                Order = order;
+                Priority = priority;
                 Provider = provider;
             }
 
@@ -201,7 +196,7 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
             public double Quality { get; }
 
-            public int Order { get; }
+            public int Priority { get; }
 
             public ICompressionProvider Provider { get; }
 
