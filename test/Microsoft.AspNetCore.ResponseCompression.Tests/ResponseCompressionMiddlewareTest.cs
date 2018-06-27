@@ -82,6 +82,16 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
 #endif
         }
 
+        [Theory]
+        [InlineData("gzip", "br")]
+        [InlineData("br", "gzip")]
+        public async Task Request_AcceptMixed_CompressedGzip(string encoding1, string encoding2)
+        {
+            var response = await InvokeMiddleware(100, new string[] { encoding1, encoding2 }, responseType: TextPlain);
+
+            CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
+        }
+
         [Fact]
         public async Task Request_AcceptUnknown_NotCompressed()
         {
