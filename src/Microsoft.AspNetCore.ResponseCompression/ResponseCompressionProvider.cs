@@ -125,7 +125,9 @@ namespace Microsoft.AspNetCore.ResponseCompression
 
                     if (StringSegment.Equals("identity", encodingName, StringComparison.OrdinalIgnoreCase))
                     {
-                        candidates.Add(new ProviderCandidate(encodingName.Value, quality, int.MaxValue, null));
+                        // We add 'identity' to the list of "candidates" with a very low priority and no provider.
+                        // This will allow it to be ordered based on its quality (and priority) later in the method.
+                        candidates.Add(new ProviderCandidate(encodingName.Value, quality, priority: int.MaxValue, provider: null));
                     }
                 }
 
