@@ -85,28 +85,34 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         [Theory]
         [InlineData("gzip", "br")]
         [InlineData("br", "gzip")]
-        public async Task Request_AcceptMixed_CompressedGzip(string encoding1, string encoding2)
+        public async Task Request_AcceptMixed_CompressedBrotli(string encoding1, string encoding2)
         {
             var response = await InvokeMiddleware(100, new[] { encoding1, encoding2 }, responseType: TextPlain);
 
+#if NET461
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
+#elif NETCOREAPP2_2
+            CheckResponseCompressed(response, expectedBodyLength: 20, expectedEncoding: "br");
+#else
+#error Target frameworks need to be updated.
+#endif
         }
 
 #if NETCOREAPP2_2
         [Theory]
         [InlineData("gzip", "br")]
         [InlineData("br", "gzip")]
-        public async Task Request_AcceptMixed_ConfiguredOrder_CompressedBrotli(string encoding1, string encoding2)
+        public async Task Request_AcceptMixed_ConfiguredOrder_CompressedGzip(string encoding1, string encoding2)
         {
             void Configure(ResponseCompressionOptions options)
             {
-                options.Providers.Add<BrotliCompressionProvider>();
                 options.Providers.Add<GzipCompressionProvider>();
+                options.Providers.Add<BrotliCompressionProvider>();
             }
 
             var response = await InvokeMiddleware(100, new[] { encoding1, encoding2 }, responseType: TextPlain, configure: Configure);
 
-            CheckResponseCompressed(response, expectedBodyLength: 20, expectedEncoding: "br");
+            CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
         }
 #elif NET461
 #else
@@ -259,7 +265,13 @@ namespace Microsoft.AspNetCore.ResponseCompression.Tests
         {
             var response = await InvokeMiddleware(100, requestAcceptEncodings: new[] { "*" }, responseType: TextPlain);
 
+#if NET461
             CheckResponseCompressed(response, expectedBodyLength: 24, expectedEncoding: "gzip");
+#elif NETCOREAPP2_2
+            CheckResponseCompressed(response, expectedBodyLength: 20, expectedEncoding: "br");
+#else
+#error Target frameworks need to be updated.
+#endif
         }
 
         [Fact]
