@@ -15,10 +15,10 @@ namespace Microsoft.AspNetCore.HttpsPolicy
         /// Sets the max-age parameter of the Strict-Transport-Security header.
         /// </summary>
         /// <remarks>
-        /// Max-age is required; defaults to 30 days.
+        /// Max-age is required; defaults to 1 year.
         /// See: https://tools.ietf.org/html/rfc6797#section-6.1.1
         /// </remarks>
-        public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(30);
+        public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(365);
 
         /// <summary>
         /// Enables includeSubDomain parameter of the Strict-Transport-Security header.

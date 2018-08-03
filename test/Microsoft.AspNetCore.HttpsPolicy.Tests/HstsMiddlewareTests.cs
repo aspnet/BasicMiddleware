@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.HttpsPolicy.Tests
             var response = await client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("max-age=2592000", response.Headers.GetValues(HeaderNames.StrictTransportSecurity).FirstOrDefault());
+            Assert.Equal("max-age=31536000", response.Headers.GetValues(HeaderNames.StrictTransportSecurity).FirstOrDefault());
         }
 
         [Theory]
