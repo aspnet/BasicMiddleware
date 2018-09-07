@@ -351,7 +351,11 @@ namespace Microsoft.AspNetCore.HttpOverrides
         {
             if (address.IsIPv4MappedToIPv6)
             {
-                address = address.MapToIPv4();
+                var ipv4Address = address.MapToIPv4();
+                if (CheckKnownAddress(ipv4Address))
+                {
+                    return true;
+                }
             }
             if (_options.KnownProxies.Contains(address))
             {
