@@ -349,6 +349,10 @@ namespace Microsoft.AspNetCore.HttpOverrides
 
         private bool CheckKnownAddress(IPAddress address)
         {
+            if (address.IsIPv4MappedToIPv6)
+            {
+                address = address.MapToIPv4();
+            }
             if (_options.KnownProxies.Contains(address))
             {
                 return true;
